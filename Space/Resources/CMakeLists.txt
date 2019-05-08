@@ -17,7 +17,7 @@ PUBLIC
 # dependencies 
 target_link_libraries(SpaceResource
 PUBLIC
-	SpaceContainer
+	SpaceKernel
 	SpaceConverter
 	SpaceTool
 )

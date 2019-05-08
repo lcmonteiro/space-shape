@@ -21,13 +21,15 @@
  * ------------------------------------------------------------------------------------------------
  */
 int main(int argc, char** argv) {   
-    std::cout << SFileSystem::GetFilePath(argv[0]) << std::endl; 
-    Reader r ("./Resources/ConnectionEditor.arxml");
+    auto in = String(
+        "/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml"); 
+    
+    Reader r (in);
 
     auto v = XmlConvert::fromXML(r);
 
 
-    std::cout << v << std::endl;
+    JsonConvert::ToPrettyJson(std::cout, v) << std::endl;
 
 
     return 0;   

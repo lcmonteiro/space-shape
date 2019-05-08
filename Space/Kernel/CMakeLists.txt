@@ -1,13 +1,13 @@
 cmake_minimum_required (VERSION 3.8)
 # ---------------------------------------------------------
-# SpaceContainer target
+# SpaceKernel target
 # ---------------------------------------------------------
-add_library(SpaceContainer 
+add_library(SpaceKernel 
 STATIC 
 	SVariable.cpp
 )
 # includes
-target_include_directories(SpaceContainer
+target_include_directories(SpaceKernel
 PUBLIC
 	.
 )

@@ -15,7 +15,7 @@ PUBLIC
 # dependencies 
 target_link_libraries(SpaceTool
 PUBLIC
-	SpaceContainer
+	SpaceKernel
 )
 # ---------------------------------------------------------
 # End

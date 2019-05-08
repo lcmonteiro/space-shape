@@ -76,7 +76,7 @@ Integer SResource::WaitFor(SResource* pResource, Float timeout) {
  * wait for a list
  * ----------------------------------------------------------------------------
  */
-std::vector<Integer> SResource::WaitFor(List list, Float timeout) {
+std::vector<Integer> SResource::WaitFor(RList list, Float timeout) {
     std::vector<pollfd> fds(list.size());
     /**
      * prepare
@@ -121,7 +121,7 @@ std::vector<Integer> SResource::WaitFor(List list, Float timeout) {
 /**
  * wait for a map
  */
-std::vector<Integer> SResource::WaitFor(Map map, Float timeout) {
+std::vector<Integer> SResource::WaitFor(RMap map, Float timeout) {
     std::vector<pollfd> fds(map.size());
     /**
      * prepare

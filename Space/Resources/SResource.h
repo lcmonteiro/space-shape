@@ -18,7 +18,7 @@
 /**
  * space
  */
-#include "SNative.h"
+#include "STypes.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * List of exceptions
@@ -55,8 +55,8 @@ public:
      * helpers
      * --------------------------------------------------------------------
      */
-    using Map     = std::map<Integer, SResource*>; 
-    using List    = std::vector<SResource*>; 
+    using RMap     = std::map<Integer, SResource*>; 
+    using RList    = std::vector<SResource*>; 
     using Handler = int;
     /**
      * --------------------------------------------------------------------
@@ -106,9 +106,9 @@ public:
      */
     static Integer WaitFor(SResource* pResource, Float timeout);
     
-    static std::vector<Integer> WaitFor(List list, Float timeout);
+    static std::vector<Integer> WaitFor(RList list, Float timeout);
 
-    static std::vector<Integer> WaitFor(Map map, Float timeout);
+    static std::vector<Integer> WaitFor(RMap map, Float timeout);
 protected:
     /**
      * --------------------------------------------------------------------

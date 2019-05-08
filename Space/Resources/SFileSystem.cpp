@@ -24,6 +24,7 @@
 #include "SLogic.h"
 #include "SSearch.h"
 #include "SUtils.h"
+#include "SKeys.h"
 /**
  * --------------------------------------------------------------------------------------------------------------------
  * FileSystem Monitor
@@ -87,7 +88,7 @@ SFileSystem::SFileSystem(const ::Map& watch) : SStream(), __watch_map(watch) {
      */
     int fd = inotify_init();
     if (fd <= 0) {
-        throw ResourceException(String::build("inotify_init: ", strerror(errno)));
+        throw ResourceException(String::Build("inotify_init: ", strerror(errno)));
     }
     /**
      * register
@@ -152,7 +153,7 @@ static Integer __watch_mask(const String& path, const Map& watch_map){
     }
     return Integer();
 }
-::List SFileSystem::read_events() {
+List SFileSystem::read_events() {
     char buf[4096] __attribute__((aligned(__alignof__(struct inotify_event))));
     // read data
     int len = ::read(ihandler(), buf, sizeof (buf));
@@ -220,7 +221,7 @@ static Integer __watch_mask(const String& path, const Map& watch_map){
         if (event->mask & IN_IGNORED) {
             if (event->len == 0) {
                 __watch_reg.erase(event->wd);
-                inotify_rm_watch(ISysHandler(), event->wd);
+                inotify_rm_watch(ihandler(), event->wd);
             }
         }
     }
@@ -435,30 +436,30 @@ static Map __find_dir(String path) {
     /**
      * parse directory
      */
-    struct dirent dirent, *res;
-    while (::readdir_r(dir, &dirent, &res) == 0 && res != nullptr) {
-        switch (dirent.d_type) {
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        switch (entry->d_type) {
             case DT_DIR:
             {
-                if (dirent.d_name[0] == '.') {
+                if (entry->d_name[0] == '.') {
                     break;
                 }
-                Map found(__find_dir(path + "/" + dirent.d_name));
+                Map found(__find_dir(path + "/" + entry->d_name));
                 if (found.empty()) {
-                    tree[dirent.d_name] = Obj(dirent.d_type);
+                    tree[entry->d_name] = Obj(entry->d_type);
                 } else {
-                    tree[dirent.d_name] = Obj(found);
+                    tree[entry->d_name] = Obj(found);
                 }
                 break;
             }
             case DT_REG:
             {
-                tree[dirent.d_name] = Obj(dirent.d_type);
+                tree[entry->d_name] = Obj(entry->d_type);
                 break;
             }
             case DT_LNK:
             {
-                tree[dirent.d_name] = Obj(dirent.d_type);
+                tree[entry->d_name] = Obj(entry->d_type);
                 break;
             }
         }
@@ -521,33 +522,33 @@ static Map __find_dir(sregex_iterator it, sregex_iterator& end, String path) {
      * parse directory and match expression
      */
     std::regex expr(name);
-    struct dirent dirent, *res;
-    while (::readdir_r(dir, &dirent, &res) == 0 && res != nullptr) {
-        if (!std::regex_match(dirent.d_name, expr)) {
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (!std::regex_match(entry->d_name, expr)) {
             continue;
         }
-        switch (dirent.d_type) {
+        switch (entry->d_type) {
             case DT_DIR:
             {
-                if (dirent.d_name[0] == '.') {
+                if (entry->d_name[0] == '.') {
                     break;
                 }
-                Map found(__find_dir(it, end, path + dirent.d_name + "/"));
+                Map found(__find_dir(it, end, path + entry->d_name + "/"));
                 if (found.empty()) {
-                    tree[dirent.d_name] = Obj(DT_DIR);
+                    tree[entry->d_name] = Obj(DT_DIR);
                 } else {
-                    tree[dirent.d_name] = Obj(found);
+                    tree[entry->d_name] = Obj(found);
                 }
                 break;
             }
             case DT_REG:
             {
-                tree[dirent.d_name] = Obj(DT_REG);
+                tree[entry->d_name] = Obj(DT_REG);
                 break;
             }
             case DT_LNK:
             {
-                tree[dirent.d_name] = Obj(DT_LNK);
+                tree[entry->d_name] = Obj(DT_LNK);
                 break;
             }
         }
@@ -694,12 +695,12 @@ static bool __delete_dir(String path, Map tree) {
             if (!__delete_dir(path + "/" + e.first, Var::Map(e.second))) {
                 return false;
             }
-            ::rmdir(String::build(path, "/", e.first).data());
+            ::rmdir(String::Build(path, "/", e.first).data());
         } else if (Var::IsList(e.second)) {
             if (!__delete_dir(path + "/" + e.first, Var::List(e.second))) {
                 return false;
             }
-            ::rmdir(String::build(path, "/", e.first).data());
+            ::rmdir(String::Build(path, "/", e.first).data());
         } else if (Var::IsString(e.second)) {
             if (!__delete_file(path + "/" + Var::String(e.second))) {
                 return false;

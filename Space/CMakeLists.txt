@@ -3,9 +3,9 @@ cmake_minimum_required (VERSION 3.8)
 # Space project
 # ---------------------------------------------------------
 project (Space)
-# folder for core objects
-add_subdirectory(Containers)
-# folder for converters
+# folder for core Kernel
+add_subdirectory(Kernel)
+# folder for Converters
 add_subdirectory(Converters)
 # folder for Tools
 add_subdirectory(Tools)
@@ -23,7 +23,7 @@ INTERFACE
 # dependencies 
 target_link_libraries(Space
 INTERFACE
-	SpaceContainer
+	SpaceKernel
 	SpaceConverter
 	SpaceResource
 )

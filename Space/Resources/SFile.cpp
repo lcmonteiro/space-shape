@@ -50,6 +50,7 @@ int SAdapter::SFileTrunc::Open(const String& path) {
     return fd;
 }
 int SAdapter::SFileRead::Open(const String& path) {
+    std::cout << path << std::endl;
     int fd = -1;
     if ((fd = open(path.data(), O_RDONLY, 0)) < 0) {
         throw ResourceException(strerror(errno));
@@ -77,24 +78,18 @@ void SLogger::__rotate() {
          * rename backlog files
          */
         ::unlink(
-            String::build(path(), ".", String::ValueOf(j)).c_str()
-        );
+            String::Build(path(), ".", String::ValueOf(j)).c_str());
         ::link(
-            String::build(path(), ".", String::ValueOf(i)).c_str(), 
-            String::build(path(), ".", String::ValueOf(j)).c_str()
-        );
+            String::Build(path(), ".", String::ValueOf(i)).c_str(), 
+            String::Build(path(), ".", String::ValueOf(j)).c_str());
     }
     /** 
      * rename current file
      */
-    ::unlink(
-        String::build(path(), ".", String::ValueOf(Integer(1))).c_str()
-    );
-    ::linkat(
-        ihandler(), "", AT_FDCWD,
-        String::build(path(), ".", String::ValueOf(Integer(1))).c_str(),
-        AT_EMPTY_PATH
-    );
+    ::unlink(String::Build(
+        path(), ".", String::ValueOf(Integer(1))).c_str());
+    ::linkat(ihandler(), "", AT_FDCWD, String::Build(
+        path(), ".", String::ValueOf(Integer(1))).c_str(), AT_EMPTY_PATH);
     /**
      * unlink current
      */

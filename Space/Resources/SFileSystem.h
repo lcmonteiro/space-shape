@@ -136,7 +136,7 @@ public:
     static String GetFileName(String path);
 
     inline static Var GetFileName(Var path) {
-        return Obj(GetFileName(path));
+        return Obj(GetFileName(String(path)));
     }
     /**
      * ----------------------------------------------------
@@ -174,7 +174,7 @@ private:
      * ----------------------------------------------------
      * path to mask
      */
-    ::Map __watch_map;
+    Map __watch_map;
     /**
      * fd to path
      */

@@ -87,31 +87,37 @@ namespace Logic {
      * Call function (func) for all elements
      * --------------------------------------------------------------------------------------------
      */
-    template<bool LINKS = false, typename Function>
-    static Var ForEach(Var var, Function func)
-    {
-        return ForEach(var, func,
-            typename integral_constant<bool, LINKS>::type()
-        );
-    }
-    template<typename Function>
-    static Var  ForEach(Var var,   Function func, false_type);
-    template<typename Function>
-    static Var  ForEach(Var var,   Function func, true_type);
     template<typename Function>
     static List ForEach(List list, Function func);
     template<typename Function>
     static Map  ForEach(Map map,   Function func);
     template<typename Function>
-    static Map ForEachMap(Map map, Function func);
+    static Var  ForEach(Var var,   Function func, false_type);
+    template<typename Function>
+    static Var  ForEach(Var var,   Function func, true_type);
+    template<bool LINKS = false, typename Function>
+    static Var ForEach(Var var,    Function func)
+    {
+        return ForEach(var, func,
+            typename integral_constant<bool, LINKS>::type()
+        );
+    }
+
     /**
-     * ForEachT
-     * @exemple Logic::ForEachT<Map>(vector<T> in, [](Map& o, T& i){
+     * ForEach
+     * @example Logic::ForEach<Map>(vector<T> in, [](Map& o, T& i){
      *      o[i.a()] = Obj(i.a());
      * })
      */
     template<typename Output, typename Input, typename Function>
-    static Output ForEachT(Input& in, Function func);
+    static Output ForEach(Input& in, Function func);
+    /**
+     * ForEachPair
+     * @example
+     */
+    template<typename Function>
+    static Map ForEachPair(Map map, Function func);
+    
     /**
      * --------------------------------------------------------------------------------------------
      * Logic Converters
@@ -228,14 +234,14 @@ Map Logic::ForEach(Map map, Function func) {
     return map;
 }
 template<typename Function>
-Map Logic::ForEachMap(Map map, Function func) {
+Map Logic::ForEachPair(Map map, Function func) {
     for (auto& v : map) {
         v.second = func(v.first, v.second);
     }
     return map;
 }
 template<typename Output, typename Input, typename Function>
-Output Logic::ForEachT(Input& in, Function func){
+Output Logic::ForEach(Input& in, Function func) {
     Output out; 
     for (auto& i : in) {
         func(out, i); 

@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.8)
 # 
 include(Pugixml.cmake)
 # ---------------------------------------------------------
-# SpaceContainer target
+# SpaceKernel target
 # ---------------------------------------------------------
 add_library(SpaceConverter 
 STATIC 
@@ -17,7 +17,7 @@ PUBLIC
 # dependencies 
 target_link_libraries(SpaceConverter
 PUBLIC
-	SpaceContainer
+	SpaceKernel
 	Pugixml::Pugixml
 )
 # ---------------------------------------------------------
