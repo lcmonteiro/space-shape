@@ -8,7 +8,7 @@
  * File:   SCsvConvert.h
  * Author: João Lima
  *
- * Created on July 19, 2016, 10:40 AM
+ * Created on Apr 10, 2019, 12:11 PM
  */
 
 #ifndef SCSVCONVERT_H

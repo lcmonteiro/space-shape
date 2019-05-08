@@ -2,7 +2,7 @@
  * File:   SReshape.h
  * Author: Luis Monteiro
  *
- * Created on September 15, 2015, 5:54 PM
+ * Created on Apr 10, 2019, 12:11 PM
  */
 #ifndef SRESHAPE_H
 #define SRESHAPE_H

@@ -2,7 +2,7 @@
  * File:   SCsvConvert.cpp
  * Author: João Lima
  *
- * Created on July 28, 2016, 3:17 PM
+ * Created on Apr 10, 2019, 12:11 PM
  */
 #include <sstream>
 #include <iostream>
@@ -12,7 +12,7 @@
 #include "Stools/SUtils.h"
 /**
  */
-#include "SCsvConvert.h"
+#include "SConvertCSV.h"
 /**
  */
 Var __Scsvconvert__::fromCSV(std::istream& v, char delim){

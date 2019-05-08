@@ -3,7 +3,7 @@
  * File:   XmlConverter.h
  * Author: Luis Monteiro
  *
- * Created on September 14, 2015, 4:11 PM
+ * Created on Apr 10, 2019, 12:11 PM
  * ------------------------------------------------------------------------------------------------
  */
 #ifndef XMLCONVERTER_H

@@ -3,7 +3,7 @@
  * File:   B64Convert.h
  * Author: Luis Monteiro
  *
- * Created on May 20, 2016, 3:57 PM
+ * Created on Apr 10, 2019, 12:11 PM
  * ------------------------------------------------------------------------------------------------
  */
 #ifndef B64CONVERTER_H

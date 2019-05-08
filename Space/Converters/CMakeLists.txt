@@ -8,8 +8,8 @@ add_library(SpaceConverter
 STATIC 
 	SConvertJSON.cpp
 	SConvertXML.cpp
-	SB64Convert.cpp
-	#CsvConvert.cpp
+	SConvertB64.cpp
+	#ConvertCSV.cpp
 )
 # includes
 target_include_directories(SpaceConverter
