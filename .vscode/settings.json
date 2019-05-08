@@ -60,7 +60,17 @@
         "thread": "cpp",
         "random": "cpp",
         "xtree": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "array": "cpp",
+        "*.tcc": "cpp",
+        "bitset": "cpp",
+        "cctype": "cpp",
+        "clocale": "cpp",
+        "cwctype": "cpp",
+        "deque": "cpp",
+        "numeric": "cpp",
+        "optional": "cpp",
+        "string_view": "cpp"
     },
     "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }

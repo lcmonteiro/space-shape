@@ -12,7 +12,7 @@
 /**
  * space
  */
-#include "SXmlConvert.h"
+#include "SConvertXML.h"
 #include "SFileSystem.h"
 #include "SFile.h"
 /**
@@ -21,18 +21,11 @@
  * ------------------------------------------------------------------------------------------------
  */
 int main(int argc, char** argv) {   
-    auto in = String(
-        "/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml"); 
+    auto r = Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
 
-    Writer w ("/tmp/ConnectionEditor.arxml");
-    
-    Reader r (in);
+    auto w = Writer("/tmp/ConnectionEditor.json");
 
-    auto v = XmlConvert::fromXML(r);
-
-
-    Convert::ToPrettyJson(w, v) << std::endl;
-
+    Convert::ToPrettyJson(w, Convert::FromXML(r));
 
     return 0;   
 }

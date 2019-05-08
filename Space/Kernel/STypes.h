@@ -22,7 +22,8 @@
  * native type template
  * ------------------------------------------------------------------------------------------------
  */
-template <class T> class Native {
+template <class T> 
+class Native {
 public:
     /**
      * constructors
@@ -30,10 +31,6 @@ public:
     Native(T val) : _val(val) {
     }
     Native() : _val(0) {
-    }
-    /**
-     */
-    virtual ~Native() {
     }
     /**
      * operators
@@ -57,12 +54,12 @@ public:
         return result;
     }
 
-#define BASE_OPERATOR_T1(_x_)                   \
-    inline Native<T> operator _x_(Native<T> val) {      \
-        return Native<T>(this->_val _x_ val._val);      \
-    }                               \
-    inline Native<T> operator _x_(T val) {          \
-        return Native<T>(this->_val _x_ val);       \
+#define BASE_OPERATOR_T1(_x_)                      \
+    inline Native<T> operator _x_(Native<T> val) { \
+        return Native<T>(this->_val _x_ val._val); \
+    }                                              \
+    inline Native<T> operator _x_(T val) {         \
+        return Native<T>(this->_val _x_ val);      \
     }
     BASE_OPERATOR_T1(^);
     BASE_OPERATOR_T1(&);
@@ -81,14 +78,14 @@ public:
         return *this;
     }
 
-#define BASE_OPERATOR_T2(_x_)                   \
-    inline Native<T>& operator _x_(const Native<T> val) {   \
-        this->_val _x_ val._val;            \
-        return *this;                   \
-    }                               \
-    inline Native<T>& operator _x_(const T val) {       \
-        this->_val _x_ val;                 \
-        return *this;                   \
+#define BASE_OPERATOR_T2(_x_)                              \
+    inline Native<T>& operator _x_(const Native<T> val) {  \
+        this->_val _x_ val._val;                           \
+        return *this;                                      \
+    }                                                      \
+    inline Native<T>& operator _x_(const T val) {          \
+        this->_val _x_ val;                                \
+        return *this;                                      \
     }
     BASE_OPERATOR_T2( =);
     BASE_OPERATOR_T2( +=);

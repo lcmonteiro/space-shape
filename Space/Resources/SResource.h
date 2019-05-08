@@ -41,7 +41,7 @@ public:
  * Helpers
  * ------------------------------------------------------------------------------------------------
  */
-#define RESORCES_SELECTED(resource, timeout) \
+#define RESOURCES_SELECTED(resource, timeout)        \
     switch ((SResource::WaitFor(resource, timeout)))
 /**
  * ------------------------------------------------------------------------------------------------
@@ -115,13 +115,7 @@ protected:
      * friend class
      * --------------------------------------------------------------------
      */
-    friend class SChannelServer;
-    friend class SChannelHub;
-    friend class SFileSystem;
-    friend class SNotify;
-    friend class SEvent;
-    friend class STimer;
-    friend class SPoll;
+    friend class SStream;
     /**
      * ------------------------------------------------------------------------
      * constructors
@@ -129,6 +123,7 @@ protected:
      */
     SResource(Handler io);
     SResource(Handler i, Handler o);
+    // empty
     SResource() : __ih(-1), __oh(-1) { }
     // move
     SResource(SResource&& res) : SResource() {

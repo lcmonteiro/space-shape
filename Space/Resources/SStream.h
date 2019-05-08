@@ -16,8 +16,8 @@
 /**
  * space
  */
-#include "SJsonConvert.h"
-#include "SBinConvert.h"
+#include "SConvertJSON.h"
+#include "SConvertBIN.h"
 #include "SResource.h"
 #include "SVariable.h"
 /**
@@ -238,12 +238,14 @@ protected:
      * constructors
      * ------------------------------------------------------------------------
      */
-    SStream(SStream&& res) = default;
     SStream(int io);
     SStream(int i, int o);
-    /**
-     */
-    SStream() : __is(nullptr), __os(nullptr) {}
+    // move
+    SStream(SStream&& res): SStream() {
+        *this = std::move(res);
+    }
+    // empty
+    SStream() : SResource(), __is(nullptr), __os(nullptr) {}
 private:
     /**
      * ------------------------------------------------------------------------
