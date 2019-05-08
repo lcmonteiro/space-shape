@@ -195,10 +195,11 @@ public:
         return BinConvert::ToBin(__os, v); 
     }
     inline std::ostream& operator<<(Var v) {
-        return JsonConvert::ToJson(__os, v);
+        return Convert::ToJson(__os, v);
     }
     inline std::istream& operator>>(Var& v) {
-        return JsonConvert::FromJson(__is, v);
+        v = Convert::FromJson(__is);
+        return __is;
     }
     template <class V>
     inline std::ostream& operator<<(V v) {

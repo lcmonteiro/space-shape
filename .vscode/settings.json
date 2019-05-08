@@ -59,7 +59,8 @@
         "xthread": "cpp",
         "thread": "cpp",
         "random": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "map": "cpp"
     },
     "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }

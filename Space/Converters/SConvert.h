@@ -178,7 +178,7 @@ namespace SConvert {
         /**
          * serialize and execute hash function
          */
-        JsonConvert::ToJson(os, v);
+        Convert::ToJson(os, v);
         return h(os.str());
     }
 
