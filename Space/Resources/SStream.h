@@ -186,13 +186,14 @@ public:
      * ------------------------------------------------------------------------
      */
     inline Var read() {
-        return BinConvert::FromBin(__is);
+        return Convert::FromBin(__is);
     }
     inline std::istream& read(Var& v) {
-        return BinConvert::FromBin(__is, v);
+        v = Convert::FromBin(__is);
+        return __is;
     }
     inline std::ostream& write(Var v) {
-        return BinConvert::ToBin(__os, v); 
+        return Convert::ToBin(__os, v); 
     }
     inline std::ostream& operator<<(Var v) {
         return Convert::ToJson(__os, v);

@@ -27,6 +27,11 @@ int main(int argc, char** argv) {
 
     Convert::ToPrettyJson(w, Convert::FromXML(r));
 
+    r = Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
+
+    w = Writer("/tmp/ConnectionEditor.bin");
+
+    Convert::ToBin(w, Convert::FromXML(r));
     return 0;   
 }
 /**

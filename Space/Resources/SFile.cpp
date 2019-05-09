@@ -50,7 +50,6 @@ int SAdapter::SFileTrunc::Open(const String& path) {
     return fd;
 }
 int SAdapter::SFileRead::Open(const String& path) {
-    std::cout << path << std::endl;
     int fd = -1;
     if ((fd = open(path.data(), O_RDONLY, 0)) < 0) {
         throw ResourceException(strerror(errno));
