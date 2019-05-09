@@ -103,7 +103,7 @@ void __ToBin(std::ostream& os, Boolean b) {
     __Write(os.put(__BOOL__T__), b);
 }
 void __ToBin(std::ostream& os, Link l) {
-    __ToBin(os.put(__LINK__T__), l);
+    __ToBin(os.put(__LINK__T__), Var(l));
 }
 /**
  * ----------------------------------------------------------------------------
@@ -111,28 +111,11 @@ void __ToBin(std::ostream& os, Link l) {
  * ----------------------------------------------------------------------------
  */
 std::ostream& Convert::ToBin(std::ostream&& os, Var v) {
-    return ToBin(os, v);
+    __ToBin(os, v);
+    return os;
 }
 std::ostream& Convert::ToBin(std::ostream& os,  Var v) {
-    if (Var::IsList(v)) {
-        __ToBin(os, Var::List(v));
-    } else if (Var::IsMap(v)) {
-        __ToBin(os, Var::Map(v));
-    } else if (Var::IsString(v)) {
-        __ToBin(os, Var::String(v));
-    } else if (Var::IsInteger(v)) {
-        __ToBin(os, Var::Integer(v));
-    } else if (Var::IsFloat(v)) {
-        __ToBin(os, Var::Float(v));
-    } else if (Var::IsBoolean(v)) {
-        __ToBin(os, Var::Boolean(v));
-    } else if (Var::IsBuffer(v)) {
-        __ToBin(os, Var::Buffer(v));
-    } else if (Var::IsLink(v)) {
-        __ToBin(os, Var::Link(v));
-    } else {
-        os.put(__NULL__T__);
-    }
+    __ToBin(os, v);
     return os;
 }
 /**
