@@ -26,7 +26,6 @@ namespace Convert {
      * ------------------------------------------------------------------------
      * To Json
      * ------------------------------------------------------------------------
-
      */  
     std::ostream& ToJson(std::ostream&& os, Var  v);
     std::ostream& ToJson(std::ostream& os,  Var  v);

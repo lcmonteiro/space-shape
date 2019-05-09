@@ -10,7 +10,7 @@ STATIC
 	SConvertBin.cpp
 	SConvertXML.cpp
 	SConvertB64.cpp
-	#ConvertCSV.cpp
+	SConvertCSV.cpp
 )
 # includes
 target_include_directories(SpaceConverter
@@ -22,6 +22,8 @@ target_link_libraries(SpaceConverter
 PUBLIC
 	SpaceKernel
 	Pugixml::Pugixml
+PRIVATE
+	SpaceTool
 )
 # ---------------------------------------------------------
 # End
