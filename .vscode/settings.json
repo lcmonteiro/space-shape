@@ -74,6 +74,7 @@
     },
     "C_Cpp.intelliSenseEngineFallback": "Enabled",
     "cSpell.words": [
-        "SEDIT"
+        "SEDIT",
+        "SKEYS"
     ]
 }

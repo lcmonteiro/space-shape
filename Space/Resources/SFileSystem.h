@@ -19,7 +19,7 @@
 #include "SStream.h"
 /**
  * -------------------------------------------------------------------------------------------------
- * 
+ *  File System
  * ------------------------------------------------------------------------------------------------
  */
 class SFileSystem: public SStream {
@@ -57,7 +57,7 @@ public:
      * read events
      * ----------------------------------------------------
      */
-    ::List read_events();
+    List read_events();
     /**
      * ----------------------------------------------------
      * process events
@@ -65,8 +65,7 @@ public:
      */
     Integer process_events(
         std::initializer_list<
-            std::pair<const Integer, std::function<void(Var v)>>
-        > l
+            std::pair<const Integer, std::function<void(Var v)>>>
     );
     /**
      * ------------------------------------------------------------------------
@@ -117,7 +116,6 @@ public:
      * ---------------------------------------------------- 
      */
     static Boolean Copy(String from, String to, Var tree=Obj::Null());
-    
     /**
      * ----------------------------------------------------
      * Move Files 
@@ -127,7 +125,6 @@ public:
      * ----------------------------------------------------
      */
     static Boolean Move(String from, String to, Var tree=Obj::Null());
-    
     /**
      * ----------------------------------------------------
      * Get path from full path

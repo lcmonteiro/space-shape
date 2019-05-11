@@ -22,14 +22,6 @@
  * ------------------------------------------------------------------------------------------------
  */
 namespace Search {
-    const Key $inc  ("$inc");
-    const Key $gt   ("$gt");
-    const Key $gte  ("$gte");
-    const Key $lt   ("$lt");
-    const Key $eq   ("$eq");
-    const Key $ne   ("$ne");
-    const Key $regex("$regex");
-    const Key $nin  ("$nin");
     /**
      * --------------------------------------------------------------------------------------------
      * Match Tree

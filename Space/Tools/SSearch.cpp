@@ -13,6 +13,7 @@
  */
 #include "SSearch.h"
 #include "SEdit.h"
+#include "SKeys.h"
 /**
  * namespaces
  */
@@ -369,7 +370,7 @@ Boolean __MatchPolicy(Map& expr, Var on) {
  * ------------------------------------------------------------------------------------------------
  */
 Boolean __MatchCompare(List val, const String& op, Var on) {
-    if (Search::$eq == op) {
+    if (Keys::$eq == op) {
         for (Var v : val) {
             if (__MatchEqual(v, on)) {
                 return true;
@@ -377,7 +378,7 @@ Boolean __MatchCompare(List val, const String& op, Var on) {
         }
         return false;
     }
-    if (Search::$ne == op) {
+    if (Keys::$ne == op) {
         for (Var v : val) {
             if (__MatchEqual(v, on)) {
                 return false;
@@ -385,7 +386,7 @@ Boolean __MatchCompare(List val, const String& op, Var on) {
         }
         return true;
     }
-    if (Search::$gt == op) {
+    if (Keys::$gt == op) {
         for (Var v : val) {
             if (__MatchGreatThan(v, on)) {
                 return true;
@@ -393,7 +394,7 @@ Boolean __MatchCompare(List val, const String& op, Var on) {
         }
         return false;
     }
-    if (Search::$lt == op) {
+    if (Keys::$lt == op) {
         for (Var v : val) {
             if (__MatchLessThan(v, on)) {
                 return true;
@@ -401,7 +402,7 @@ Boolean __MatchCompare(List val, const String& op, Var on) {
         }
         return false;
     }
-    if (Search::$regex == op) {
+    if (Keys::$regex == op) {
         for (Var v : val) {
             if (__MatchRegex(v, on)) {
                 return true;
@@ -412,19 +413,19 @@ Boolean __MatchCompare(List val, const String& op, Var on) {
     return false;
 }
 Boolean __MatchCompare(Var val, const String& op, Var on) {
-    if (Search::$eq == op) {
+    if (Keys::$eq == op) {
         return __MatchEqual(val, on);
     }
-    if (Search::$ne == op) {
+    if (Keys::$ne == op) {
         return !__MatchEqual(val, on);
     }
-    if (Search::$gt == op) {
+    if (Keys::$gt == op) {
         return __MatchGreatThan(val, on);
     }
-    if (Search::$lt == op) {
+    if (Keys::$lt == op) {
         return __MatchLessThan(val, on);
     }
-    if (Search::$regex == op) {
+    if (Keys::$regex == op) {
         return __MatchRegex(val, on);
     }
     return false;
