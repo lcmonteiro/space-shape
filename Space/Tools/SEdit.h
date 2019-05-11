@@ -28,6 +28,14 @@ namespace Edit {
     }
     /**
      * ------------------------------------------------------------------------
+     * verify match from var (A) on (B)
+     * -------------------------------------------------------------------------
+     */
+    Boolean Match(const Var&  var, const Var&  on);
+    Boolean Match(const Map&  var, const Map&  on);
+    Boolean Match(const List& var, const List& on);
+    /**
+     * ------------------------------------------------------------------------
      *                                   ___ _____ ___       _________ ___
      * Insert var (A) on other var(B)   |_A_|_A&B_|_B_| ->  |____A____|_B_| 
      * ------------------------------------------------------------------------
@@ -108,22 +116,14 @@ namespace Edit {
     /**
      * Delete utilities
      */
-    static inline Var Delete(List& var, Var on = nullptr) {
+    inline Var Delete(List& var, Var on = nullptr) {
         for (Var v : var) 
             on = Delete(v, on);
         return on;
     }
-    static inline Var Delete(List&& var, Var on = nullptr) {
+    inline Var Delete(List&& var, Var on = nullptr) {
         return Delete(var, on);
     }
-    /**
-     * --------------------------------------------------------------------
-     * verify match from var (A) on (B)
-     * --------------------------------------------------------------------
-     */
-    Boolean Match(const Var&  var, const Var&  on);
-    Boolean Match(const Map&  var, const Map&  on);
-    Boolean Match(const List& var, const List& on);
     /**
      * --------------------------------------------------------------------
      * Count var (A) on other var (B)
@@ -196,7 +196,7 @@ namespace Edit {
      * Find Key on var 
      * ------------------------------------------------------------------------
      */
-    static Var Find(Key path, Var on);
+    Var Find(Key path, Var on);
     /**
      * derived
      */
@@ -217,17 +217,17 @@ namespace Edit {
      * Remove Key on var 
      * ------------------------------------------------------------------------
      */
-    static Var Remove(Key path, Var on);
+    Var Remove(Key path, Var on);
     /**
      * derived
      */
-    static inline List Remove(ListKey paths, Var on) {
+    inline List Remove(ListKey paths, Var on) {
         List l;
         for (auto& p : paths) 
             l.push_back(Remove(p, on));
         return move(l);
     }
-    static inline List Remove(Key path, List on) {
+    inline List Remove(Key path, List on) {
         List l;
         for (auto& o : on) 
             l.push_back(Remove(path, o));
@@ -238,19 +238,19 @@ namespace Edit {
      * Delete Key on var 
      * ------------------------------------------------------------------------
      */
-    static inline Var Delete(Key path, Var on){
+    inline Var Delete(Key path, Var on){
         Remove(path, on);
         return on;
     }
     /**
      * derived
      */
-    static inline List Delete(ListKey paths, Var on) {
+    inline List Delete(ListKey paths, Var on) {
         for (auto& p : paths) 
             Remove(p, on);
         return std::move(on);
     }
-    static inline List Delete(Key path, List on) {
+    inline List Delete(Key path, List on) {
         for (auto& o : on)
             Remove(path, o);
         return std::move(on);
@@ -306,7 +306,7 @@ namespace Edit {
      * Normalize var 
      * ------------------------------------------------------------------------
      */ 
-    static Var Normalize(Var var);
+    Var Normalize(Var var);
 }
 /**
  * ------------------------------------------------------------------------------------------------

@@ -16,6 +16,90 @@
  */
 #include "SSearch.h"
 #include "SEdit.h"
+/***
+ * ------------------------------------------------------------------------------------------------
+ * Match
+ * ------------------------------------------------------------------------------------------------
+ */
+static Boolean __Match(const Link& var, const Link& on);
+/**
+ * ----------------------------------------------------------------------------
+ * map on map
+ * ----------------------------------------------------------------------------
+ */
+static inline Boolean __Match(const Map& v, const Map& o) {
+    if (v.size() != o.size()) {
+        return false;
+    }
+    for (auto it = v.begin(), end = v.end(); it != end; ++it) {
+        auto find = o.find(it->first);
+        if (find == o.end()) {
+            return false;
+        }
+        if (!__Match(it->second, find->second)){
+            return false;
+        }
+    }
+    return true;
+}
+Boolean Edit::Match(const Map& v, const Map& o) {
+    return __Match(v, o);
+}
+/**
+ * ----------------------------------------------------------------------------
+ * list on list
+ * ----------------------------------------------------------------------------
+ */
+static inline Boolean __Match(const List& v, const List& o) {
+    if (v.size() != o.size()) {
+        return false;
+    }
+    for (auto vit = v.begin(), oit = o.begin(); oit != o.end(); ++vit, ++oit) {
+        if (!__Match(*vit, *oit)){
+            return false;
+        }
+    }
+    return true;
+}
+Boolean Edit::Match(const List& v, const List& o) {
+    return __Match(v, o);
+}
+/**
+ * ----------------------------------------------------------------------------
+ * var on var
+ * ----------------------------------------------------------------------------
+ */
+static Boolean __Match(const Link& var, const Link& on) {
+    try {
+        if (var == on) {
+            return true;
+        }
+        if (Var::IsFloat(var) && Var::IsFloat(on)) {  
+            return Var::Float(var) == Var::Float(on);    
+        }
+        if (Var::IsInteger(var) && Var::IsInteger(on)) {  
+            return Var::Integer(var) == Var::Integer(on);    
+        }
+        if (Var::IsString(var) && Var::IsString(on)) {  
+            return Var::String(var) == Var::String(on);    
+        }
+        if (Var::IsBuffer(var) && Var::IsBuffer(on)) {  
+            return Var::Buffer(var) == Var::Buffer(on);    
+        }
+        if (Var::IsMap(var) && Var::IsMap(on)) {    
+            return __Match(Var::Map(var), Var::Map(on));
+        }
+        if (Var::IsList(var) && Var::IsList(on)) {      
+            return __Match(Var::List(var), Var::List(on));;
+        }
+        return Var::ToString(var) == Var::ToString(on);
+    } catch (...) {}
+    // not match
+    return false;
+}
+Boolean Edit::Match(const Var& var, const Var& on) {
+    return __Match(var, on);
+}
 /**
  * ------------------------------------------------------------------------------------------------
  * Insert 
@@ -383,90 +467,6 @@ Var Edit::Delete(const Var var, Var on) {
         __Delete(var, on);
     }
     return on; 
-}
-/***
- * ------------------------------------------------------------------------------------------------
- * Match
- * ------------------------------------------------------------------------------------------------
- */
-static Boolean __Match(const Link& var, const Link& on);
-/**
- * ----------------------------------------------------------------------------
- * map on map
- * ----------------------------------------------------------------------------
- */
-static inline Boolean __Match(const Map& v, const Map& o) {
-    if (v.size() != o.size()) {
-        return false;
-    }
-    for (auto it = v.begin(), end = v.end(); it != end; ++it) {
-        auto find = o.find(it->first);
-        if (find == o.end()) {
-            return false;
-        }
-        if (!__Match(it->second, find->second)){
-            return false;
-        }
-    }
-    return true;
-}
-Boolean Edit::Match(const Map& v, const Map& o) {
-    return __Match(v, o);
-}
-/**
- * ----------------------------------------------------------------------------
- * list on list
- * ----------------------------------------------------------------------------
- */
-static inline Boolean __Match(const List& v, const List& o) {
-    if (v.size() != o.size()) {
-        return false;
-    }
-    for (auto vit = v.begin(), oit = o.begin(); oit != o.end(); ++vit, ++oit) {
-        if (!__Match(*vit, *oit)){
-            return false;
-        }
-    }
-    return true;
-}
-Boolean Edit::Match(const List& v, const List& o) {
-    return __Match(v, o);
-}
-/**
- * ----------------------------------------------------------------------------
- * var on var
- * ----------------------------------------------------------------------------
- */
-static Boolean __Match(const Link& var, const Link& on) {
-    try {
-        if (var == on) {
-            return true;
-        }
-        if (Var::IsFloat(var) && Var::IsFloat(on)) {  
-            return Var::Float(var) == Var::Float(on);    
-        }
-        if (Var::IsInteger(var) && Var::IsInteger(on)) {  
-            return Var::Integer(var) == Var::Integer(on);    
-        }
-        if (Var::IsString(var) && Var::IsString(on)) {  
-            return Var::String(var) == Var::String(on);    
-        }
-        if (Var::IsBuffer(var) && Var::IsBuffer(on)) {  
-            return Var::Buffer(var) == Var::Buffer(on);    
-        }
-        if (Var::IsMap(var) && Var::IsMap(on)) {    
-            return __Match(Var::Map(var), Var::Map(on));
-        }
-        if (Var::IsList(var) && Var::IsList(on)) {      
-            return __Match(Var::List(var), Var::List(on));;
-        }
-        return Var::ToString(var) == Var::ToString(on);
-    } catch (...) {}
-    // not match
-    return false;
-}
-Boolean Edit::Match(const Var& var, const Var& on) {
-    return __Match(var, on);
 }
 /**
  * ------------------------------------------------------------------------------------------------
