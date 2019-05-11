@@ -6,368 +6,390 @@
  *
  * Created on Apr 10, 2019, 12:11 PM
  * ------------------------------------------------------------------------------------------------
+ * std
  */
 #include <regex>
 #include <iostream>
 #include <list>
 /**
+ * space
  */
 #include "SSearch.h"
-#include "Edit.h"
+#include "SEdit.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * Insert 
  * ------------------------------------------------------------------------------------------------
  **/
-static Var __Insert(Var var, Var on);
+static void __Insert(const Link& var, Link& on);
 /**
+ * ----------------------------------------------------------------------------
  * map on map
+ * ----------------------------------------------------------------------------
  */
-static inline Map& __Insert(const Map& var, Map& on) {
+static inline void __Insert(const Map& var, Map& on) {
     for (auto& it : var) {
         if (!on.count(it.first)) {
             on[it.first] = it.second;
         } else {
-            on[it.first] = __Insert(it.second, on[it.first]);
+            __Insert(it.second, on[it.first]);
         }
-    }
-    return on;      
+    }   
 }
 Map& Edit::Insert(const Map& var, Map& on) {
-    return __insert(var, on);
+    __Insert(var, on);
+    return on;
 }
 /**
+ * ----------------------------------------------------------------------------
  * list on list
+ * ----------------------------------------------------------------------------
  */
-static inline  List& __Insert(const List& var, List& on) {
+static inline void __Insert(const List& var, List& on) {
     for (List::size_type i = 0; i < var.size(); ++i) {
         if (on.size() <= i) {
             on.push_back(var[i]);
         } else {
-            on[i] = __Insert(var[i], on[i]);
+            __Insert(var[i], on[i]);
         }
-    }
-    return on;      
+    }      
 }
 List& Edit::Insert(const List& var, List& on) {
-    return __Insert(var, on);
+    __Insert(var, on);
+    return on;
 }
 /**
- * var on var
+ * ----------------------------------------------------------------------------
+ * link on link
+ * ----------------------------------------------------------------------------
  */
-static Var& __Insert(const Var& var, Var& on) {
+static void __Insert(const Link& var, Link& on) {
     if (var == on) {
-        return var;
+        return;
     }
     if (Var::IsMap(var) && Var::IsMap(on)) {
         __Insert(Var::Map(var), Var::Map(on));
-        return on;
+        return;
     }
     if (Var::IsList(var) && Var::IsList(on)) {
         __Insert(Var::List(var), Var::List(on));
-        return on;
+        return;
     }
     if (Var::IsDefined(var)) {
-        if(Var::IsList(on)) {
-            Edit::Insert("-1", var, on);
-        }
-        return var;
+        on = var; 
+    }
+}
+Var Edit::Insert(const Var var, Var on) {
+    if(Var::IsDefined(on)) {
+        __Insert(var, on);
+    } else {
+        on = var;
     }
     return on;
-}
-Var& Edit::Insert(const Var& var, Var& on) {
-    return Var::IsUndefined(on) ? var: __Insert(var, on);
 }
 /**
  * ------------------------------------------------------------------------------------------------
  * Update
  * ------------------------------------------------------------------------------------------------
  */
-static Var& __Update(const Var& var, Var& on);
+static void __Update(const Link& var, Link& on);
 /**
  * ----------------------------------------------------------------------------
  * map on map
  * ----------------------------------------------------------------------------
  */
-static inline Map& __Update(const Map& var, Map& on) {
+static inline void __Update(const Map& var, Map& on) {
     for (auto it = var.begin(), end = var.end(); it != end; ++it) {
         auto find = on.find(it->first);
         if (find != on.end()) {
-            find->second = __Update(it->second, find->second);
+            __Update(it->second, find->second);
         }    
-    }
-    return on;      
+    }      
 }
 Map& Edit::Update(const Map& var, Map& on) {
-    return __update(var, on);
+    __Update(var, on);
+    return on;
 }
 /**
  * ----------------------------------------------------------------------------
  * list on list
  * ----------------------------------------------------------------------------
  */
-static inline  List& __Update(const List& var, List& on) {
-    for (List::size_type i = 0; i < var.size() && i < on.size(); ++i) {
-        on[i] = __Update(var[i], on[i]);
-    }
-    return on;      
+static inline void __Update(const List& var, List& on) {
+    for (size_t i = 0; i < var.size() && i < on.size(); ++i) {
+        __Update(var[i], on[i]);
+    }      
 }
 List& Edit::Update(const List& var, List& on) {
-    return __Update(var, on);
+    __Update(var, on);
+    return on;
 }
 /**
  * ----------------------------------------------------------------------------
  * var on var
  * ----------------------------------------------------------------------------
  */
-static Var& __Update(const Var& var, Var& on) {
+static void __Update(const Link& var, Link& on) {
     if (var == on) {
-        return var;
+        return;
     }
     if (Var::IsMap(var) && Var::IsMap(on)) {    
         __Update(Var::Map(var), Var::Map(on));
-        return on;
     }
     if (Var::IsList(var) && Var::IsList(on)) {
         __Update(Var::List(var), Var::List(on));
-        return on;
     }
     if (Var::IsDefined(var)) {
-        return var;
+        on = var;
     }
-    return on;
 }
 Var Edit::Update(Var var, Var on) {
-    return Var::IsUndefined(on) ? var : __Update(var, on);
+    if(Var::IsDefined(on)) {
+        __Update(var, on);
+    } else {
+        on = var;
+    }
+    return on;
 }
 /**
  * ------------------------------------------------------------------------------------------------
  * Find
  * ------------------------------------------------------------------------------------------------
  */
-static Var& __Find(Var& var, const Var& on);
+static void __Find(Link& var, const Link& on);
 /**
  * ---------------------------------------------------------------------------
  * map on map
  * ---------------------------------------------------------------------------
  */
-static inline Map& __Find(Map& var, const Map& on) {
+static inline void __Find(Map& var, const Map& on) {
     for (auto it = var.begin(), end = var.end(); it != end;) {
         auto find = on.find(it->first);
         if (find == on.end()) {
             it = var.erase(it);
             continue;
         }
-        it->second = __find(it->second, find->second);
+        __Find(it->second, find->second);
         ++it;
-    }
-    return var;      
+    }      
 }
 Map& Edit::Find(Map& var, const Map& on) {
-    return __find(var, on);
+    __Find(var, on);
+    return var;
 }
 /**
  * ----------------------------------------------------------------------------
  * list on list
  * ----------------------------------------------------------------------------
  */
-static inline  List& __Find(List& var, const List& on) {
+static inline void __Find(List& var, const List& on) {
     List::size_type i = 0;
     for (; i < var.size() && i < on.size(); ++i) {
-        var[i] = __find(var[i], on[i]);
+        __Find(var[i], on[i]);
     }
     for (; i < var.size(); ++i) {
         var.pop_back();
     }
-    return var;
 }
 List& Edit::Find(List& var, const List& on) {
-    return __find(var, on);
+    __Find(var, on);
+    return var;
 }
 /**
  * ----------------------------------------------------------------------------
  * var on var
  * ----------------------------------------------------------------------------
  */
-static Var& __Find(Var& var, const Var& on) {
+static void __Find(Link& var, const Link& on) {
     try {
         if (var == on) {
-            return var;
+            return;
         }
         if (Var::IsUndefined(var)) {
-            return (var = on);
+            var = on;
+            return;
         }
         if (Var::IsMap(var) && Var::IsMap(on)) {
             __Find(Var::Map(var), Var::Map(on));
-            return var;
+            return;
         }
         if (Var::IsList(var) && Var::IsList(on)) {
             __Find(Var::List(var), Var::List(on));
-            return var;
+            return;
         }
-        if (String(var) == String(on)) {
-            return var;
+        if (__Match(var, on)) {
+            return;
         }
-    } catch (...) {
-    }
-    return Obj::Null();
+    } catch (...) {}
+    // not found
+    var = Obj::Null();
 }
-Var Edit::Find(Var var, const Var& on) {
-    return Var::IsNull(var) ? var : __Find(var, on);
+Var Edit::Find(Var var, const Var on) {
+    if(Var::IsDefined(var)) {
+        __Find(var, on);
+    }
+    return var;
 }
 /**
  * ------------------------------------------------------------------------------------------------
  * Remove
  * ------------------------------------------------------------------------------------------------
  */
-static Var& __Remove(const Var& var, const Var& on);
+static Void __Remove(const Link& var, Link& on);
 /**
  * ----------------------------------------------------------------------------
  * map on map
  * ----------------------------------------------------------------------------
  */
-static inline Map& __Remove(const Map& var, Map& on) {
+static inline Void __Remove(const Map& var, Map& on) {
     for (auto it = var.begin(), end = var.end(); it != end; ++it) {
         auto find = on.find(it->first);
         if (find != on.end()) {
-            find->second = __Remove(it->second, find->second);
+            __Remove(it->second, find->second);
         }    
-    }
-    return on;      
+    }      
 }
 Map& Edit::Remove(const Map& var, Map& on) {
-    return __Remove(var, on);
+    __Remove(var, on);
+    return on;
 }
 /**
  * ----------------------------------------------------------------------------
  * list on list
  * ----------------------------------------------------------------------------
  */
-static inline List& __Remove(const List& var, List& on) {
+static inline Void __Remove(const List& var, List& on) {
     for (size_t i = 0; i < var.size() && i < on.size(); ++i) {
-        on[i] = __Remove(var[i], on[i]);
-    }
-    return on;      
+        __Remove(var[i], on[i]);
+    }      
 }
 List& Edit::Remove(const List& var, List& on) {
-    return __Remove(var, on);
+    __Remove(var, on);
+    return on;
 }
 /**
  * ----------------------------------------------------------------------------
  * var on var
  * ----------------------------------------------------------------------------
  */
-static Var& __Remove(const Var& var, const Var& on) {
+static Void __Remove(const Link& var, Link& on) {
     try {
         if (var == on) {
-            return Obj::Null();
-        }
+            on = Obj::Null();
+            return;
+        } 
         if (Var::IsUndefined(var)) {
-            return Obj::Null();
+            on = Obj::Null();
+            return;
         }
         if (Var::IsMap(var) && Var::IsMap(on)) {
             __Remove(Var::Map(var), Var::Map(on));
-            return on;
+            return;
         }
         if (Var::IsList(var) && Var::IsList(on)) {
             __Remove(Var::List(var), Var::List(on));
-            return on;
+            return;
         }
-        if (String(var) == String(on)) {
-            return Obj::Null();
+        if (__Match(var, on)) {
+            on = Obj::Null();
+            return;
         }
-    } catch (...) {
+    } catch (...) {}
+}
+Var Edit::Remove(const Var var, Var on) {
+    if(Var::IsDefined(var)) {
+        __Remove(var, on);
     }
     return on;
-}
-Var Edit::Remove(Var var, Var on) {
-    return Var::IsNull(var) ? on : __Remove(var, on);
 }
 /**
  * ------------------------------------------------------------------------------------------------
  * Delete 
  * ------------------------------------------------------------------------------------------------
  */
-static Var& __Delete(const Var& var, const Var& on);
+static Void __Delete(const Link& var, Link& on);
 /**
  * ----------------------------------------------------------------------------
  * map on map
  * ----------------------------------------------------------------------------
  */
-static inline Map& __Delete(const Map& v, Map& o) {
-    for (auto it = v.begin(), end = v.end(); it != end; ++it) {
-        auto find = o.find(it->first);
-        if (find != o.end()) {
-            find->second = __Delete(it->second, find->second);
+static inline Void __Delete(const Map& var, Map& on) {
+    for (auto it = var.begin(), end = var.end(); it != end; ++it) {
+        auto find = on.find(it->first);
+        if (find != on.end()) {
+            __Delete(it->second, find->second);
             if (Var::IsEmpty(find->second)) {
-                o.erase(find);
+                on.erase(find);
             }
         }
     }
-    return o;
 }
-Map& Edit::Delete(const Map& v, Map& o) {
-    return __Delete(v, o);
+Map& Edit::Delete(const Map& var, Map& on) {
+    __Delete(var, on);
+    return on;
 }
 /**
  * ----------------------------------------------------------------------------
  * list on list
  * ----------------------------------------------------------------------------
  */
-static inline List& __delete(const List& v, List& o) {
-    auto vit = v.begin();
-    auto oit = o.begin();
-    for (; (vit != v.end()) && (oit != o.end()); ++vit) {
-        *oit = __Delete(*vit, *oit);
+static inline Void __Delete(const List& var, List& on) {
+    auto vit = var.begin();
+    auto oit = on.begin();
+    for (; (vit != var.end()) && (oit != on.end()); ++vit) {
+        __Delete(*vit, *oit);
         // check
         if (Var::IsEmpty(*oit)) {
-            oit = o.erase(oit);
+            oit = on.erase(oit);
         } else {
             ++oit;
         }
     }
-    return o;
 }
-List& Edit::Delete(const List& v, List& o) {
-    return __delete(v, o);
+List& Edit::Delete(const List& var, List& on) {
+    __Delete(var, on);
 }
 /**
  * ----------------------------------------------------------------------------
  * var on var
  * ----------------------------------------------------------------------------
  */
-static Var& __Delete(const Var& var, const Var& on) {
+static inline Void __Delete(const Link& var, Link& on) {
     try {
         if (var == on) {
-            return Obj::Null();
+            on = Obj::Null();
+            return;
         }
         if (Var::IsUndefined(var)) {
-            return Obj::Null();
+            on = Obj::Null();
+            return;
         }
         if (Var::IsMap(var) && Var::IsMap(on)) {    
-            __delete(Var::Map(var), Var::Map(on));
-            return on;
+            __Delete(Var::Map(var), Var::Map(on));
+            return;
         }
         if (Var::IsList(var) && Var::IsList(on)) {
-            __delete(Var::List(var), Var::List(on));
-            return on;
+            __Delete(Var::List(var), Var::List(on));
+            return;
         }
-        if (String(var) == String(on)) {
-            return Obj::Null();
+        if (__Match(var, on)) {
+            on = Obj::Null();
+            return;
         }
-    } catch (...) {
-    }
-    return on;
+    } catch (...) {}
 }
-Var& Edit::Delete(const Var& var, Var& on) {
-    return Var::IsNull(var) ? on : __Delete(var, on);
+Var Edit::Delete(const Var var, Var on) {
+    if(Var::IsDefined(var)) {
+        __Delete(var, on);
+    }
+    return on; 
 }
 /***
  * ------------------------------------------------------------------------------------------------
  * Match
  * ------------------------------------------------------------------------------------------------
  */
-static Boolean __Match(Var var, Var on);
+static Boolean __Match(const Link& var, const Link& on);
 /**
  * ----------------------------------------------------------------------------
  * map on map
@@ -401,7 +423,7 @@ static inline Boolean __Match(const List& v, const List& o) {
         return false;
     }
     for (auto vit = v.begin(), oit = o.begin(); oit != o.end(); ++vit, ++oit) {
-        if (!__match(*vit, *oit)){
+        if (!__Match(*vit, *oit)){
             return false;
         }
     }
@@ -415,20 +437,32 @@ Boolean Edit::Match(const List& v, const List& o) {
  * var on var
  * ----------------------------------------------------------------------------
  */
-static Boolean __Match(const Var& var, const Var& on) {
+static Boolean __Match(const Link& var, const Link& on) {
     try {
         if (var == on) {
             return true;
         }
+        if (Var::IsFloat(var) && Var::IsFloat(on)) {  
+            return Var::Float(var) == Var::Float(on);    
+        }
+        if (Var::IsInteger(var) && Var::IsInteger(on)) {  
+            return Var::Integer(var) == Var::Integer(on);    
+        }
+        if (Var::IsString(var) && Var::IsString(on)) {  
+            return Var::String(var) == Var::String(on);    
+        }
+        if (Var::IsBuffer(var) && Var::IsBuffer(on)) {  
+            return Var::Buffer(var) == Var::Buffer(on);    
+        }
         if (Var::IsMap(var) && Var::IsMap(on)) {    
-            return __match(Var::Map(var), Var::Map(on));
+            return __Match(Var::Map(var), Var::Map(on));
         }
         if (Var::IsList(var) && Var::IsList(on)) {      
-            return __match(Var::List(var), Var::List(on));;
+            return __Match(Var::List(var), Var::List(on));;
         }
-        return String(var) == String(on);
-    } catch (...) {
-    }
+        return Var::ToString(var) == Var::ToString(on);
+    } catch (...) {}
+    // not match
     return false;
 }
 Boolean Edit::Match(const Var& var, const Var& on) {
@@ -439,7 +473,7 @@ Boolean Edit::Match(const Var& var, const Var& on) {
  * Count var on var
  * ------------------------------------------------------------------------------------------------
  */
-Integer Edit::Count(String var, Var on) {
+Integer Edit::Count(const Var& var, const Var& on) {
     if (Var::IsMap(on)) {
         Map& o = Var::Map(on);
         {
@@ -460,14 +494,14 @@ Integer Edit::Count(String var, Var on) {
             return c;
         }
     }
-    return (var == String(on)) ? 1 : 0;
+    return Match(var , on) ? 1 : 0;
 }
 /**
  * ------------------------------------------------------------------------------------------------
  * Insert key:value
  * ------------------------------------------------------------------------------------------------
  */
-static void __Insert (String& key, Var var, Var on){
+static void __Insert(String& key, Var var, Var on){
     if (Var::IsMap(on)) {
         /**
          * add key: obj
@@ -497,7 +531,8 @@ Var Edit::Insert(Key path, Var var, Var on) {
     /**
      * path iterator
      */
-    sregex_iterator it(path.begin(), path.end(), e), end;
+    auto it  = std::sregex_iterator(path.begin(), path.end(), e);
+    auto end = std::sregex_iterator();
     /**
      * path end
      */
@@ -510,32 +545,36 @@ Var Edit::Insert(Key path, Var var, Var on) {
     if (Var::IsNull(on)) {
         on = Obj::Map();
     }
-    for (Var c = on;;) {
-        String k = it->str();
-        if (++it == end) {
-            __Insert(k, var, c);
-            break;
-        }
-        Var n = c[k];
+    auto c = on;
+    auto k = String(it->str());
+    for (++it; it != end; ++it) {
+        auto n = c[k];
         if (Var::IsNull(n)) {
             n = Obj::Map();
             __Insert(k, n, c);
         }
         c = n;
+        k = it->str();
     }
+    __Insert(k, var, c);
     return on;
 }
-/**---------------------------------------------------------------------------------------------------------------------
+/**
+ * ------------------------------------------------------------------------------------------------
  * Update key:value
- **--------------------------------------------------------------------------------------------------------------------*/
+ * ------------------------------------------------------------------------------------------------
+ */
 Var Edit::Update(Key path, Var var, Var on) {
     /**
      */
-    static const regex e("([^/]+)");
+    static const std::regex e("([^/]+)");
     /**
+     * path iterator
      */
-    sregex_iterator it(path.begin(), path.end(), e), end;
+    auto it  = std::sregex_iterator(path.begin(), path.end(), e);
+    auto end = std::sregex_iterator();
     /**
+     * process
      */
     if (it == end) {
         return var;
@@ -554,8 +593,8 @@ Var Edit::Update(Key path, Var var, Var on) {
                 return on;
             }
             if (Var::IsList(o)) {
-                List& l = Var::List(o);
-                Integer k = Integer::ValueOf(key);
+                auto l = Var::List(o);
+                auto k = Integer::ValueOf(key);
                 // verify position
                 if (l.size() > size_t(k)) {
                     l[k] = var;
@@ -573,9 +612,8 @@ Var Edit::Update(Integer deep, Var var, Var on) {
             return var;
         }
         --deep;
-        Map& m = Var::Map(on);
-        for (Map::iterator it = m.begin(); it != m.end(); ++it) {
-            /**/
+        auto& m = Var::Map(on);
+        for (auto it = m.begin(); it != m.end(); ++it) {
             it->second = Update(deep, var, it->second);
         }
     } else if (Var::IsList(on)) {
@@ -583,89 +621,84 @@ Var Edit::Update(Integer deep, Var var, Var on) {
             return var;
         }
         --deep;
-        List& l = Var::List(on);
-        for (List::iterator it = l.begin(); it != l.end(); ++it) {
-            /**/
+        auto& l = Var::List(on);
+        for (auto it = l.begin(); it != l.end(); ++it) {
             *it = Update(deep, var, *it);
         }
     }
     return on;
 }
-/**---------------------------------------------------------------------------------------------------------------------
+/**
+ * ------------------------------------------------------------------------------------------------
  * Find path
- **--------------------------------------------------------------------------------------------------------------------*/
+ * ------------------------------------------------------------------------------------------------
+ */
 Var Edit::Find(Key path, Var on) {
-    /**
-     */
     static const std::regex e("([^/]+)");
     /**
+     * process
      */
-    Var r = on;
-    for (sregex_iterator it(path.begin(), path.end(), e), end; (!Var::IsNull(r)) && (it != end); ++it) {
-        r = r[it->str()];
+    auto it  = std::sregex_iterator(path.begin(), path.end(), e);
+    auto end = std::sregex_iterator();
+    auto res = on;
+    for (; Var::IsDefined(res) && (it != end); ++it) {
+        res = res[it->str()];
     }
-    return r;
+    return res;
 }
 /**---------------------------------------------------------------------------------------------------------------------
  * Remove
  **--------------------------------------------------------------------------------------------------------------------*/
 Var Edit::Remove(Key path, Var on) {
-    /**
-     */
     static const std::regex e("([^/]+)");
     /**
+     * process
      */
-    sregex_iterator it(path.begin(), path.end(), e), end;
+    auto it  = std::sregex_iterator(path.begin(), path.end(), e);
+    auto end = std::sregex_iterator();
     /**
      */
     if (it == end) {
         return on;
     }
     for (Var o = on; Var::IsDefined(o);) {
-        /**/
-        String key = move(it->str());
-        /**/
+        auto key = String(std::move(it->str()));
         if (++it == end) {
             if (Var::IsMap(o)) {
-                Map& m = Var::Map(o);
-                // try to find
+                auto& m   = Var::Map(o);
                 auto find = m.find(key);
                 if (find != m.end()) {
                     auto tmp = find->second;
-                    /**/
                     m.erase(find);
-                    /**/
                     return tmp;
                 }
                 return Obj::Null();
             }
             if (Var::IsList(o)) {
-                List& l = Var::List(o);
-                // try to find
+                auto& l   = Var::List(o);
                 auto find = l.begin() + Integer::ValueOf(key);
                 if (find != l.end()) {
                     auto tmp = *find;
-                    //
                     l.erase(find);
-                    //
                     return tmp;
                 }
                 return Obj::Null();
             }
         }
-        /**/
         o = o[key];
     }
     return Obj(nullptr);
 }
-/**---------------------------------------------------------------------------------------------------------------------
+/**
+ * ------------------------------------------------------------------------------------------------
  * Normalize
- **--------------------------------------------------------------------------------------------------------------------*/
+ * ------------------------------------------------------------------------------------------------
+ */
 Var Edit::Normalize(Var var) {
     if (Var::IsMap(var)) {
-        Map& m = Var::Map(var);
+        auto& m = Var::Map(var);
         {
-            list<String> keys;
+            std::list<String> keys;
             Map out;
             /**
              * read keys
@@ -687,7 +720,7 @@ Var Edit::Normalize(Var var) {
         }
     }
     if (Var::IsList(var)) {
-        List& l = Var::List(var);
+        auto& l = Var::List(var);
         {
             List out;
             for (Var v : l) {
@@ -698,3 +731,8 @@ Var Edit::Normalize(Var var) {
     }
     return var;
 }
+/**
+ * ------------------------------------------------------------------------------------------------
+ * End
+ * ------------------------------------------------------------------------------------------------
+ */

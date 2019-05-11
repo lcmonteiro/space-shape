@@ -14,6 +14,10 @@
 #include "SSearch.h"
 #include "SEdit.h"
 /**
+ * namespaces
+ */
+using namespace std;
+/**
  * ---------------------------------------------------------------------------------------------------------------------
  * Helpers
  * ---------------------------------------------------------------------------------------------------------------------
@@ -211,13 +215,15 @@ Boolean Search::Match(Var expr, Var& on) {
  * ----------------------------------------------------------------------------
  **/
 Var Search::Update(Key expr, Var var, Var on) {
-    static const std::regex e("([^/]+)");
-
-    // iterator ---------------------------------------
+    static const regex e("([^/]+)");
+    /**
+     * iterator
+     */
     sregex_iterator it(expr.begin(), expr.end(), e);
     sregex_iterator end;
-    
-    // execute ----------------------------------------
+    /**
+     * execute
+     */
     return __ExecuteFilter(
             it, end, on, [&](Var v){ return var; }, on);
 }
@@ -227,7 +233,7 @@ Var Search::Update(Key expr, Var var, Var on) {
  * ----------------------------------------------------------------------------
  */
 Var Search::Find(Key expr, Var on) {
-    static const std::regex e("([^/]+)");
+    static const regex e("([^/]+)");
     
     // iterator ---------------------------------------
     sregex_iterator it(expr.begin(), expr.end(), e);
@@ -242,7 +248,7 @@ Var Search::Find(Key expr, Var on) {
  * ----------------------------------------------------------------------------
  */
 Var Search::Delete(Key expr, Var on) {
-    static const std::regex e("([^/]+)");
+    static const regex e("([^/]+)");
 
     // iterator ---------------------------------------
     sregex_iterator it(expr.begin(), expr.end(), e);
@@ -456,7 +462,7 @@ Boolean __MatchEqual(Var val, Var on) {
     return (String(on).compare(String(val)) == 0);
 }
 Boolean __MatchRegex(Var val, Var on) {
-    return std::regex_match(Var::ToString(on), std::regex(Var::ToString(val)));
+    return regex_match(Var::ToString(on), regex(Var::ToString(val)));
 }
 /**
  * ------------------------------------------------------------------------------------------------
@@ -491,13 +497,13 @@ Var __FindFilter(sregex_iterator it, sregex_iterator& end, Var on) {
     }
     // regex - map case -----------------------------------
     if (Var::IsMap(on)) {
-        std::regex expr(k);
+        regex expr(k);
         // go to next position
         ++it;
         // iterate
         Map m;
         for (auto v : Var::Map(on)) {
-            if (std::regex_match(v.first, expr)) {
+            if (regex_match(v.first, expr)) {
                 // try to find
                 Var f = __FindFilter(it, end, v.second);
                 // save if found
@@ -511,14 +517,14 @@ Var __FindFilter(sregex_iterator it, sregex_iterator& end, Var on) {
     // regex - list case -----------------------------------
     if (Var::IsList(on)) {
         // validate regex
-        std::regex expr(k);
+        regex expr(k);
         // go to next position
         ++it;
         // iterate
         List    l;
         Integer i;
         for (Var v : Var::List(on)) {
-            if (std::regex_match(String::ValueOf(i++), expr)) {
+            if (regex_match(String::ValueOf(i++), expr)) {
                 // try to find
                 Var f = __FindFilter(it, end, v);
                 // save if found
@@ -554,10 +560,10 @@ Boolean __DeleteFilter(sregex_iterator it, sregex_iterator& end, Var on) {
             return m.empty();
         }
         // validate regex
-        std::regex expr(it->str());
+        regex expr(it->str());
         ++it;
         for (auto mit = m.begin(); mit != m.end();) {
-            if (std::regex_match(mit->first, expr)) {
+            if (regex_match(mit->first, expr)) {
                 if (__DeleteFilter(it, end, mit->second)) {
                     mit = m.erase(mit);
                     continue;
@@ -579,10 +585,10 @@ Boolean __DeleteFilter(sregex_iterator it, sregex_iterator& end, Var on) {
             return l.empty();
         }
         // validate regex
-        std::regex expr(it->str());
+        regex expr(it->str());
         ++it;
         for (auto lit = l.begin(); lit != l.end();) {
-            if (std::regex_match(String::ValueOf(Integer(std::distance(l.begin(), lit))), expr)) {
+            if (regex_match(String::ValueOf(Integer(distance(l.begin(), lit))), expr)) {
                 if (__DeleteFilter(it, end, *lit)) {
                     lit = l.erase(lit);
                     continue;

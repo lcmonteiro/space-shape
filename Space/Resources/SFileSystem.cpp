@@ -26,6 +26,10 @@
 #include "SUtils.h"
 #include "SKeys.h"
 /**
+ * namespaces
+ */
+using namespace std;
+/**
  * --------------------------------------------------------------------------------------------------------------------
  * FileSystem Monitor
  * --------------------------------------------------------------------------------------------------------------------
@@ -43,7 +47,7 @@ const Integer SFileSystem::DELETE = IN_DELETE;
  * ------------------------------------------------------------------------------------------------
  */
 static Boolean __contain(const Key& expr, const String& path) {
-    static const std::regex e("([^/]+)");
+    static const regex e("([^/]+)");
 
     sregex_iterator eit(expr.begin(), expr.end(), e);
     sregex_iterator pit(path.begin(), path.end(), e);
@@ -53,7 +57,7 @@ static Boolean __contain(const Key& expr, const String& path) {
         if(eit == end){
             return false;
         }
-        if (!std::regex_match(pit->str(), std::regex(eit->str()))) {
+        if (!regex_match(pit->str(), regex(eit->str()))) {
             return false;
         }
     }
@@ -230,9 +234,9 @@ List SFileSystem::read_events() {
 
 Integer SFileSystem::process_events(initializer_list<pair<const Integer, function<void(Var v)>>> l) {
     // map functions
-    std::map<const Integer, std::function<void(Var v) >> functions(l);
+    map<const Integer, function<void(Var v) >> functions(l);
     // read events
-    List events = std::move(read_events());
+    List events = move(read_events());
     // process events
     for (Var e : events) functions[e[_type_]](e);
     // return number os events 
@@ -293,7 +297,7 @@ Boolean SFileSystem::Insert(String path, Var tree) {
     Map out;
     struct stat st;
     if(stat((path).data(), &st) < 0) {
-        throw std::runtime_error(strerror(errno));
+        throw runtime_error(strerror(errno));
     }
     // get type
     if (st.st_mode && S_IFDIR) {
@@ -313,8 +317,8 @@ Var SFileSystem::Find(String path) {
 }
 
 Var SFileSystem::Find(String path, Key expr) {
-    static const std::regex e("([^/]+)");
-    std::sregex_iterator it(expr.begin(), expr.end(), e), end;
+    static const regex e("([^/]+)");
+    sregex_iterator it(expr.begin(), expr.end(), e), end;
     return Obj(__find_dir(it, end, path.back() == '/' ? path : path + "/"));
 }
 
@@ -401,7 +405,7 @@ String SFileSystem::GetFilePath(String path) {
 String SFileSystem::GetFullPath(String path) {
     char tmp[FILENAME_MAX];
     if (realpath(path.data(), tmp) == 0) {
-        throw std::runtime_error(strerror(errno));
+        throw runtime_error(strerror(errno));
     }
     return String(tmp);
 }
@@ -409,14 +413,14 @@ String SFileSystem::GetFullPath(String path) {
 String SFileSystem::GetPath() {
     char tmp[FILENAME_MAX];
     if (getcwd(tmp, FILENAME_MAX) == 0) {
-        throw std::runtime_error(strerror(errno));
+        throw runtime_error(strerror(errno));
     }
     return String(tmp);
 }
 
 void SFileSystem::SetPath(String path) {
     if (chdir(path.data()) != 0) {
-        throw std::runtime_error(strerror(errno));
+        throw runtime_error(strerror(errno));
     }
 }
 /**
@@ -521,10 +525,10 @@ static Map __find_dir(sregex_iterator it, sregex_iterator& end, String path) {
     /**
      * parse directory and match expression
      */
-    std::regex expr(name);
+    regex expr(name);
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) {
-        if (!std::regex_match(entry->d_name, expr)) {
+        if (!regex_match(entry->d_name, expr)) {
             continue;
         }
         switch (entry->d_type) {
@@ -613,15 +617,15 @@ static bool __copy_dir(String from, String to, List tree) {
 }
 
 static bool __copy_file(String from, String to) {
-    std::ifstream fromf(from, std::ios::binary);
+    ifstream fromf(from, ios::binary);
     if (fromf.fail()) {
         return false;
     }
-    std::ofstream tof(to, std::ios::binary);
+    ofstream tof(to, ios::binary);
     if (tof.fail()) {
         return false;
     }
-    tof << fromf.rdbuf() << std::flush;
+    tof << fromf.rdbuf() << flush;
     return true;
 }
 

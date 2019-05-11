@@ -92,14 +92,14 @@ namespace Logic {
     template<typename Function>
     static Map  ForEach(Map map,   Function func);
     template<typename Function>
-    static Var  ForEach(Var var,   Function func, false_type);
+    static Var  ForEach(Var var,   Function func, std::false_type);
     template<typename Function>
-    static Var  ForEach(Var var,   Function func, true_type);
+    static Var  ForEach(Var var,   Function func, std::true_type);
     template<bool LINKS = false, typename Function>
     static Var ForEach(Var var,    Function func)
     {
         return ForEach(var, func,
-            typename integral_constant<bool, LINKS>::type()
+            typename std::integral_constant<bool, LINKS>::type()
         );
     }
 
@@ -179,41 +179,41 @@ namespace Logic {
  * ------------------------------------------------------------------------------------------------
  */
 template<typename Function>
-Var Logic::ForEach(Var var, Function func, true_type) {
+Var Logic::ForEach(Var var, Function func, std::true_type) {
     if (Var::IsMap(var)) {
-        ::Map& map = Var::Map(var);
+        auto& map = Var::Map(var);
         for (auto& v : map) {
-            v.second = ForEach(v.second, func, true_type());
+            v.second = ForEach(v.second, func, std::true_type());
         }
         return var;
     }
     if (Var::IsList(var)) {
-        ::List& list = Var::List(var);
+        auto& list = Var::List(var);
         for (auto& v : list) {
-            v = ForEach(v, func, true_type());
+            v = ForEach(v, func, std::true_type());
         }
         return var;
     }
     if (Var::IsLink(var)) {
-        ::Link& link = Var::Link(var);
-        link = ForEach(link, func, true_type());
+        auto& link = Var::Link(var);
+        link = ForEach(link, func, std::true_type());
         return var;
     }
     return func(var);
 }
 template<typename Function>
-Var Logic::ForEach(Var var, Function func, false_type) {
+Var Logic::ForEach(Var var, Function func, std::false_type) {
     if (Var::IsMap(var)) {
-        ::Map& map = Var::Map(var);
+        auto& map = Var::Map(var);
         for (auto& v : map) {
-            v.second = ForEach(v.second, func, false_type());
+            v.second = ForEach(v.second, func, std::false_type());
         }
         return var;
     }
     if (Var::IsList(var)) {
-        ::List& list = Var::List(var);
+        auto& list = Var::List(var);
         for (auto& v : list) {
-            v = ForEach(v, func, false_type());
+            v = ForEach(v, func, std::false_type());
         }
         return var;
     }

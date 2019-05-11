@@ -11,21 +11,25 @@
 #include "SUtils.h"
 #include "SEdit.h"
 /**
+ * namespaces
+ */
+using namespace std;
+/**
  * ----------------------------------------------------------------------------
  * From CSV
  * ----------------------------------------------------------------------------
  */
-Var Convert::FromCSV(std::istream& v, char delim) {
+Var Convert::FromCSV(istream& v, char delim) {
     try{
         List lines;
-        for(String line; std::getline(v, line);) {
+        for(String line; getline(v, line);) {
             List values;
             /**
              * get data of each cell
              */
             stringstream s(line.update('\r', '\0'));
             String value;
-            while (std::getline(s, value, delim)) {
+            while (getline(s, value, delim)) {
                 values.emplace_back(Obj(value));
             }
             if(!value.empty()){
@@ -58,7 +62,7 @@ Var Convert::FromCSV(std::istream& v, char delim) {
         return Obj::Null();
     }
 }
-Var Convert::FromCSV(std::istream&& v, char delim) {
+Var Convert::FromCSV(istream&& v, char delim) {
     return FromCSV(v, delim);
 }
 /**
@@ -66,7 +70,7 @@ Var Convert::FromCSV(std::istream&& v, char delim) {
  * To CSV
  * ----------------------------------------------------------------------------
  */
-std::ostream& Convert::ToCSV(std::ostream& os, Var data, char delim) {
+ostream& Convert::ToCSV(ostream& os, Var data, char delim) {
     /**
      * convert to list
      */  
@@ -104,11 +108,11 @@ std::ostream& Convert::ToCSV(std::ostream& os, Var data, char delim) {
                 }
             }
         }
-        os << String(los.str()).pop(1) << std::endl;
+        os << String(los.str()).pop(1) << endl;
     }
     return os;
 }
-std::ostream& Convert::ToCSV(std::ostream&& os, Var data, char delim) {
+ostream& Convert::ToCSV(ostream&& os, Var data, char delim) {
     return ToCSV(os, data, delim);
 }
 /**
