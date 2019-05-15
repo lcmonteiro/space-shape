@@ -132,7 +132,7 @@ Map& Edit::Insert(const Map& var, Map& on) {
 static inline void __Insert(const List& var, List& on) {
     for (List::size_type i = 0; i < var.size(); ++i) {
         if (on.size() <= i) {
-            on.push_back(var[i]);
+            on.emplace_back(var[i]);
         } else {
             __Insert(var[i], on[i]);
         }
@@ -704,7 +704,7 @@ Var Edit::Normalize(Var var) {
              * read keys
              */
             for (auto&v : m) {
-                keys.push_back(v.first);
+                keys.emplace_back(v.first);
             }
             /** 
              * sort keys 
@@ -724,7 +724,7 @@ Var Edit::Normalize(Var var) {
         {
             List out;
             for (Var v : l) {
-                out.push_back(Normalize(v));
+                out.emplace_back(Normalize(v));
             }
             return Obj(out);
         }
