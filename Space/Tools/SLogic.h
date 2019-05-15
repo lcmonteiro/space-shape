@@ -87,6 +87,36 @@ namespace Logic {
      * Call function (func) for all elements
      * --------------------------------------------------------------------------------------------
      */
+     namespace {
+        Var __ForEach(List path, Var var, Function func, true_type) {
+            if (Var::IsMap(var)) {
+                for (auto& v : Var::Map(var)) {
+                    v.second = __ForEach(
+                        path + Obj(v), v.second, func, true_type());
+                }
+                return var;
+            }
+            if (Var::IsList(var)) {
+                size_t i = 0; 
+                for (auto& v : Var::List(var)) {
+                    v.second = __ForEach(
+                        path + Obj(i++), v.second, func, true_type());
+                }
+                return var;
+            }
+            if (Var::IsLink(var)) {
+                link = __ForEach(Var::Link(var), func, true_type());
+                return var;
+            }
+            return func(var);
+        }
+    }
+    static Var ForEach(Var var,    Function func)
+    {
+        return __ForEach(var, func,
+            typename integral_constant<bool, LINKS>::type()
+        );
+    }
     template<typename Function>
     static List ForEach(List list, Function func);
     template<typename Function>
@@ -95,13 +125,7 @@ namespace Logic {
     static Var  ForEach(Var var,   Function func, false_type);
     template<typename Function>
     static Var  ForEach(Var var,   Function func, true_type);
-    template<bool LINKS = false, typename Function>
-    static Var ForEach(Var var,    Function func)
-    {
-        return ForEach(var, func,
-            typename integral_constant<bool, LINKS>::type()
-        );
-    }
+    
 
     /**
      * ForEach

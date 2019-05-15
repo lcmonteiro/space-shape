@@ -25,7 +25,9 @@
  * ------------------------------------------------------------------------------------------------
  * declare
  */
-class __interface__;
+namespace {
+    class __interface__;
+}
 /**
  * define
  */
@@ -48,6 +50,8 @@ typedef class __link__: public std::shared_ptr<__interface__> {
  * ------------------------------------------------------------------------------------------------
  * Containers
  * ------------------------------------------------------------------------------------------------
+ * List
+ * ----------------------------------------------------------------------------
  **/
 typedef class __list__ : public std::vector<Link> {
 public:
@@ -58,11 +62,13 @@ public:
     using Super::Super;
     using Super::operator=;
     /**
-     * constructors
-     */    
-    __list__() = default;
-    __list__(const Super& a) : Super(a) {}
-    __list__(Super &&a): Super(std::move(a)) {}
+     * operators
+     */
+    inline __list__ operator + (Link b) {
+        auto res = __list__(*this);
+        res.emplace_back(b);
+        return std::move(res);
+    }
     /**
      * utilities
      */
