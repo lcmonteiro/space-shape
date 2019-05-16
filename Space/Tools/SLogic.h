@@ -88,39 +88,25 @@ namespace Logic {
      * --------------------------------------------------------------------------------------------
      */
      namespace {
-<<<<<<< HEAD
         Var __ForEach(List& path, Var var, Function func, true_type) {
             if (Var::IsMap(var)) {
                 for (auto& v : Var::Map(var)) {
                     path.emplace_back(Obj(v.first));
                     v.second = __ForEach(path, v.second, func, true_type());
                     path.pop_back();
-=======
-        Var __ForEach(List path, Var var, Function func, true_type) {
-            if (Var::IsMap(var)) {
-                for (auto& v : Var::Map(var)) {
-                    v.second = __ForEach(
-                        path + Obj(v), v.second, func, true_type());
->>>>>>> 55be053b2246003c5a28d1dd40ce7ef21b495688
                 }
                 return var;
             }
             if (Var::IsList(var)) {
                 size_t i = 0; 
                 for (auto& v : Var::List(var)) {
-<<<<<<< HEAD
                     path.emplace_back(Obj(i++));
                     v.second = __ForEach(path, v.second, func, true_type());
                     path.pop_back();
-=======
-                    v.second = __ForEach(
-                        path + Obj(i++), v.second, func, true_type());
->>>>>>> 55be053b2246003c5a28d1dd40ce7ef21b495688
                 }
                 return var;
             }
             if (Var::IsLink(var)) {
-<<<<<<< HEAD
                 link = __ForEach(path, Var::Link(var), func, true_type());
                 return var;
             }
@@ -128,15 +114,6 @@ namespace Logic {
         }
     }
     static Var ForEach(Var var, Function func)
-=======
-                link = __ForEach(Var::Link(var), func, true_type());
-                return var;
-            }
-            return func(var);
-        }
-    }
-    static Var ForEach(Var var,    Function func)
->>>>>>> 55be053b2246003c5a28d1dd40ce7ef21b495688
     {
         return __ForEach(var, func,
             typename integral_constant<bool, LINKS>::type()
@@ -149,14 +126,8 @@ namespace Logic {
     template<typename Function>
     static Var  ForEach(Var var,   Function func, std::false_type);
     template<typename Function>
-<<<<<<< HEAD
     static Var  ForEach(Var var,   Function func, std::true_type);
     template<bool LINKS = false, typename Function>
-=======
-    static Var  ForEach(Var var,   Function func, true_type);
-    
-
->>>>>>> 55be053b2246003c5a28d1dd40ce7ef21b495688
     /**
      * ForEach
      * @example Logic::ForEach<Map>(vector<T> in, [](Map& o, T& i){
