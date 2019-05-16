@@ -31,18 +31,18 @@ class __interface__;
  */
 typedef class __link__: public std::shared_ptr<__interface__> {
     public:
-    using Super = std::shared_ptr<__interface__>;
+    using __super__ = std::shared_ptr<__interface__>;
     /**
-     * super
+     * __super__
      */ 
-    using Super::Super;
-    using Super::operator=;
+    using __super__::__super__;
+    using __super__::operator=;
     /**
      * constructors
      */  
     __link__() = default;
-    __link__(const Super& a) : Super(a) {}
-    __link__(Super &&a): Super(std::move(a)) {}
+    __link__(const __super__& a) : __super__(a) {}
+    __link__(__super__ &&a): __super__(std::move(a)) {}
 } Link;
 /**
  * ------------------------------------------------------------------------------------------------
@@ -51,58 +51,52 @@ typedef class __link__: public std::shared_ptr<__interface__> {
  * List
  * ----------------------------------------------------------------------------
  **/
-typedef class __list__ : public std::vector<Link> {
+typedef class __list__ : public std::vector<__link__> {
 public:
-    using Super = std::vector<Link>;
+    using __super__ = std::vector<__link__>;
     /**
      * super
      */ 
-    using Super::Super;
-    using Super::operator=;
+    using __super__::__super__;
+    using __super__::operator=;
     /**
      * operators
      */
-    inline __list__ operator + (Link b) {
+    inline __list__ operator + (__link__ val) {
         auto res = __list__(*this);
-        res.emplace_back(b);
+        res.emplace_back(val);
         return std::move(res);
     }
-    /**
-     * utilities
-     */
-    inline __list__& insert(Super&& list) {
+    inline __list__ operator + (__super__ list) {
         for(auto& v : list) {
             emplace_back(std::move(v));
-        }
-        list.clear();     
+        }     
         return *this;
     }
-    inline __link__ remove() {
-        if(empty()) {
-            return Link();
-        }     
-        auto tmp = std::move(front()); erase(begin()); return tmp;
-    }
 } List;
-typedef class __map__ : public std::unordered_map<Key, Link> {
-    typedef std::unordered_map<Key, Link> Base;
+/**
+ * ----------------------------------------------------------------------------
+ * Map
+ * ----------------------------------------------------------------------------
+ */
+typedef class __map__ : public std::unordered_map<__key__, __link__> {
 public:
-    using Super = std::unordered_map<Key, Link> ;
+    using __super__ = std::unordered_map<__key__, __link__>;
     /**
      * super
      */ 
-    using Super::Super;
-    using Super::operator=;
+    using __super__::__super__;
+    using __super__::operator=;
     /**
      * constructors
      */    
     __map__() = default;
-    __map__(const Super& a) : Super(a) {}
-    __map__(Super &&a): Super(std::move(a)) {}
+    __map__(const __super__& a) : __super__(a) {}
+    __map__(__super__ &&a): __super__(std::move(a)) {}
 } Map;
 /**
  * ------------------------------------------------------------------------------------------------
- * Interface with objects
+ * Object interfaces
  * ------------------------------------------------------------------------------------------------
  **/
 class __interface__ {
@@ -382,39 +376,24 @@ public:
     /**
      * native types constructors
      */
-    __obj__(nullptr_t) : __link__() {
-    }
-    __obj__(bool v) : __link__(std::make_shared<__boolean>(v)) {
-    }
-    __obj__(int v) : __link__(std::make_shared<__integer>(v)) {
-    }
-    __obj__(const char* v) : __link__(std::make_shared<__string>(v)) {
-    }
-    __obj__(float v) : __link__(std::make_shared<__float>(v)) {
-    }
-    __obj__(double v) : __link__(std::make_shared<__float>(v)) {
-    }
+    __obj__(nullptr_t    ) : __link__() {}
+    __obj__(bool        v) : __link__(std::make_shared<__boolean>(v)) {}
+    __obj__(int         v) : __link__(std::make_shared<__integer>(v)) {}
+    __obj__(const char* v) : __link__(std::make_shared<__string >(v)) {}
+    __obj__(float       v) : __link__(std::make_shared<__float  >(v)) {}
+    __obj__(double      v) : __link__(std::make_shared<__float  >(v)) {}
     /**
      * base types constructors
      */
-    __obj__(__boolean__ v) : __link__(std::make_shared<__boolean>(v)) {
-    }
-    __obj__(__integer__ v) : __link__(std::make_shared<__integer>(v)) {
-    }
-    __obj__(__float__ v) : __link__(std::make_shared<__float>(v)) {
-    }
-    __obj__(__string__ v) : __link__(std::make_shared<__string>(v)) {
-    }
-    __obj__(__buffer__ v) : __link__(std::make_shared<__buffer>(v)) {
-    }
-    __obj__(__list__ v) : __link__(std::make_shared<__list>(v)) {
-    }
-    __obj__(__map__ v) : __link__(std::make_shared<__map>(v)) {
-    }
-    __obj__(std::initializer_list<__map::value_type> l) : __link__(std::make_shared<__map>(l)){
-    }
-    __obj__(std::initializer_list<__list::value_type> l) : __link__(std::make_shared<__list>(l)){
-    }
+    __obj__(__boolean__ v) : __link__(std::make_shared<__boolean>(v)) {}
+    __obj__(__integer__ v) : __link__(std::make_shared<__integer>(v)) {}
+    __obj__(__float__   v) : __link__(std::make_shared<__float  >(v)) {}
+    __obj__(__string__  v) : __link__(std::make_shared<__string >(v)) {}
+    __obj__(__buffer__  v) : __link__(std::make_shared<__buffer >(v)) {}
+    __obj__(__list__    v) : __link__(std::make_shared<__list   >(v)) {}
+    __obj__(__map__     v) : __link__(std::make_shared<__map    >(v)) {}
+    __obj__(std::initializer_list<__map::value_type>  l) : __link__(std::make_shared<__map >(l)){}
+    __obj__(std::initializer_list<__list::value_type> l) : __link__(std::make_shared<__list>(l)){}
     /**
      * Null
      */
@@ -424,16 +403,16 @@ public:
     /**
      * Link
      */
-    template<typename...Args>
-    static inline __link__ Link(Args &&...args) {
-        return std::make_shared<__link>(std::forward<Args>(args)...);
+    template<typename...__args__>
+    static inline __link__ Link(__args__ &&...args) {
+        return std::make_shared<__link>(std::forward<__args__>(args)...);
     }
     /**
      * Boolean
      */
-    template<typename...Args>
-    static inline __link__ Boolean(Args &&...args) {
-        return std::make_shared<__boolean>(std::forward<Args>(args)...);
+    template<typename...__args__>
+    static inline __link__ Boolean(__args__ &&...args) {
+        return std::make_shared<__boolean>(std::forward<__args__>(args)...);
     }
     static inline __link__ Boolean(__link__ l) {
         return std::make_shared<__boolean>(l->to_integer());
@@ -441,9 +420,9 @@ public:
     /**
      * Integer
      */
-    template<typename...Args>
-    static inline __link__ Integer(Args &&...args) {
-        return std::make_shared<__integer>(std::forward<Args>(args)...);
+    template<typename...__args__>
+    static inline __link__ Integer(__args__ &&...args) {
+        return std::make_shared<__integer>(std::forward<__args__>(args)...);
     }
     static inline __link__ Integer(__link__ l) {
         return std::make_shared<__integer>(l->to_integer());
@@ -451,9 +430,9 @@ public:
     /**
      * Float
      */
-    template<typename...Args>
-    static inline __link__ Float(Args &&...args) {
-        return std::make_shared<__float>(std::forward<Args>(args)...);
+    template<typename...__args__>
+    static inline __link__ Float(__args__ &&...args) {
+        return std::make_shared<__float>(std::forward<__args__>(args)...);
     }
     static inline __link__ Float(__link__ l) {
         return std::make_shared<__float>(l->to_float());
@@ -461,9 +440,9 @@ public:
     /**
      * String
      */
-    template<typename...Args>
-    static inline __link__ String(Args &&...args) {
-        return std::make_shared<__string>(std::forward<Args>(args)...);
+    template<typename...__args__>
+    static inline __link__ String(__args__ &&...args) {
+        return std::make_shared<__string>(std::forward<__args__>(args)...);
     }
     static inline __link__ String(__link__ l) {
         return std::make_shared<__string>(l->to_string());
@@ -471,9 +450,9 @@ public:
     /**
      * Buffer
      */
-    template<typename...Args>
-    static inline __link__ Buffer(Args &&...args) {
-        return std::make_shared<__buffer>(std::forward<Args>(args)...);
+    template<typename...__args__>
+    static inline __link__ Buffer(__args__ &&...args) {
+        return std::make_shared<__buffer>(std::forward<__args__>(args)...);
     }
     static inline __link__ Buffer(__link__ l) {
         return std::make_shared<__buffer>(l->to_buffer());
@@ -481,9 +460,9 @@ public:
     /**
      * List
      */
-    template<typename...Args>
-    static inline __link__ List(Args &&...args) {
-        return std::make_shared<__list>(std::forward<Args>(args)...);
+    template<typename...__args__>
+    static inline __link__ List(__args__ &&...args) {
+        return std::make_shared<__list>(std::forward<__args__>(args)...);
     }
     static inline __link__ List(std::initializer_list<__link__> l) {
         return std::make_shared<__list>(l);
@@ -494,11 +473,11 @@ public:
     /**
      * Map
      */
-    template<typename...Args>
-    static inline __link__ Map(Args &&...args) {
-        return std::make_shared<__map>(std::forward<Args>(args)...);
+    template<typename...__args__>
+    static inline __link__ Map(__args__ &&...args) {
+        return std::make_shared<__map>(std::forward<__args__>(args)...);
     }
-    static inline __link__ Map(std::initializer_list<std::pair<const __string__, __link__>> l) {
+    static inline __link__ Map(std::initializer_list<std::pair<const __key__, __link__>> l) {
         return std::make_shared<__map>(l);
     }
     static inline __link__ Map(__link__ l) {
@@ -918,19 +897,19 @@ public:
  * Utils types
  * ------------------------------------------------------------------------------------------------
  */
-using ListKey = std::vector<Key>;
-using MapKey  = std::unordered_map<Key, Key>;
+using ListKey = std::vector<__key__>;
+using MapKey  = std::unordered_map<__key__, __key__>;
 /**
  * ------------------------------------------------------------------------------------------------
  * Utils operators
  * ------------------------------------------------------------------------------------------------
  */
-inline List operator+(List list, Var var) {
+inline __list__ operator+(__list__ list, __var__ var) {
     list.push_back(var);
     return list;
 }
-inline Var operator+(Obj obj, Var var) {
-    return Var(obj) + var;
+inline __var__ operator+(__obj__ obj, __var__ var) {
+    return __var__(obj) + var;
 }
 /**
  * ------------------------------------------------------------------------------------------------ 

@@ -319,13 +319,13 @@ Var Edit::Find(Var var, const Var on) {
  * Remove
  * ------------------------------------------------------------------------------------------------
  */
-static Void __Remove(const Link& var, Link& on);
+static void __Remove(const Link& var, Link& on);
 /**
  * ----------------------------------------------------------------------------
  * map on map
  * ----------------------------------------------------------------------------
  */
-static inline Void __Remove(const Map& var, Map& on) {
+static inline void __Remove(const Map& var, Map& on) {
     for (auto it = var.begin(), end = var.end(); it != end; ++it) {
         auto find = on.find(it->first);
         if (find != on.end()) {
@@ -342,7 +342,7 @@ Map& Edit::Remove(const Map& var, Map& on) {
  * list on list
  * ----------------------------------------------------------------------------
  */
-static inline Void __Remove(const List& var, List& on) {
+static inline void __Remove(const List& var, List& on) {
     for (size_t i = 0; i < var.size() && i < on.size(); ++i) {
         __Remove(var[i], on[i]);
     }      
@@ -356,7 +356,7 @@ List& Edit::Remove(const List& var, List& on) {
  * var on var
  * ----------------------------------------------------------------------------
  */
-static Void __Remove(const Link& var, Link& on) {
+static void __Remove(const Link& var, Link& on) {
     try {
         if (var == on) {
             on = Obj::Null();
@@ -391,13 +391,13 @@ Var Edit::Remove(const Var var, Var on) {
  * Delete 
  * ------------------------------------------------------------------------------------------------
  */
-static Void __Delete(const Link& var, Link& on);
+static void __Delete(const Link& var, Link& on);
 /**
  * ----------------------------------------------------------------------------
  * map on map
  * ----------------------------------------------------------------------------
  */
-static inline Void __Delete(const Map& var, Map& on) {
+static inline void __Delete(const Map& var, Map& on) {
     for (auto it = var.begin(), end = var.end(); it != end; ++it) {
         auto find = on.find(it->first);
         if (find != on.end()) {
@@ -417,7 +417,7 @@ Map& Edit::Delete(const Map& var, Map& on) {
  * list on list
  * ----------------------------------------------------------------------------
  */
-static inline Void __Delete(const List& var, List& on) {
+static inline void __Delete(const List& var, List& on) {
     auto vit = var.begin();
     auto oit = on.begin();
     for (; (vit != var.end()) && (oit != on.end()); ++vit) {
@@ -438,7 +438,7 @@ List& Edit::Delete(const List& var, List& on) {
  * var on var
  * ----------------------------------------------------------------------------
  */
-static inline Void __Delete(const Link& var, Link& on) {
+static inline void __Delete(const Link& var, Link& on) {
     try {
         if (var == on) {
             on = Obj::Null();

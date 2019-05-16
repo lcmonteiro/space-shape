@@ -65,7 +65,7 @@ public:
      * utilities
      * ------------------------------------------------------
      */
-    inline Void link() {
+    inline void link() {
         SFileT::operator=(SFileT(path()));
     }
     inline String path() {
