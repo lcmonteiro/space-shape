@@ -75,6 +75,8 @@
     "C_Cpp.intelliSenseEngineFallback": "Enabled",
     "cSpell.words": [
         "SEDIT",
-        "SKEYS"
+        "SFILESYSTEM",
+        "SKEYS",
+        "SRESOURCE"
     ]
 }

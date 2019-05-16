@@ -98,13 +98,13 @@ public:
      */
     static Var Find(String path, Key expr);
     static Var Find(String path);
-    
+
     /**
      * ----------------------------------------------------
      * Properties of resource
      * ----------------------------------------------------
      */
-    static ::Map Properties(String path);
+    static Map Properties(String path);
 
     /**
      * ----------------------------------------------------
@@ -115,7 +115,8 @@ public:
      * @return
      * ---------------------------------------------------- 
      */
-    static Boolean Copy(String from, String to, Var tree=Obj::Null());
+    static Boolean Copy(String from, String to, Var tree=nullptr);
+
     /**
      * ----------------------------------------------------
      * Move Files 
@@ -124,14 +125,17 @@ public:
      * @param tree
      * ----------------------------------------------------
      */
-    static Boolean Move(String from, String to, Var tree=Obj::Null());
+    static Boolean Move(String from, String to, Var tree=nullptr);
+
     /**
      * ----------------------------------------------------
      * Get path from full path
      * ----------------------------------------------------
      */
     static String GetFileName(String path);
-
+    /**
+     * utils
+     */
     inline static Var GetFileName(Var path) {
         return Obj(GetFileName(String(path)));
     }
@@ -141,7 +145,9 @@ public:
      * ----------------------------------------------------
      */
     static String GetFilePath(String path);
-    
+    /**
+     * utils
+     */
     inline static Var GetFilePath(Var path) {
         return Obj(GetFilePath(Var::ToString(path)));
     }
@@ -151,6 +157,7 @@ public:
      * ----------------------------------------------------
      */
     static String GetFullPath(String path);
+    
     /**
      * ----------------------------------------------------
      * Get System directory

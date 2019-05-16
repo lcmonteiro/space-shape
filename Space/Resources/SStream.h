@@ -227,13 +227,7 @@ protected:
      * friend class
      * ------------------------------------------------------------------------
      */
-    friend class SExternProcess;
-    friend class SInterface;
-    friend class SChannel;
-    friend class SChannelServer;
-    friend class SEvent;
     friend class SFileSystem;
-    friend class STimer;
     /**
      * ------------------------------------------------------------------------
      * constructors
@@ -241,12 +235,10 @@ protected:
      */
     SStream(int io);
     SStream(int i, int o);
-    // move
-    SStream(SStream&& res): SStream() {
-        *this = std::move(res);
-    }
     // empty
     SStream() : SResource(), __is(nullptr), __os(nullptr) {}
+    // move
+    SStream(SStream&& res): SStream() { *this = std::move(res); }
 private:
     /**
      * ------------------------------------------------------------------------
