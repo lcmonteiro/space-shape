@@ -210,23 +210,16 @@ Boolean Search::Match(Var expr, Var& on) {
 }
 /**
  * ------------------------------------------------------------------------------------------------
-* Match Tree
+ * Match Tree
  * ------------------------------------------------------------------------------------------------
  * Update
  * ----------------------------------------------------------------------------
  **/
 Var Search::Update(Key expr, Var var, Var on) {
-    static const regex e("([^/]+)");
-    /**
-     * iterator
-     */
-    sregex_iterator it(expr.begin(), expr.end(), e);
-    sregex_iterator end;
     /**
      * execute
      */
-    return __ExecuteFilter(
-            it, end, on, [&](Var v){ return var; }, on);
+    return Execute(expr, [&](Key path, Var v){ return var; }, on);
 }
 /**
  * ----------------------------------------------------------------------------

@@ -86,13 +86,16 @@ namespace Logic {
      * --------------------------------------------------------------------------------------------
      * Call function (func(const List& path, )) for all elements
      * --------------------------------------------------------------------------------------------
+     * Var
+     * ------------------------------------------------------------------------
      */
      namespace {
-        Var __ForEach(List& path, Var var, Function func, true_type) {
+        template<typename Function>
+        Var __ForEach(List& path, Var var, Function func, std::true_type) {
             if (Var::IsMap(var)) {
                 for (auto& v : Var::Map(var)) {
                     path.emplace_back(Obj(v.first));
-                    v.second = __ForEach(path, v.second, func, true_type());
+                    v.second = __ForEach(path, v.second, func, std::true_type());
                     path.pop_back();
                 }
                 return var;
@@ -101,64 +104,107 @@ namespace Logic {
                 size_t i = 0; 
                 for (auto& v : Var::List(var)) {
                     path.emplace_back(Obj(i++));
-                    v.second = __ForEach(path, v.second, func, true_type());
+                    v = __ForEach(path, v, func, std::true_type());
                     path.pop_back();
                 }
                 return var;
             }
             if (Var::IsLink(var)) {
-                link = __ForEach(path, Var::Link(var), func, true_type());
+                auto& v = Var::Link(var);
+                v = __ForEach(path, v, func, std::true_type());
+                return var;
+            }
+            return func(const_cast<List&>(path), var);
+        }
+        template<typename Function>
+        Var __ForEach(List& path, Var var, Function func, std::false_type) {
+            if (Var::IsMap(var)) {
+                for (auto& v : Var::Map(var)) {
+                    path.emplace_back(Obj(v.first));
+                    v.second = __ForEach(path, v.second, func, std::false_type());
+                    path.pop_back();
+                }
+                return var;
+            }
+            if (Var::IsList(var)) {
+                Integer i = 0; 
+                for (auto& v : Var::List(var)) {
+                    path.emplace_back(Obj::Integer(i++));
+                    v = __ForEach(path, v, func, std::false_type());
+                    path.pop_back();
+                }
                 return var;
             }
             return func(const_cast<List&>(path), var);
         }
     }
-    static Var ForEach(Var var, Function func)
-    {
-        return __ForEach(var, func,
-            typename integral_constant<bool, LINKS>::type()
-        );
-    }
-    template<typename Function>
-    static List ForEach(List list, Function func);
-    template<typename Function>
-    static Map  ForEach(Map map,   Function func);
-    template<typename Function>
-    static Var  ForEach(Var var,   Function func, std::false_type);
-    template<typename Function>
-    static Var  ForEach(Var var,   Function func, std::true_type);
     template<bool LINKS = false, typename Function>
+    static Var ForEach(Var var, Function func) {
+        List path;
+        return __ForEach(path, var, func,
+            typename std::integral_constant<bool, LINKS>::type());
+    }
     /**
+     * ------------------------------------------------------------------------
+     * List
+     * ------------------------------------------------------------------------
+     */ 
+    template<typename Function>
+    static List ForEach(List list, Function func) {
+        for (auto& v : list) {
+            v = func(v);
+        }
+        return list;
+    }
+    /**
+     * ------------------------------------------------------------------------
+     * Map
+     * ------------------------------------------------------------------------
+     */ 
+    template<typename Function>
+    static Map  ForEach(Map map, Function func){
+        for (auto& v : map) {
+            v.second = func(v.second);
+        }
+        return map;
+    }
+    /**
+     * ------------------------------------------------------------------------
      * ForEach
      * @example Logic::ForEach<Map>(vector<T> in, [](Map& o, T& i){
      *      o[i.a()] = Obj(i.a());
      * })
+     * ------------------------------------------------------------------------
      */
     template<typename Output, typename Input, typename Function>
-    static Output ForEach(Input& in, Function func);
-    /**
-     * ForEachPair
-     * @example
-     */
-    template<typename Function>
-    static Map ForEachPair(Map map, Function func);
-    
+    static Output ForEach(Input& in, Function func) {
+        Output out; 
+        for (auto& i : in) {
+            func(out, i); 
+        } 
+        return out;
+    }  
     /**
      * --------------------------------------------------------------------------------------------
      * Logic Converters
      * --------------------------------------------------------------------------------------------
      */
     static inline List ToList(Map data) {
-        List l; for (auto& v : data) { l.push_back(v.second); } return l;
+        List l; 
+        for (auto& v : data) l.emplace_back(v.second); 
+        return l;
     }
     static inline List ToList(Var data) {
-        return Var::IsList(data) ? Var::List(data) : Var::IsDefined(data) ? List{data}: List{};
+        return Var::IsList(data) ? 
+            Var::List(data) : Var::IsDefined(data) ? List{data}: List{};
     }
     static inline Map ToMap(Var data) {
-        return Var::IsMap(data) ? Var::Map(data) : Var::IsDefined(data) ? Map{{Key(""), data}}: Map{};
+        return Var::IsMap(data) ? 
+            Var::Map(data) : Var::IsDefined(data) ? Map{{Key(), data}}: Map{};
     }
     static inline String ToString(Var data) {
-        return Var::IsString(data) ? Var::String(data) : Var::IsDefined(data) ? String(data): String();
+        return Var::IsString(data) ? 
+            Var::String(data) : Var::IsDefined(data) ? String(data): String();
     }
     /**
      * --------------------------------------------------------------------------------------------
@@ -197,81 +243,6 @@ namespace Logic {
             throw SLogicException("assert");
         }
     }
-}
-/**
- * ------------------------------------------------------------------------------------------------
- * Implementation 
- * ------------------------------------------------------------------------------------------------
- */
-template<typename Function>
-Var Logic::ForEach(Var var, Function func, std::true_type) {
-    if (Var::IsMap(var)) {
-        auto& map = Var::Map(var);
-        for (auto& v : map) {
-            v.second = ForEach(v.second, func, std::true_type());
-        }
-        return var;
-    }
-    if (Var::IsList(var)) {
-        auto& list = Var::List(var);
-        for (auto& v : list) {
-            v = ForEach(v, func, std::true_type());
-        }
-        return var;
-    }
-    if (Var::IsLink(var)) {
-        auto& link = Var::Link(var);
-        link = ForEach(link, func, std::true_type());
-        return var;
-    }
-    return func(var);
-}
-template<typename Function>
-Var Logic::ForEach(Var var, Function func, std::false_type) {
-    if (Var::IsMap(var)) {
-        auto& map = Var::Map(var);
-        for (auto& v : map) {
-            v.second = ForEach(v.second, func, std::false_type());
-        }
-        return var;
-    }
-    if (Var::IsList(var)) {
-        auto& list = Var::List(var);
-        for (auto& v : list) {
-            v = ForEach(v, func, std::false_type());
-        }
-        return var;
-    }
-    return func(var);
-}
-template<typename Function>
-List Logic::ForEach(List list, Function func) {
-    for (auto& v : list) {
-        v = func(v);
-    }
-    return list;
-}
-template<typename Function>
-Map Logic::ForEach(Map map, Function func) {
-    for (auto& v : map) {
-        v.second = func(v.second);
-    }
-    return map;
-}
-template<typename Function>
-Map Logic::ForEachPair(Map map, Function func) {
-    for (auto& v : map) {
-        v.second = func(v.first, v.second);
-    }
-    return map;
-}
-template<typename Output, typename Input, typename Function>
-Output Logic::ForEach(Input& in, Function func) {
-    Output out; 
-    for (auto& i : in) {
-        func(out, i); 
-    } 
-    return out;
 }
 /**
  * --------------------------------------------------------------------------------------------------------------------

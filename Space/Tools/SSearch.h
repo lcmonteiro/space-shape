@@ -114,11 +114,11 @@ namespace Search {
         template<typename F>
         Var __ExecuteFilter(
             std::sregex_iterator  it, 
-            std::sregex_iterator& end, Key path, F func, Var on) {
+            std::sregex_iterator& end, F func, Key path, Var on) {
             /**
              * end case
              */
-            if (it == end) { return func(on); }
+            if (it == end) { return func(path, on); }
             /**
              * map case 
              */
@@ -130,7 +130,7 @@ namespace Search {
                 auto find = m.find(it->str());
                 if (find != m.end()) {
                     find->second = __ExecuteFilter(
-                        ++it, end, find->second, func, find->second);
+                        ++it, end, func, path + find->first, find->second);
                     return on;
                 }
                 /**
@@ -141,7 +141,7 @@ namespace Search {
                 for (auto mit = m.begin(); mit != m.end(); ++mit) {
                     if (std::regex_match(mit->first, expr)) {
                         mit->second = __ExecuteFilter(
-                            it, end, mit->second, func, mit->second);
+                            it, end, func, path + mit->first, mit->second);
                     }
                 }
                 return on;
@@ -158,7 +158,7 @@ namespace Search {
                     auto find = l.begin() + Integer::ValueOf(it->str());
                     if (find != l.end()) {
                         *find = __ExecuteFilter(
-                            ++it, end, *find, func, *find);
+                            ++it, end, func, path + it->str(), *find);
                         return on;
                     }
                 } catch (std::invalid_argument& ex) {
@@ -168,10 +168,9 @@ namespace Search {
                     std::regex expr(it->str());
                     ++it;
                     for (auto lit = l.begin(); lit != l.end(); ++lit) {
-                        if (std::regex_match(
-                            String::ValueOf(Integer(std::distance(l.begin(), lit))),
-                            expr)) {
-                            *lit = __ExecuteFilter(it, end, *lit, func, *lit);
+                        auto str = String::ValueOf(Integer(std::distance(l.begin(), lit)));
+                        if (std::regex_match(str, expr)) {
+                            *lit = __ExecuteFilter(it, end, func, path + str, *lit);
                         }
                     }
                 }
@@ -189,7 +188,7 @@ namespace Search {
     Var Execute(Key expr, Function func, Var on) {
         const std::regex e("([^/]+)");
         /**
-         * iterartor
+         * iterator
          */
         auto it   = std::sregex_iterator(expr.begin(), expr.end(), e);
         auto end  = std::sregex_iterator();
@@ -197,7 +196,7 @@ namespace Search {
         /**
          * execute
          */
-        return __ExecuteFilter(it, end, on, func, on);
+        return __ExecuteFilter(it, end, func, path, on);
     }
 }
 /**
