@@ -70,7 +70,9 @@
         "deque": "cpp",
         "numeric": "cpp",
         "optional": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "condition_variable": "cpp",
+        "mutex": "cpp"
     },
     "C_Cpp.intelliSenseEngineFallback": "Enabled",
     "cSpell.words": [

@@ -11,6 +11,7 @@ STATIC
 	SConvertXML.cpp
 	SConvertB64.cpp
 	SConvertCSV.cpp
+	SConvertARG.cpp
 )
 # includes
 target_include_directories(SpaceConverter
