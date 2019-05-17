@@ -49,9 +49,11 @@ Var Convert::FromARG(std::vector<std::string> args) {
          */
         for(auto& p : KEY_PATTERNS) {
             auto m = std::smatch();
-
-            if (std::regex_match (a, m, p)){
-
+            if (std::regex_match (a, m, p)) {
+                /**
+                 * found
+                 */
+                k = Key(m.str(1));
             }
         }
     
