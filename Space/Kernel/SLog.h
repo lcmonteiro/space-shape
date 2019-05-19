@@ -13,10 +13,13 @@
  */
 #include <mutex>
 #include <iostream>
+#include <functional>
 /**
  * space
  */
 #include "STime.h"
+#include "SVariable.h"
+#include "SConvertJSON.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * Log Macros
@@ -25,12 +28,12 @@
  * --------------------------------------------------------
  */
 #define DEBUG(_tag_, _msg_) do {                     \
-    auto locker = SLog::Locker():                    \
+    std::lock_guard<std::mutex>(SLog::Locker());     \
     SLog::Debug()                                    \
-        << "[ " << STime::DateTime() << " ] "        \
+        << "[ " << STime::ToDateTime(STime::Time()) << " ] "\
         << "[  DEBUG  ] "                            \
         << "[ " <<_tag_ << " | " << __func__ <<" ]"  \
-        <<" [ " <<_msg_ <<" ]"                       \
+        <<" [ " <<_msg_ <<" ]";                      \
 } while(0)
 /**
  * --------------------------------------------------------
@@ -38,12 +41,12 @@
  * --------------------------------------------------------
  */
 #define INFO(_tag_, _msg_) do {                      \
-    auto locker = SLog::Locker():                    \
+    std::lock_guard<std::mutex>(SLog::Locker());     \
     SLog::Debug()                                    \
-        << "[ " << STime::DateTime() << " ] "        \
+        << "[ " << STime::ToDateTime(STime::Time()) << " ] "\
         << "[  INFO   ] "                            \
         << "[ " << _tag_ << " ]"                     \
-        <<" [ " << _msg_ << " ]"                     \
+        <<" [ " << _msg_ << " ]";                    \
 } while(0)
 /**
  * --------------------------------------------------------
@@ -51,12 +54,12 @@
  * --------------------------------------------------------
  */
 #define WARNING(_tag_, _msg_) do {                   \
-    auto locker = SLog::Locker():                    \
+    std::lock_guard<std::mutex>(SLog::Locker());     \
     SLog::Debug()                                    \
-        << "[ " << STime::DateTime() << " ] "        \
+        << "[ " << STime::ToDateTime(STime::Time()) << " ] "\
         << "[ WARNING ] "                            \
         << "[ " << _tag_ << " ]"                     \
-        <<" [ " << _msg_ << " ]"                     \
+        <<" [ " << _msg_ << " ]";                    \
 } while(0)
 /**
  * --------------------------------------------------------
@@ -64,12 +67,12 @@
  * --------------------------------------------------------
  */
 #define ERROR(_tag_, _msg_) do {                     \
-    auto locker = SLog::Locker():                    \
+    std::lock_guard<std::mutex>(SLog::Locker());     \
     SLog::Debug()                                    \
-    << "[ " << STime::DateTime() << " ] "            \
-    << "[  ERROR  ] "                                \
-    << "[ " << _tag_ <<" ]"                          \
-    <<" [ " << _msg_ <<" ]"                          \
+        << "[ " << STime::ToDateTime(STime::Time()) << " ] "\
+        << "[  ERROR  ] "                            \
+        << "[ " << _tag_ <<" ]"                      \
+        <<" [ " << _msg_ <<" ]";                     \
 } while(0)
 /**
  * ------------------------------------------------------------------------------------------------
@@ -84,7 +87,7 @@ public:
      * ------------------------------------------------------------------------
      */
     typedef enum {
-      DEBUG = 0, INFO, WARNING, ERROR, NONE
+        DEBUG = 0, INFO, WARNING, ERROR, NONE
     } Level;
     /**
      * -----------------------------------------------------------------------
@@ -92,26 +95,26 @@ public:
      * -----------------------------------------------------------------------
      * Set log level
      */
-    static inline void SetLevel(LEVEL l) {
+    static inline void SetLevel(Level l) {
         __level = l;
     }
     /**
      * set log streams
      */
-    static inline void SetDebug  (std::ostream os) {
+    static inline void SetDebug  (std::ostream& os) {
         __debug   = os;
     }
-    static inline void SetInfo   (std::ostream os) {
+    static inline void SetInfo   (std::ostream& os) {
         __info    = os;
     }
-    static inline void SetWarning(std::ostream os) {
+    static inline void SetWarning(std::ostream& os) {
         __warning = os;
     }
-    static inline void SetError  (std::ostream os) {
+    static inline void SetError  (std::ostream& os) {
         __error   = os;
     }
-    static inline void SetNull   (std::ostream os) {
-        __null    = os;
+    static inline void SetNull   (std::ostream& os) {
+        __none    = os;
     }
     /**
      * ------------------------------------------------------------------------
@@ -120,22 +123,22 @@ public:
      * streams
      */
     static inline std::ostream& Debug() {
-        return _level > LEVEL::DEBUG    ? __null : __debug;
+        return __level > Level::DEBUG   ? __none : __debug;
     }
     static inline std::ostream& Info() {
-        return __level > LEVEL::INFO    ? __null : __info;
+        return __level > Level::INFO    ? __none : __info;
     }
     static inline std::ostream& Warning() {
-        return __level > LEVEL::WARNING ? __null : __warning;
+        return __level > Level::WARNING ? __none : __warning;
     }
     static inline std::ostream& Error()   {
-        return __level > LEVEL::ERROR   ? __null : __error;
+        return __level > Level::ERROR   ? __none : __error;
     }
     /**
     * atomicity
     */
-    static inline std::lock_guard<std::mutex>&& Locker() {
-        return {__mutex};
+    static inline std::mutex& Locker() {
+        return __mutex;
     }
 private:
     /**
@@ -144,15 +147,15 @@ private:
      * ------------------------------------------------------------------------
      * log level
      */
-    static LEVEL __level;
+    static Level __level;
     /**
      * output streams 
      */
-    static std::ostream __debug;
-    static std::ostream __info;
-    static std::ostream __warning;
-    static std::ostream __error;
-    static std::ostream __null;
+    static std::reference_wrapper<std::ostream> __debug;
+    static std::reference_wrapper<std::ostream> __info;
+    static std::reference_wrapper<std::ostream> __warning;
+    static std::reference_wrapper<std::ostream> __error;
+    static std::reference_wrapper<std::ostream> __none;
     /**
     * atomicity
     */
@@ -160,8 +163,21 @@ private:
 };
 /**
  * ------------------------------------------------------------------------------------------------
+ * Log Serializer
+ * ------------------------------------------------------------------------------------------------
+ */
+inline std::ostream& operator<<(std::ostream& os, const Link& data) {
+    return Convert::ToPrettyJson(os, data); 
+}
+inline std::ostream& operator<<(std::ostream& os, const Map&  data) {
+    return Convert::ToPrettyJson(os, data);
+}
+inline std::ostream& operator<<(std::ostream& os, const List& data) {
+    return Convert::ToPrettyJson(os, data);
+}
+/**
+ * ------------------------------------------------------------------------------------------------
  * End
  * ------------------------------------------------------------------------------------------------
  */
 #endif /* SLOG_H */
-

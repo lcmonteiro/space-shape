@@ -5,28 +5,40 @@
  * 
  * Created on October 14, 2015, 2:29 PM
  * ------------------------------------------------------------------------------------------------
+ **
+ * space
  */
 #include "SLog.h"
+#include "SNullStream.h"
 /**
- * --------------------------------------------------------
- * Initialization
- * --------------------------------------------------------
- * log level
+ * namespace 
  */
-SLog::LEVEL SLog::__level    = SLog::DEBUG;
+using namespace std;
 /**
+ * ----------------------------------------------------------------------------
+ * Initialization (default values)
+ * ----------------------------------------------------------------------------
+ * log level
+ * --------------------------------------------------------
+ */
+SLog::Level SLog::__level    = SLog::DEBUG;
+/**
+ * --------------------------------------------------------
  * output streams 
+ * --------------------------------------------------------
  */
 static SNullStream __ns;
-std::ostream SLog::__debug   = ns;
-std::ostream SLog::__info    = ns;
-std::ostream SLog::__warning = ns;
-std::ostream SLog::__error   = ns;
-std::ostream SLog::__null    = ns;
+reference_wrapper<ostream> SLog::__debug   = cout;
+reference_wrapper<ostream> SLog::__info    = cout;
+reference_wrapper<ostream> SLog::__warning = cout;
+reference_wrapper<ostream> SLog::__error   = cerr;
+reference_wrapper<ostream> SLog::__none    = __ns;
 /**
+ * --------------------------------------------------------
 * atomicity
+-----------------------------------------------------------
 */
-std::mutex __mutex;
+mutex SLog::__mutex;
 /**
  * ------------------------------------------------------------------------------------------------
  * End

@@ -16,6 +16,8 @@
 #include "SConvertARG.h"
 #include "SFileSystem.h"
 #include "SFile.h"
+#include "SLog.h"
+#include "SNullStream.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * Main
@@ -25,9 +27,17 @@ int main(int argc, char** argv) {
     /**
      * parse arguments
      */
-    auto args = Convert::FromARG({argv + 1, argv + argc}, {{"i", "in"}, {"o", "out"}});
-
-    Convert::ToPrettyJson(std::cout, var);
+    auto args = Convert::FromARG(
+        {argv + 1, argv + argc}, 
+        {
+            {"i", "in"}, 
+            {"o", "out"}
+        }
+    );
+    /**
+     * log configuration
+     */
+    DEBUG("arg", args);
 
     // auto r = Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
 

@@ -1,24 +1,10 @@
 cmake_minimum_required (VERSION 3.8)
 # ---------------------------------------------------------
-# SpaceKernel target
+# SpaceStream target
 # ---------------------------------------------------------
-add_library(SpaceKernel 
-STATIC 
-	SVariable.cpp
-	STime.cpp
-	SLog.cpp
-)
+add_library(SpaceStream INTERFACE)
 # includes
-target_include_directories(SpaceKernel
-PUBLIC
-	.
-)
-# connect
-target_link_libraries(SpaceKernel
-PRIVATE
-	SpaceStream
-	SpaceConverter
-)
+target_include_directories(SpaceStream INTERFACE .)
 # ---------------------------------------------------------
 # End
 # ---------------------------------------------------------

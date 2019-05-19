@@ -11,6 +11,8 @@ add_subdirectory(Converters)
 add_subdirectory(Tools)
 # folder for resources
 add_subdirectory(Resources)
+# folder for resources
+add_subdirectory(Streams)
 # ---------------------------------------------------------
 # Space target
 # ---------------------------------------------------------
@@ -24,6 +26,7 @@ INTERFACE
 target_link_libraries(Space
 INTERFACE
 	SpaceKernel
+	SpaceStream
 	SpaceConverter
 	SpaceResource
 )
