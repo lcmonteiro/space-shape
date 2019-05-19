@@ -6,18 +6,14 @@
  * Created on Apr 10, 2019, 12:11 PM
  * ------------------------------------------------------------------------------------------------
  **
- * std
- */
-#include <iostream>
-/**
  * space
  */
+#include "SLog.h"
 #include "SConvertXML.h"
 #include "SConvertARG.h"
 #include "SFileSystem.h"
-#include "SFile.h"
-#include "SLog.h"
 #include "SNullStream.h"
+#include "SFileStream.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * Main
@@ -34,22 +30,21 @@ int main(int argc, char** argv) {
             {"o", "out"}
         }
     );
+    INFO("Arguments", args);
     /**
-     * log configuration
+     * Process
      */
-    DEBUG("arg", args);
+    auto r = File::Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
 
-    // auto r = Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
+    auto w = File::Writer("/tmp/ConnectionEditor.json");
 
-    // auto w = Writer("/tmp/ConnectionEditor.json");
+    Convert::ToPrettyJson(w, Convert::FromXML(r));
 
-    // Convert::ToPrettyJson(w, Convert::FromXML(r));
+    r = File::Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
 
-    // r = Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
+    w = File::Writer("/tmp/ConnectionEditor.bin");
 
-    // w = Writer("/tmp/ConnectionEditor.bin");
-
-    // Convert::ToBin(w, Convert::FromXML(r));
+    Convert::ToBin(w, Convert::FromXML(r));
     return 0;   
 }
 /**
