@@ -73,6 +73,10 @@ public:
         }     
         return *this;
     }
+    inline __list__& operator += (__link__ val) {
+        this->emplace_back(val);
+        return *this;
+    }
 } List;
 /**
  * ----------------------------------------------------------------------------
