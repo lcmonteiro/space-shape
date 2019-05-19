@@ -12,19 +12,18 @@
 /**
  * std
  */
+#include <cmath>
 #include <regex>
 #include <sstream>
 #include <iostream>
 #include <iomanip>
 #include <functional>
-//#include <openssl/md5.h>
 /**
  * space
  */
 #include "SConvertJSON.h"
 #include "SVariable.h"
 #include "SEdit.h"
-//#include "SLog.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * Convert - Space

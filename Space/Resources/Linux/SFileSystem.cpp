@@ -1,268 +1,52 @@
 /**
  * ------------------------------------------------------------------------------------------------ 
- * File:   SFileSystem.h
+ * File:   FileSystem.h
  * Author: Luis Monteiro
  *
  * Created on Apr 10, 2019, 12:11 PM
  * ------------------------------------------------------------------------------------------------
  */
-#include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <sys/inotify.h>
 /**
  * std
  */
 #include <fstream>
-#include <cstdio>
 /**
  * space
  */
 #include "SFileSystem.h"
 #include "SConvert.h"
-#include "SLogic.h"
-#include "SSearch.h"
-#include "SUtils.h"
-#include "SKeys.h"
 /**
  * namespaces
  */
 using namespace std;
-using namespace Keys;
 /**
  * ------------------------------------------------------------------------------------------------
- * FileSystem Monitor
- * ------------------------------------------------------------------------------------------------
- **/
-const Integer SFileSystem::OPEN   = IN_OPEN;
-const Integer SFileSystem::INPUT  = IN_MOVED_TO;
-const Integer SFileSystem::CREATE = IN_CREATE;
-const Integer SFileSystem::ACCESS = IN_ACCESS;
-const Integer SFileSystem::MODIFY = IN_MODIFY;
-const Integer SFileSystem::CLOSE  = IN_CLOSE;
-const Integer SFileSystem::DELETE = IN_DELETE;
-/**
- * ------------------------------------------------------------------------------------------------
- * Utils
+ * Local Interface
  * ------------------------------------------------------------------------------------------------
  */
-static Boolean __Contain(const Key& expr, const String& path) {
-    static const regex e("([^/]+)");
+static Map  __FindDirectory(sregex_iterator it, sregex_iterator& end, String path);
+static Map  __FindDirectory(String path);
 
-    sregex_iterator eit(expr.begin(), expr.end(), e);
-    sregex_iterator pit(path.begin(), path.end(), e);
-    sregex_iterator end;
-
-    for (; pit != end; ++eit, ++pit){
-        if(eit == end){
-            return false;
-        }
-        if (!regex_match(pit->str(), regex(eit->str()))) {
-            return false;
-        }
-    }
-    return true;
-}
-static List __RecursivePaths(const String& path, const Key& expr) {
-    return Utils::GetKeys(
-        Search::Find(Obj(DT_DIR), 
-            Logic::ForEach(SConvert::ToMap(SFileSystem::Find(path, expr), "/"), [](Var v){
-                if(Var::IsMap(v)){
-                    return Var(Obj(DT_DIR));
-                }
-                return v;
-            })
-        )
-    );
-}
-static List __Paths(const String& path, const Key& expr) {
-    return Utils::GetKeys(SConvert::ToSimpleMap(SFileSystem::Find(path, expr), "/"));
-}
-static List __Paths2(const String& path, const Key& expr) {
-    return Utils::GetKeys(SConvert::ToMap(SFileSystem::Find(path, expr), "/"));
-}
-/**
- * ------------------------------------------------------------------------------------------------
- * File System
- * ------------------------------------------------------------------------------------------------
- */
-SFileSystem::SFileSystem(const ::Map& watch) : SStream(), __watch_map(watch) {
-    /**
-     *  Create inotify instance
-     */
-    int fd = inotify_init();
-    if (fd <= 0) {
-        throw ResourceException(String::Build("inotify_init: ", strerror(errno)));
-    }
-    /**
-     * register
-     */
-    for (auto& watch : __watch_map) {
-        /**
-         * is a pattern
-         */
-        if (Var::IsMap(watch.second)) {
-            __watch_reg[
-                inotify_add_watch(fd, watch.first.c_str(), IN_CREATE)
-            ] = watch.first;
-            for (auto pattern : Var::Map(watch.second)) {
-                auto mask = int(Var(pattern.second));
-                auto find = SFileSystem::Find(watch.first, pattern.first);
-                auto smap = SConvert::ToSimpleMap(find, "/");
-                auto cmap = SConvert::ToMap(find, "/");
-                // add watchers 
-                for (auto p : Utils::GetKeys(Edit::Delete(smap, cmap))) {
-                    __watch_reg[
-                        ::inotify_add_watch(
-                            fd, (watch.first + "/" + Var::String(p)).c_str(), IN_CREATE)
-                    ] = (watch.first + "/" + Var::String(p));
-                }
-                for (auto p : Utils::GetKeys(smap)) {
-                    __watch_reg[
-                        ::inotify_add_watch(
-                            fd, (watch.first + "/" + Var::String(p)).c_str(), mask)
-                    ] = (watch.first + "/" + Var::String(p));
-                }
-            } 
-            continue;
-        }
-        /**
-         * default
-         */
-        __watch_reg[
-            ::inotify_add_watch(fd, watch.first.c_str(), int(Var(watch.second)))
-        ] = watch.first;
-    }
-    /**
-     * update resource
-     */
-    SStream::operator=(SStream(fd));
-}
-
-static Integer __watch_mask(const String& path, const Map& watch_map){
-    for (auto& watch : watch_map) {
-        if (Var::IsMap(watch.second)) {
-            for (auto pattern : Var::Map(watch.second)) {
-                if (__Contain(watch.first + pattern.first, path)) {
-                    return Var(pattern.second);
-                }
-            }
-            continue;
-        }
-        if (__Contain(watch.first, path)) {
-            return Var(watch.second);
-        }
-    }
-    return Integer();
-}
-List SFileSystem::read_events() {
-    char buf[4096] __attribute__((aligned(__alignof__(struct inotify_event))));
-    // read data
-    int len = ::read(ihandler(), buf, sizeof (buf));
-    if (len <= 0) {
-        throw runtime_error(string("read: ") + strerror(errno));
-    }
-    // parse data
-    List out;
-    auto event = (const struct inotify_event *) buf;
-    for (char * ptr = buf; ptr < buf + len; ptr += sizeof (struct inotify_event) + event->len) {
-        event = (const struct inotify_event *) ptr;
-        // create event structure
-        String path = event->len ? __watch_reg[event->wd] + "/" + String(event->name) : __watch_reg[event->wd];
-        // process event 
-        if (event->mask & IN_CREATE) {
-            if (event->mask & IN_ISDIR) {
-                auto mask = __watch_mask(path, __watch_map);
-                if (mask) {
-                    __watch_reg[
-                        inotify_add_watch(ihandler(), path.c_str(), mask)
-                    ] = path;
-                }
-            }
-            out.push_back(Obj{
-                {$type, Obj::Integer(IN_CREATE)},
-                {$path, Obj::String(path)},
-            });
-        }
-        if (event->mask & IN_OPEN) {
-            out.push_back(Obj{
-                {$type, Obj::Integer(IN_OPEN)},
-                {$path, Obj::String(path)},
-            });
-        }
-        if (event->mask & IN_MOVED_TO) {
-            out.push_back(Obj{
-                {$type, Obj::Integer(IN_MOVED_TO)},
-                {$path, Obj::String(path)},
-            });
-        }
-        if (event->mask & IN_ACCESS) {
-            out.push_back(Obj{
-                {$type, Obj::Integer(IN_ACCESS)},
-                {$path, Obj::String(path)},
-            });
-        }
-        if (event->mask & IN_MODIFY) {
-            out.push_back(Obj{
-                {$type, Obj::Integer(IN_MODIFY)},
-                {$path, Obj::String(path)},
-            });
-        }
-        if (event->mask & IN_CLOSE) {
-            out.push_back(Obj{
-                {$type, Obj::Integer(IN_CLOSE)},
-                {$path, Obj::String(path)},
-            });
-        }
-        if (event->mask & IN_DELETE) {
-            out.push_back(Obj{
-                {$type, Obj::Integer(IN_DELETE)},
-                {$path, Obj::String(path)},
-            });
-        }
-        if (event->mask & IN_IGNORED) {
-            if (event->len == 0) {
-                __watch_reg.erase(event->wd);
-                inotify_rm_watch(ihandler(), event->wd);
-            }
-        }
-    }
-    return out;
-}
-
-Integer SFileSystem::process_events(initializer_list<pair<const Integer, function<void(Var v)>>> l) {
-    // map functions
-    map<const Integer, function<void(Var v) >> functions(l);
-    // read events
-    List events = move(read_events());
-    // process events
-    for (Var e : events) functions[e[$type]](e);
-    // return number os events 
-    return events.size();
-}
-/**
- * ------------------------------------------------------------------------------------------------
- * General operation over FileSystem
- * ------------------------------------------------------------------------------------------------
- * local interface
- * ----------------------------------------------------------------------------
- */
-static Map __FindDirectory(sregex_iterator it, sregex_iterator& end, String path);
-static Map __FindDirectory(String path);
 static bool __CopyDirectory(String from, String to, Map tree);
 static bool __CopyDirectory(String from, String to, List tree);
 static bool __CopyFile(String from, String to);
+
 static bool __MoveDirectory(String from, String to, Map tree);
 static bool __MoveDirectory(String from, String to, List tree);
 static bool __MoveFile(String from, String to);
+
 static bool __DeleteDirectory(String path, Map tree);
 static bool __DeleteDirectory(String path, List tree);
 static bool __DeleteFile(String path);
 /**
- *
+ * ----------------------------------------------------------------------------
+ * Insert Folder Tree 
+ * ----------------------------------------------------------------------------
  */
-Boolean SFileSystem::Insert(String path, Var tree) {
+Boolean FileSystem::Insert(String path, Var tree) {
     if (Var::IsMap(tree)) {
         for (auto& e : Var::Map(tree)) {
             if (!Insert((path + e.first).data(), e.second)) {
@@ -291,37 +75,25 @@ Boolean SFileSystem::Insert(String path, Var tree) {
     }
     return true;
 }
-
-Map SFileSystem::Properties(String path){
-    Map out;
-    struct stat st;
-    if(stat((path).data(), &st) < 0) {
-        throw runtime_error(strerror(errno));
-    }
-    // get type
-    if (st.st_mode && S_IFDIR) {
-        out[$type] = Obj::Integer(DT_DIR);
-    } else if (st.st_mode && S_IFREG) {
-        out[$type] = Obj::Integer(DT_REG);
-    }
-    // get size
-    out[$size] = Obj::Integer(st.st_size);
-    // get modification time
-    out[$time] = Obj::Float(st.st_mtim.tv_sec);
-    return out;
-}
-
-Var SFileSystem::Find(String path) {
+/**
+ * ----------------------------------------------------------------------------
+ * File Resources on Folder Tree
+ * ----------------------------------------------------------------------------
+ */
+Var FileSystem::Find(String path) {
     return Obj(__FindDirectory(path));
 }
-
-Var SFileSystem::Find(String path, Key expr) {
+Var FileSystem::Find(String path, Key expr) {
     static const regex e("([^/]+)");
     sregex_iterator it(expr.begin(), expr.end(), e), end;
     return Obj(__FindDirectory(it, end, path.back() == '/' ? path : path + "/"));
 }
-
-Boolean SFileSystem::Copy(String from, String to, Var tree) {
+/**
+ * ----------------------------------------------------------------------------
+ * Copy Folder Tree
+ * ----------------------------------------------------------------------------
+ */
+Boolean FileSystem::Copy(String from, String to, Var tree) {
     if(Var::IsUndefined(tree)){
         if (!__CopyFile(from , to)) {
             return false;
@@ -341,8 +113,12 @@ Boolean SFileSystem::Copy(String from, String to, Var tree) {
     }
     return true;
 }
-
-Boolean SFileSystem::Move(String from, String to, Var tree) {
+/**
+ * ----------------------------------------------------------------------------
+ * Move Folder Tree
+ * ----------------------------------------------------------------------------
+ */
+Boolean FileSystem::Move(String from, String to, Var tree) {
     if(Var::IsUndefined(tree)){
         if (!__MoveFile(from , to)) {
             return false;
@@ -362,8 +138,12 @@ Boolean SFileSystem::Move(String from, String to, Var tree) {
     }
     return true;
 }
-
-Boolean SFileSystem::Delete(String path, Var tree) {
+/**
+ * ----------------------------------------------------------------------------
+ * Delete Folder Tree
+ * ----------------------------------------------------------------------------
+ */
+Boolean FileSystem::Delete(String path, Var tree) {
     if(Var::IsUndefined(tree)){
         if (!__DeleteFile(path)) {
             return false;
@@ -383,15 +163,23 @@ Boolean SFileSystem::Delete(String path, Var tree) {
     } 
     return true;
 }
-
-String SFileSystem::GetFileName(String path) {
+/**
+ * ----------------------------------------------------------------------------
+ * Get File Name
+ * ----------------------------------------------------------------------------
+ */
+String FileSystem::GetFileName(String path) {
     if (path.back() == '/') {
         return String();
     }
     return Var::ToString(SConvert::FromPath(path).back());
 }
-
-String SFileSystem::GetFilePath(String path) {
+/**
+ * ----------------------------------------------------------------------------
+ *  Get File Path
+ * ----------------------------------------------------------------------------
+ */
+String FileSystem::GetFilePath(String path) {
     if (path.back() == '/')  return path;
     // convert to "[a, b, c]"
     auto tmp = SConvert::FromPath(path);
@@ -400,32 +188,46 @@ String SFileSystem::GetFilePath(String path) {
     // convert to "/a/b"
     return SConvert::ToPath(tmp);
 }
-
-String SFileSystem::GetFullPath(String path) {
+/**
+ * ----------------------------------------------------------------------------
+ * Get Full File Path
+ * ----------------------------------------------------------------------------
+ */
+String FileSystem::GetFullPath(String path) {
     char tmp[FILENAME_MAX];
     if (realpath(path.data(), tmp) == 0) {
         throw runtime_error(strerror(errno));
     }
     return String(tmp);
 }
-
-String SFileSystem::GetPath() {
+/**
+ * ----------------------------------------------------------------------------
+ * Get Working Directory
+ * ----------------------------------------------------------------------------
+ */
+String FileSystem::GetPath() {
     char tmp[FILENAME_MAX];
     if (getcwd(tmp, FILENAME_MAX) == 0) {
         throw runtime_error(strerror(errno));
     }
     return String(tmp);
 }
-
-void SFileSystem::SetPath(String path) {
+/**
+ * ----------------------------------------------------------------------------
+ * Set Working Directory
+ * ----------------------------------------------------------------------------
+ */
+void FileSystem::SetPath(String path) {
     if (chdir(path.data()) != 0) {
         throw runtime_error(strerror(errno));
     }
 }
 /**
  * ------------------------------------------------------------------------------------------------
- * local implementation
+ * Local Implementation
  * ------------------------------------------------------------------------------------------------
+ * Find Directories
+ * ----------------------------------------------------------------------------
  */
 static Map __FindDirectory(String path) {
     Map tree;
@@ -473,7 +275,11 @@ static Map __FindDirectory(String path) {
     closedir(dir);
     return tree;
 }
-
+/**
+ * ----------------------------------------------------------------------------
+ * Find Directories
+ * ----------------------------------------------------------------------------
+ */
 static Map __FindDirectory(sregex_iterator it, sregex_iterator& end, String path) {
     Map tree;
     /**
@@ -562,7 +368,11 @@ static Map __FindDirectory(sregex_iterator it, sregex_iterator& end, String path
     closedir(dir);
     return tree;
 }
-
+/**
+ * ----------------------------------------------------------------------------
+ * Copy Directories
+ * ----------------------------------------------------------------------------
+ */
 static bool __CopyDirectory(String from, String to, Map tree) {
     ::mkdir(to.data(), S_IRWXU | S_IRWXG | S_IRWXO);
     for (auto& e : tree) {
@@ -594,7 +404,11 @@ static bool __CopyDirectory(String from, String to, Map tree) {
     }
     return true;
 }
-
+/**
+ * ----------------------------------------------------------------------------
+ * Copy Directories
+ * ----------------------------------------------------------------------------
+ */
 static bool __CopyDirectory(String from, String to, List tree) {
     ::mkdir(to.data(), S_IRWXU | S_IRWXG | S_IRWXO);
     for (Var e : tree) {
@@ -614,7 +428,11 @@ static bool __CopyDirectory(String from, String to, List tree) {
     }
     return true;
 }
-
+/**
+ * ----------------------------------------------------------------------------
+ * Copy File
+ * ----------------------------------------------------------------------------
+ */
 static bool __CopyFile(String from, String to) {
     ifstream fromf(from, ios::binary);
     if (fromf.fail()) {
@@ -627,7 +445,11 @@ static bool __CopyFile(String from, String to) {
     tof << fromf.rdbuf() << flush;
     return true;
 }
-
+/**
+ * ----------------------------------------------------------------------------
+ * Move Directory
+ * ----------------------------------------------------------------------------
+ */
 static bool __MoveDirectory(String from, String to, Map tree) {
     ::mkdir(to.data(), S_IRWXU | S_IRWXG | S_IRWXO);
     for (auto& e : tree) {
@@ -659,7 +481,11 @@ static bool __MoveDirectory(String from, String to, Map tree) {
     }
     return true;
 }
-
+/**
+ * ----------------------------------------------------------------------------
+ * Move Directory
+ * ----------------------------------------------------------------------------
+ */
 static bool __MoveDirectory(String from, String to, List tree) {
     ::mkdir(to.data(), S_IRWXU | S_IRWXG | S_IRWXO);
     for (Var e : tree) {
@@ -679,7 +505,11 @@ static bool __MoveDirectory(String from, String to, List tree) {
     }
     return true;
 }
-
+/**
+ * ----------------------------------------------------------------------------
+ * Move File
+ * ----------------------------------------------------------------------------
+ */
 static bool __MoveFile(String from, String to) {
     unlink(to.data());
 
@@ -691,7 +521,11 @@ static bool __MoveFile(String from, String to) {
     }
     return true;
 }
-
+/**
+ * ----------------------------------------------------------------------------
+ * Delete Directory
+ * ----------------------------------------------------------------------------
+ */
 static bool __DeleteDirectory(String path, Map tree) {
     for (auto& e : tree) {
         if (Var::IsMap(e.second)) {
@@ -716,7 +550,11 @@ static bool __DeleteDirectory(String path, Map tree) {
     }
     return true;
 }
-
+/**
+ * ----------------------------------------------------------------------------
+ * Delete Directory
+ * ----------------------------------------------------------------------------
+ */
 static bool __DeleteDirectory(String path, List tree) {
     for (Var e : tree) {
         if (Var::IsMap(e)) {
@@ -737,7 +575,11 @@ static bool __DeleteDirectory(String path, List tree) {
     }
     return true;
 }
-
+/**
+ * ----------------------------------------------------------------------------
+ * Delete File
+ * ----------------------------------------------------------------------------
+ */
 static bool __DeleteFile(String file) {
     return (remove(file.data()) == 0);
 }

@@ -11,6 +11,7 @@
 #include "SLog.h"
 #include "SConvertXML.h"
 #include "SConvertARG.h"
+#include "SConvertBIN.h"
 #include "SFileSystem.h"
 #include "SNullStream.h"
 #include "SFileStream.h"
