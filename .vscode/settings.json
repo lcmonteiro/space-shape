@@ -79,6 +79,7 @@
         "SEDIT",
         "SFILESYSTEM",
         "SKEYS",
+        "SNULLSTREAM",
         "SRESOURCE"
     ]
 }
