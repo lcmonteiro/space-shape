@@ -15,6 +15,10 @@
  */
 #include "SConvertARG.h"
 /**
+ * namespace
+ */
+using namespace std;
+/**
  * ------------------------------------------------------------------------------------------------
  *  From XML
  * ------------------------------------------------------------------------------------------------
@@ -22,14 +26,14 @@
  * ----------------------------------------------------------------------------
  * definitions
  */
-const auto KEY_PATTERNS = std::list<std::regex>{
-    std::regex("-([a-zA-Z])"),
-    std::regex("--([a-zA-Z])+"),
+const auto KEY_PATTERNS = list<regex>{
+    regex("-([a-zA-Z])"),
+    regex("--([a-zA-Z]+)"),
 };
 /**
  * implementation
  */
-Var Convert::FromARG(std::vector<std::string> args) {
+Var Convert::FromARG(vector<string> args, map<string,string> map) {
     /**
      * init values
      */
@@ -44,37 +48,49 @@ Var Convert::FromARG(std::vector<std::string> args) {
              * try find key
              */
             for(auto& p : KEY_PATTERNS) {
-                auto m = std::smatch();
-                if (std::regex_match (a, m, p)) {
+                auto m = smatch();
+                if (regex_match (a, m, p)) {
                     throw Key(m.str(1));
                 }
             }
             /**
-             * not a key 
+             * key not found
+             * updade as a value 
              */
             switch(out.count(key)) {
-                // new one
-                case 0:  out[key]= Obj(a);                        break;
-                // list transform                        
-                case 1:  out[key]= Obj::List({out[key], Obj(a)}); break;
-                // append
-                default: Var::List(out[key]) += Obj(a);           break;
+                case 0: // new 
+                    out[key]= Obj(a);                        
+                break;
+                case 1: // list  
+                    out[key]= Obj::List({out[key], Obj(a)}); 
+                break;
+                default: // append
+                    Var::List(out[key]) += Obj(a);           
+                break;
             }
             /**
-             * remove key
+             * key consumed
+             * clear key
              */
             key = Key();
         } catch(Key k) {
             /**
-             * found a key
+             * key found
+             * update update as a flag if previous key still exist 
              */
             if(!key.empty()) {
                 out[key]= Obj(true);
             }
             /**
              * update key
+             * try to find key translation on the map 
              */
-            key = k;
+            auto found = map.find(k);
+            if(found != map.end()) {
+                key = found->second;
+            } else {
+                key = k;    
+            }
         }
     }
     if(!key.empty()) { 
@@ -83,9 +99,8 @@ Var Convert::FromARG(std::vector<std::string> args) {
     /**
      * return 
      */
-    return Obj(std::move(out));
-}
-
+    return Obj(move(out));
+}   
 /**
  * ------------------------------------------------------------------------------------------------
  * End

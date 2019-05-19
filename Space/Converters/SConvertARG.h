@@ -9,6 +9,11 @@
 #ifndef ARGCONVERTER_H
 #define ARGCONVERTER_H
 /**
+ * std
+ */
+#include <map>
+#include <vector>
+/**
  * space
  */
 #include "SVariable.h"
@@ -23,7 +28,10 @@ namespace Convert {
      *  From ARGs
      * ------------------------------------------------------------------------
      */
-    Var FromARG(std::vector<std::string> args);
+    Var FromARG(
+        std::vector<std::string> args, 
+        std::map<std::string, std::string> map={}
+    );
 }
 /**
  * ------------------------------------------------------------------------------------------------

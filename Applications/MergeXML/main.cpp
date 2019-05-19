@@ -13,6 +13,7 @@
  * space
  */
 #include "SConvertXML.h"
+#include "SConvertARG.h"
 #include "SFileSystem.h"
 #include "SFile.h"
 /**
@@ -21,17 +22,24 @@
  * ------------------------------------------------------------------------------------------------
  */
 int main(int argc, char** argv) {   
-    auto r = Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
+    /**
+     * parse arguments
+     */
+    auto args = Convert::FromARG({argv + 1, argv + argc}, {{"i", "in"}, {"o", "out"}});
 
-    auto w = Writer("/tmp/ConnectionEditor.json");
+    Convert::ToPrettyJson(std::cout, var);
 
-    Convert::ToPrettyJson(w, Convert::FromXML(r));
+    // auto r = Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
 
-    r = Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
+    // auto w = Writer("/tmp/ConnectionEditor.json");
 
-    w = Writer("/tmp/ConnectionEditor.bin");
+    // Convert::ToPrettyJson(w, Convert::FromXML(r));
 
-    Convert::ToBin(w, Convert::FromXML(r));
+    // r = Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
+
+    // w = Writer("/tmp/ConnectionEditor.bin");
+
+    // Convert::ToBin(w, Convert::FromXML(r));
     return 0;   
 }
 /**
