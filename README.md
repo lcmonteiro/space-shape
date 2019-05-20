@@ -1,7 +1,7 @@
 # space-shape
 
 **Shape Your Information**
----
+
 ``` mermaid
 graph LR
 m1{Map} -->|a| m1d1(Data)
