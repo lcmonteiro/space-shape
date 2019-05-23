@@ -60,20 +60,17 @@ namespace Edit {
      * Update var (A) on other var (B)  |_A_|_A&B_|_B_| ->  ~_|__A__|_B_| 
      * --------------------------------------------------------------------
      */
-    Var   Update(const Var   var,  Var  on);
+    Var   Update(const Var&  var, Var&  on);
     Map&  Update(const Map&  var, Map&  on);
     List& Update(const List& var, List& on);
     /**
      * Update utilities 
      */
-    Var Update(const List& var, Var on = nullptr) {
+    inline Var Update(const List& var, Var on = nullptr) {
         for (Var v : var) {
             on = Update(v, on);
         }
         return on;
-    }
-    Var Update(const List&& var, Var on = nullptr) {
-        return Update(var, on);
     }
     /**
      * --------------------------------------------------------------------
@@ -81,8 +78,8 @@ namespace Edit {
      *  Find var (A) on other var (B)   |_A_|_A&B_|_B_| ->  ~_|_A&B_|_~
      * --------------------------------------------------------------------
      */
-    Var   Find(Var  var,  const Var   on);
-    Map&  Find(Map& var,  const Map&  on);
+    Var   Find(Var&  var, const Var&  on);
+    Map&  Find(Map&  var, const Map&  on);
     List& Find(List& var, const List& on);
     /**
      * --------------------------------------------------------------------
@@ -90,19 +87,16 @@ namespace Edit {
      *  Remove var (A) on other var (B) |_A_|_A&B_|_B_| ->  ~_|_B_|
      * --------------------------------------------------------------------
      */
-    Var   Remove(const Var var,   Var   on);
-    Map&  Remove(const Map& var,  Map&  on);
+    Var   Remove(const Var&  var, Var&  on);
+    Map&  Remove(const Map&  var, Map&  on);
     List& Remove(const List& var, List& on);
     /**
      * Remove utilities 
      */
-    Var Remove(const List& var, Var on = nullptr) {
+    inline Var Remove(const List& var, Var on = nullptr) {
         for (const Var v : var)
             on = Remove(v, on);
         return on;
-    }
-    Var Remove(const List&& var, Var on = nullptr) {
-        return Remove(var, on);
     }
     /**
      * -------------------------------------------------------------------
@@ -110,19 +104,16 @@ namespace Edit {
      *  Delete var (A) on other var (B) and clear empty branches |_A_|_A&B_|_B_| ->  ~_|_B_|
      * --------------------------------------------------------------------
      */
-    Var   Delete(const Var  var,  Var   on);
-    Map&  Delete(const Map& var,  Map&  on);
+    Var   Delete(const Var&  var, Var&  on);
+    Map&  Delete(const Map&  var, Map&  on);
     List& Delete(const List& var, List& on);
     /**
      * Delete utilities
      */
-    inline Var Delete(List& var, Var on = nullptr) {
+    inline Var Delete(const List& var, Var on = nullptr) {
         for (Var v : var) 
             on = Delete(v, on);
         return on;
-    }
-    inline Var Delete(List&& var, Var on = nullptr) {
-        return Delete(var, on);
     }
     /**
      * --------------------------------------------------------------------

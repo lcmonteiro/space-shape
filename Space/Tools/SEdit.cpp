@@ -1,7 +1,7 @@
 
 /**
  * ------------------------------------------------------------------------------------------------
- * File:   Edit.cc
+ * File:   SEdit.cpp
  * Author: Luis Monteiro
  *
  * Created on Apr 10, 2019, 12:11 PM
@@ -227,7 +227,7 @@ static void __Update(const Link& var, Link& on) {
         on = var;
     }
 }
-Var Edit::Update(Var var, Var on) {
+Var Edit::Update(const Var& var, Var& on) {
     if(Var::IsDefined(on)) {
         __Update(var, on);
     } else {
@@ -308,7 +308,7 @@ static void __Find(Link& var, const Link& on) {
     // not found
     var = Obj::Null();
 }
-Var Edit::Find(Var var, const Var on) {
+Var Edit::Find(Var& var, const Var& on) {
     if(Var::IsDefined(var)) {
         __Find(var, on);
     }
@@ -380,7 +380,7 @@ static void __Remove(const Link& var, Link& on) {
         }
     } catch (...) {}
 }
-Var Edit::Remove(const Var var, Var on) {
+Var Edit::Remove(const Var& var, Var& on) {
     if(Var::IsDefined(var)) {
         __Remove(var, on);
     }
@@ -462,7 +462,7 @@ static inline void __Delete(const Link& var, Link& on) {
         }
     } catch (...) {}
 }
-Var Edit::Delete(const Var var, Var on) {
+Var Edit::Delete(const Var& var, Var& on) {
     if(Var::IsDefined(var)) {
         __Delete(var, on);
     }
