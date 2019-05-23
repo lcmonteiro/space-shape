@@ -18,6 +18,23 @@
 #include "SEdit.h"
 /***
  * ------------------------------------------------------------------------------------------------
+ * Match Content
+ * ------------------------------------------------------------------------------------------------
+ */
+static Boolean __MatchContent(const Link& var, const Link& on) {
+    if (Var::IsInteger(var) && Var::IsInteger(on)) {  
+        return Var::Integer(var) == Var::Integer(on);    
+    }
+    if (Var::IsString(var) && Var::IsString(on)) {  
+        return Var::String(var) == Var::String(on);    
+    }
+    if (Var::IsBuffer(var) && Var::IsBuffer(on)) {  
+        return Var::Buffer(var) == Var::Buffer(on);    
+    }
+    return Var::ToString(var) == Var::ToString(on);
+}
+/***
+ * ------------------------------------------------------------------------------------------------
  * Match
  * ------------------------------------------------------------------------------------------------
  */
@@ -74,25 +91,13 @@ static Boolean __Match(const Link& var, const Link& on) {
         if (var == on) {
             return true;
         }
-        if (Var::IsFloat(var) && Var::IsFloat(on)) {  
-            return Var::Float(var) == Var::Float(on);    
-        }
-        if (Var::IsInteger(var) && Var::IsInteger(on)) {  
-            return Var::Integer(var) == Var::Integer(on);    
-        }
-        if (Var::IsString(var) && Var::IsString(on)) {  
-            return Var::String(var) == Var::String(on);    
-        }
-        if (Var::IsBuffer(var) && Var::IsBuffer(on)) {  
-            return Var::Buffer(var) == Var::Buffer(on);    
-        }
         if (Var::IsMap(var) && Var::IsMap(on)) {    
             return __Match(Var::Map(var), Var::Map(on));
         }
         if (Var::IsList(var) && Var::IsList(on)) {      
             return __Match(Var::List(var), Var::List(on));;
         }
-        return Var::ToString(var) == Var::ToString(on);
+        return __MatchContent(var, on);
     } catch (...) {}
     // not match
     return false;
@@ -227,7 +232,7 @@ static void __Update(const Link& var, Link& on) {
         on = var;
     }
 }
-Var Edit::Update(const Var& var, Var& on) {
+Var Edit::Update(const Var var, Var on) {
     if(Var::IsDefined(on)) {
         __Update(var, on);
     } else {
@@ -301,14 +306,14 @@ static void __Find(Link& var, const Link& on) {
             __Find(Var::List(var), Var::List(on));
             return;
         }
-        if (__Match(var, on)) {
+        if (__MatchContent(var, on)) {
             return;
         }
     } catch (...) {}
     // not found
     var = Obj::Null();
 }
-Var Edit::Find(Var& var, const Var& on) {
+Var Edit::Find(Var var, const Var on) {
     if(Var::IsDefined(var)) {
         __Find(var, on);
     }
@@ -374,13 +379,13 @@ static void __Remove(const Link& var, Link& on) {
             __Remove(Var::List(var), Var::List(on));
             return;
         }
-        if (__Match(var, on)) {
+        if (__MatchContent(var, on)) {
             on = Obj::Null();
             return;
         }
     } catch (...) {}
 }
-Var Edit::Remove(const Var& var, Var& on) {
+Var Edit::Remove(const Var var, Var on) {
     if(Var::IsDefined(var)) {
         __Remove(var, on);
     }
@@ -456,13 +461,13 @@ static inline void __Delete(const Link& var, Link& on) {
             __Delete(Var::List(var), Var::List(on));
             return;
         }
-        if (__Match(var, on)) {
+        if (__MatchContent(var, on)) {
             on = Obj::Null();
             return;
         }
     } catch (...) {}
 }
-Var Edit::Delete(const Var& var, Var& on) {
+Var Edit::Delete(const Var var, Var on) {
     if(Var::IsDefined(var)) {
         __Delete(var, on);
     }

@@ -42,11 +42,13 @@
  */
 #define INFO(_tag_, _msg_) do {                      \
     std::lock_guard<std::mutex>(SLog::Locker());     \
-    SLog::Debug()                                    \
+    SLog::Info()                                     \
+        << "\e[32m"                                  \
         << "[ " << STime::ToDateTime(STime::Time()) << " ] "\
         << "[  INFO   ] "                            \
         << "[ " << _tag_ << " ]"                     \
-        <<" [ " << _msg_ << " ]";                    \
+        <<" [ " << _msg_ << " ]"                     \
+        <<"\e[0m";                                   \
 } while(0)
 /**
  * --------------------------------------------------------
@@ -55,11 +57,13 @@
  */
 #define WARNING(_tag_, _msg_) do {                   \
     std::lock_guard<std::mutex>(SLog::Locker());     \
-    SLog::Debug()                                    \
+    SLog::Warning()                                  \
+        << "\e[33m"                                  \
         << "[ " << STime::ToDateTime(STime::Time()) << " ] "\
         << "[ WARNING ] "                            \
         << "[ " << _tag_ << " ]"                     \
-        <<" [ " << _msg_ << " ]";                    \
+        <<" [ " << _msg_ << " ]"                     \
+        <<"\e[0m";                                   \
 } while(0)
 /**
  * --------------------------------------------------------
@@ -68,11 +72,13 @@
  */
 #define ERROR(_tag_, _msg_) do {                     \
     std::lock_guard<std::mutex>(SLog::Locker());     \
-    SLog::Debug()                                    \
+    SLog::Error()                                    \
+        << "\e[31m"                                  \
         << "[ " << STime::ToDateTime(STime::Time()) << " ] "\
         << "[  ERROR  ] "                            \
         << "[ " << _tag_ <<" ]"                      \
-        <<" [ " << _msg_ <<" ]";                     \
+        <<" [ " << _msg_ <<" ]"                      \
+        <<"\e[0m";                                   \
 } while(0)
 /**
  * ------------------------------------------------------------------------------------------------
@@ -166,7 +172,7 @@ private:
  * Log Serializer
  * ------------------------------------------------------------------------------------------------
  */
-inline std::ostream& operator<<(std::ostream& os, const Link& data) {
+inline std::ostream& operator<<(std::ostream& os, const Var& data) {
     return Convert::ToPrettyJson(os, data); 
 }
 inline std::ostream& operator<<(std::ostream& os, const Map&  data) {

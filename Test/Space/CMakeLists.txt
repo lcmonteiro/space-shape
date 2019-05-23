@@ -2,14 +2,14 @@ cmake_minimum_required (VERSION 3.10)
 # ---------------------------------------------------------
 # add Tools test 
 # ---------------------------------------------------------
-# add_gtests(
-# TARGET 
-#     TestSpaceTools
-# SOURCES 
-
-# DEPENDS
-
-# )
+add_gtests(
+TARGET 
+    TestSpaceTools
+SOURCES 
+    Tools/TestEdit.cpp
+DEPENDS
+    Space
+)
 
 # ---------------------------------------------------------
 # end

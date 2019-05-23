@@ -60,7 +60,7 @@ namespace Edit {
      * Update var (A) on other var (B)  |_A_|_A&B_|_B_| ->  ~_|__A__|_B_| 
      * --------------------------------------------------------------------
      */
-    Var   Update(const Var&  var, Var&  on);
+    Var   Update(const Var   var, Var   on);
     Map&  Update(const Map&  var, Map&  on);
     List& Update(const List& var, List& on);
     /**
@@ -78,7 +78,7 @@ namespace Edit {
      *  Find var (A) on other var (B)   |_A_|_A&B_|_B_| ->  ~_|_A&B_|_~
      * --------------------------------------------------------------------
      */
-    Var   Find(Var&  var, const Var&  on);
+    Var   Find(Var   var, const Var   on);
     Map&  Find(Map&  var, const Map&  on);
     List& Find(List& var, const List& on);
     /**
@@ -87,7 +87,7 @@ namespace Edit {
      *  Remove var (A) on other var (B) |_A_|_A&B_|_B_| ->  ~_|_B_|
      * --------------------------------------------------------------------
      */
-    Var   Remove(const Var&  var, Var&  on);
+    Var   Remove(const Var   var, Var   on);
     Map&  Remove(const Map&  var, Map&  on);
     List& Remove(const List& var, List& on);
     /**
@@ -104,7 +104,7 @@ namespace Edit {
      *  Delete var (A) on other var (B) and clear empty branches |_A_|_A&B_|_B_| ->  ~_|_B_|
      * --------------------------------------------------------------------
      */
-    Var   Delete(const Var&  var, Var&  on);
+    Var   Delete(const Var   var, Var  on);
     Map&  Delete(const Map&  var, Map&  on);
     List& Delete(const List& var, List& on);
     /**

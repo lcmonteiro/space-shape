@@ -42,7 +42,7 @@ typedef class __link__: public std::shared_ptr<__interface__> {
      */  
     __link__() = default;
     __link__(const __super__& a) : __super__(a) {}
-    __link__(__super__ &&a): __super__(std::move(a)) {}
+    __link__(__super__ &&a) : __super__(std::forward<__super__>(a)) {}
 } Link;
 /**
  * ------------------------------------------------------------------------------------------------
