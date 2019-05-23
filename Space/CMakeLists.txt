@@ -26,6 +26,7 @@ INTERFACE
 target_link_libraries(Space
 INTERFACE
 	SpaceKernel
+	SpaceTool
 	SpaceStream
 	SpaceConverter
 	SpaceResource

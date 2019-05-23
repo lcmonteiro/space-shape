@@ -9,6 +9,7 @@
  * space
  */
 #include "SLog.h"
+#include "SEdit.h"
 #include "SConvertXML.h"
 #include "SConvertARG.h"
 #include "SConvertBIN.h"
