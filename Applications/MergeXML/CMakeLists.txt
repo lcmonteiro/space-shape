@@ -8,6 +8,7 @@ project (MergeXml)
 # ---------------------------------------------------------
 add_executable(MergeXml 
 	main.cpp
+	Commands/Normalize.cpp
 )
 # dependencies 
 target_link_libraries(MergeXml
