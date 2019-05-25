@@ -20,13 +20,12 @@
 namespace Command {
     /**
      * ----------------------------------------------------
-     * Normalize
-     * @doc      - document to normalize
-     * @settings - structural properties
-     * @return normalized document 
+     * Learn
+     * @files - list of files paths
+     * @return structural properties 
      * ----------------------------------------------------
      */
-    Var Normalize(Var doc, Var prop);
+    Var Learn(const List& files);
 }
 /**
  * ------------------------------------------------------------------------------------------------
