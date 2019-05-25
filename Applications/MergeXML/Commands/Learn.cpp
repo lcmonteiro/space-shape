@@ -18,7 +18,7 @@
  * Normalize
  * ----------------------------------------------------------------------------
  */
-Var Command::Normalize(Var doc, Var prop) { 
+Var Command::Normalize(Var doc, Var settings) { 
 
     return doc;
 }  
