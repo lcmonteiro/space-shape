@@ -1,0 +1,16 @@
+cmake_minimum_required (VERSION 3.8)
+# ---------------------------------------------------------
+# SpaceKernel target
+# ---------------------------------------------------------
+add_library(SpaceContainer INTERFACE)
+# includes
+target_include_directories(SpaceContainer 
+	INTERFACE . 
+)
+# dependencies 
+target_link_libraries(SpaceConverter 
+	INTERFACE SpaceKernel
+)
+# ---------------------------------------------------------
+# End
+# ---------------------------------------------------------
