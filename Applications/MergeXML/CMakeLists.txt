@@ -8,11 +8,17 @@ project (MergeXml)
 # ---------------------------------------------------------
 add_executable(MergeXml 
 	main.cpp
+	Commands/Learn.cpp
 	Commands/Normalize.cpp
+)
+# includes
+target_include_directories(MergeXml
+PUBLIC
+	Commands
 )
 # dependencies 
 target_link_libraries(MergeXml
-PRIVATE
+PUBLIC
 	Space
 )
 # ---------------------------------------------------------
