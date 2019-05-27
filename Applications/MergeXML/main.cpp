@@ -26,10 +26,10 @@ int main(int argc, char** argv) {
      * parse arguments
      */
     auto args = Convert::FromARG(
-        {argv + 1, argv + argc}, 
-        {
-            {"i", "in"}, 
-            {"o", "out"}
+        {argv + 1, argv + argc}, {
+            {"in"     , "i"}, 
+            {"out"    , "o"},
+            {"pattern", "p"}
         }
     );
     INFO("Arguments", args);

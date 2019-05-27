@@ -27,8 +27,7 @@ using namespace std;
  * Local Interface
  * ------------------------------------------------------------------------------------------------
  */
-static Map  __FindDirectory(sregex_iterator it, sregex_iterator& end, String path);
-static Map  __FindDirectory(String path);
+static Map  __FindDirectory(KeyList& path, std::function<bool(const KeyList&, int)> filter);
 
 static bool __CopyDirectory(String from, String to, Map tree);
 static bool __CopyDirectory(String from, String to, List tree);
@@ -63,7 +62,7 @@ Boolean FileSystem::Insert(String path, Var tree) {
             }
         }
     } else {
-        for(auto& e : SConvert::FromPath(Var::ToString(tree))){
+        for(auto& e : Convert::FromPath(Var::ToString(tree))){
             path += (Var::ToString(e) + "/");
             // create directory
             auto r = ::mkdir(path.data(), S_IRWXU | S_IRWXG | S_IRWXO);
@@ -80,13 +79,9 @@ Boolean FileSystem::Insert(String path, Var tree) {
  * File Resources on Folder Tree
  * ----------------------------------------------------------------------------
  */
-Var FileSystem::Find(String path) {
-    return Obj(__FindDirectory(path));
-}
-Var FileSystem::Find(String path, Key expr) {
-    static const regex e("([^/]+)");
-    sregex_iterator it(expr.begin(), expr.end(), e), end;
-    return Obj(__FindDirectory(it, end, path.back() == '/' ? path : path + "/"));
+Var FileSystem::Find(String path, function<bool(const KeyList&, int)> filter) {
+    auto stack = KeyList{path};
+    return Obj(__FindDirectory(stack, filter));
 }
 /**
  * ----------------------------------------------------------------------------
@@ -172,7 +167,7 @@ String FileSystem::GetFileName(String path) {
     if (path.back() == '/') {
         return String();
     }
-    return Var::ToString(SConvert::FromPath(path).back());
+    return Var::ToString(Convert::FromPath(path).back());
 }
 /**
  * ----------------------------------------------------------------------------
@@ -182,11 +177,11 @@ String FileSystem::GetFileName(String path) {
 String FileSystem::GetFilePath(String path) {
     if (path.back() == '/')  return path;
     // convert to "[a, b, c]"
-    auto tmp = SConvert::FromPath(path);
+    auto tmp = Convert::FromPath(path);
     // remove filename
     tmp.pop_back();
     // convert to "/a/b"
-    return SConvert::ToPath(tmp);
+    return Convert::ToPath(tmp);
 }
 /**
  * ----------------------------------------------------------------------------
@@ -229,12 +224,12 @@ void FileSystem::SetPath(String path) {
  * Find Directories
  * ----------------------------------------------------------------------------
  */
-static Map __FindDirectory(String path) {
+static Map __FindDirectory(KeyList& path, function<bool(const KeyList&, int)> filter) {
     Map tree;
     /**
      * open directory
      */
-    DIR* dir = ::opendir(path.data());
+    DIR* dir = ::opendir(Convert::ToPath(path).data());
     if (dir == nullptr) {
         return tree;
     }
@@ -243,124 +238,39 @@ static Map __FindDirectory(String path) {
      */
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) {
+        path.emplace_back(entry->d_name);
         switch (entry->d_type) {
             case DT_DIR:
             {
                 if (entry->d_name[0] == '.') {
                     break;
                 }
-                Map found(__FindDirectory(path + "/" + entry->d_name));
-                if (found.empty()) {
+                if(filter(path, DT_DIR)) {
+                    auto found = __FindDirectory(path, filter);
+                    if (found.empty()) {
+                        tree[entry->d_name] = Obj(entry->d_type);
+                    } else {
+                        tree[entry->d_name] = Obj(found);
+                    }
+                }
+                break;
+            }
+            case DT_REG:
+            {
+                if(filter(path, DT_REG)) {
                     tree[entry->d_name] = Obj(entry->d_type);
-                } else {
-                    tree[entry->d_name] = Obj(found);
                 }
-                break;
-            }
-            case DT_REG:
-            {
-                tree[entry->d_name] = Obj(entry->d_type);
                 break;
             }
             case DT_LNK:
             {
-                tree[entry->d_name] = Obj(entry->d_type);
-                break;
-            }
-        }
-    }
-    /**
-     * close directory
-     */
-    closedir(dir);
-    return tree;
-}
-/**
- * ----------------------------------------------------------------------------
- * Find Directories
- * ----------------------------------------------------------------------------
- */
-static Map __FindDirectory(sregex_iterator it, sregex_iterator& end, String path) {
-    Map tree;
-    /**
-     * end search
-     */
-    if (it == end) {
-        return tree;
-    }
-    String name(it->str());
-    ++it;
-    /**
-     * try to get status
-     */
-    struct stat sb;
-    if (stat((path + name).c_str(), &sb) != -1) {
-        switch (sb.st_mode & S_IFMT) {
-            case S_IFDIR:
-            {
-                Map found(__FindDirectory(it, end, path + name + "/"));
-                if (found.empty()) {
-                    tree[name] = Obj(DT_DIR);
-                } else {
-                    tree[name] = Obj(found);
+                if(filter(path, DT_LNK)) {
+                    tree[entry->d_name] = Obj(entry->d_type);
                 }
                 break;
             }
-            case S_IFLNK:
-            {
-                tree[name] = Obj(DT_LNK);
-                break;
-            }
-            case S_IFREG:
-            {
-                tree[name] = Obj(DT_REG);
-                break;
-            }
-            default:;
         }
-        return tree;
-    }
-    /**
-     * open directory
-     */
-    DIR* dir = ::opendir(path.data());
-    if (dir == nullptr) {
-        return tree;
-    }
-    /**
-     * parse directory and match expression
-     */
-    regex expr(name);
-    struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL) {
-        if (!regex_match(entry->d_name, expr)) {
-            continue;
-        }
-        switch (entry->d_type) {
-            case DT_DIR:
-            {
-                if (entry->d_name[0] == '.') {
-                    break;
-                }
-                Map found(__FindDirectory(it, end, path + entry->d_name + "/"));
-                if (found.empty()) {
-                    tree[entry->d_name] = Obj(DT_DIR);
-                } else {
-                    tree[entry->d_name] = Obj(found);
-                }
-                break;
-            }
-            case DT_REG:
-            {
-                tree[entry->d_name] = Obj(DT_REG);
-                break;
-            }
-            case DT_LNK:
-            {
-                tree[entry->d_name] = Obj(DT_LNK);
-                break;
-            }
-        }
+        path.pop_back();
     }
     /**
      * close directory

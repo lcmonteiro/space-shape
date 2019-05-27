@@ -17,7 +17,7 @@
 /**---------------------------------------------------------------------------------------------------------------------
  * map reshape
  **--------------------------------------------------------------------------------------------------------------------*/
-Var SReshape::toMap(Var doc, Key location, ListKey tags) {
+Var SReshape::toMap(Var doc, Key location, KeyList tags) {
         Map map;
         for (Var e : Logic::toList(Edit::Find(location, doc))) {
                 List l;

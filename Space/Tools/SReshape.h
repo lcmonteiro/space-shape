@@ -23,7 +23,7 @@ public:
          * @param tags
          * @return reshape document
          */
-        static Var toMap(Var doc, Key location, ListKey tags);
+        static Var toMap(Var doc, Key location, KeyList tags);
         /**
          * List Reshape
          * @param doc

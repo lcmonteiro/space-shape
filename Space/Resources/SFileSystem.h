@@ -9,6 +9,10 @@
 #ifndef SFILESYSTEM_H
 #define SFILESYSTEM_H
 /**
+ * std
+ */
+#include <functional>
+/**
  * space
  */
 #include "SVariable.h"
@@ -40,11 +44,11 @@ namespace FileSystem {
      * ------------------------------------------------------------------------
      * Find file tree
      * @param path
+     * @param filter function
      * @return tree
      * ------------------------------------------------------------------------
      */
-    static Var Find(String path, Key expr);
-    static Var Find(String path);
+    Var Find(String path, std::function<bool(const KeyList&, int)> filter);
     /**
      * ------------------------------------------------------------------------
      * Copy Files 

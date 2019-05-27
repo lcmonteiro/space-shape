@@ -20,8 +20,8 @@ namespace Edit {
      * Utilities
      * ------------------------------------------------------------------------
      */
-    inline MapKey ToMapKey(Var map) {
-        MapKey ret;
+    inline KeyMap ToKeyMap(Var map) {
+        KeyMap ret;
         for (auto& v : Var::ToMap(map))
             ret[v.first] = Var::ToString(v.second);
         return ret;
@@ -191,7 +191,7 @@ namespace Edit {
     /**
      * derived
      */
-    static inline List Find(ListKey paths, Var on) {
+    static inline List Find(KeyList paths, Var on) {
         List l;
         for (auto& p : paths) 
             l.push_back(Find(p, on));
@@ -212,7 +212,7 @@ namespace Edit {
     /**
      * derived
      */
-    inline List Remove(ListKey paths, Var on) {
+    inline List Remove(KeyList paths, Var on) {
         List l;
         for (auto& p : paths) 
             l.push_back(Remove(p, on));
@@ -236,7 +236,7 @@ namespace Edit {
     /**
      * derived
      */
-    inline List Delete(ListKey paths, Var on) {
+    inline List Delete(KeyList paths, Var on) {
         for (auto& p : paths) 
             Remove(p, on);
         return std::move(on);
@@ -259,7 +259,7 @@ namespace Edit {
      * Move
      * ------------------------------------------------------------------------
      */
-    inline Var Move(Var from, MapKey& map, Var to = Obj::Map()) {
+    inline Var Move(Var from, KeyMap& map, Var to = Obj::Map()) {
         for (auto& v : map) 
             to = Insert(v.second, Remove(v.first, from), to);
         return to;        
@@ -267,18 +267,18 @@ namespace Edit {
     /**
      * derived
      */
-    inline Var Move(Var from, MapKey&& map, Var to = Obj::Map()) {
+    inline Var Move(Var from, KeyMap&& map, Var to = Obj::Map()) {
         return Move(from, map, to);
     }
     inline Var Move(Var from, Var map, Var to = Obj::Map()) {
-        return Move(from, ToMapKey(map), to);
+        return Move(from, ToKeyMap(map), to);
     }
     /**
      * ------------------------------------------------------------------------
      * Link
      * ------------------------------------------------------------------------
      */
-    inline Var Link(Var from, MapKey& map, Var to = Obj::Map()){
+    inline Var Link(Var from, KeyMap& map, Var to = Obj::Map()){
         for (auto& v : map) 
             to = Insert(v.second, Find(v.first, from), to);
         return to;
@@ -286,11 +286,11 @@ namespace Edit {
     /**
      * derived
      */
-    inline Var Link(Var from, MapKey&& map, Var to = Obj::Map()) {
+    inline Var Link(Var from, KeyMap&& map, Var to = Obj::Map()) {
         return Link(from, map, to);
     }
     inline Var Link(Var from, Var map, Var to = Obj::Map()) {
-        return Link(from, ToMapKey(map), to);
+        return Link(from, ToKeyMap(map), to);
     }
     /**
      * ------------------------------------------------------------------------

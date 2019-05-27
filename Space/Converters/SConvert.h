@@ -29,13 +29,13 @@
  * Convert - Space
  * ------------------------------------------------------------------------------------------------
  */
-namespace SConvert {
+namespace Convert {
     /**
      * ------------------------------------------------------------------------
      * convert String (format a/b/c to [a,b,c]) to list
      * ------------------------------------------------------------------------
      */
-    static List FromString(String p, String pattern) {
+    static inline List FromString(String p, String pattern) {
         using filter_iterator = std::regex_iterator<std::string::iterator>;
         // implementation
         const auto reg  = std::regex(pattern);
@@ -46,45 +46,48 @@ namespace SConvert {
         return list;
     }
     /**
-     * utils
+     * utilities
      */
-    static List FromString(Var p, String pattern) { 
-        return FromString(p, pattern);   
-    }
-    static List FromPath(String p) {
+    static inline List FromPath(String p) {
         return FromString(p, "([^/]+)"); 
-    }
-    static List FromPath(Var p) {
-        return FromPath(String(p));      
     }
     /**
      * ------------------------------------------------------------------------
      * convert list (format a/b/c to [a,b,c]) to string
      * ------------------------------------------------------------------------
      */
-    static String ToString(List l, String delim) {
-        auto str = String();  
+    static inline String ToString(List l, String delim) {
+        auto os = std::ostringstream();  
         auto it  = l.begin();
         auto end = l.end();
         if (it != end) {
-            str = Var::ToString(*it);
+            os << Var::ToString(*it);
             for (++it; it != end; ++it) {
-                str += (delim + Var::ToString(*it));
+                os << delim << Var::ToString(*it);
             }
         }
-        return str;
+        return os.str();
+    }
+    static inline String ToString(KeyList l, String delim) {
+        auto os = std::ostringstream();  
+        auto it  = l.begin();
+        auto end = l.end();
+        if (it != end) {
+            os << *it;
+            for (++it; it != end; ++it) {
+                os << delim << *it;
+            }
+        }
+        return os.str();
     }
     /**
-     * utils
+     * utilities
      */
-    static String ToString(Var l, String delim) { 
-        return ToString(List(l), delim); 
+    static inline String ToPath(List l) {
+       return ToString(l, "/");         
     }
-    static String ToPath(List l) {
-        return ToString(l, "/");         
-    }
-    static String ToPath(Var l) {
-        return ToPath(List(l));          
+    static inline String ToPath(KeyList l) {
+       return ToString(l, "/");         
     }
     /**
      * ------------------------------------------------------------------------
@@ -118,7 +121,7 @@ namespace SConvert {
             }
         }
     }
-    static Map ToSimpleMap(Var var, String delim) {
+    static inline Map ToSimpleMap(Var var, String delim) {
         Map base;
         if (Var::IsMap(var)) {
             __ToSimpleMap("", base, delim, Var::Map(var));
@@ -171,7 +174,7 @@ namespace SConvert {
      * Convert Var to Number
      * ------------------------------------------------------------------------
      */
-    static Integer ToHash(Var v) {
+    static inline Integer ToHash(Var v) {
         std::ostringstream os;
         std::hash<std::string> h;
         /**
@@ -217,7 +220,7 @@ namespace SConvert {
      * convert Var to Hex format
      * ------------------------------------------------------------------------
      */
-    static Var ToHex(Integer v) {        
+    static inline Var ToHex(Integer v) {        
         auto result = std::string();
         auto stream = std::stringstream();
         auto number = int(log2(int(v)));

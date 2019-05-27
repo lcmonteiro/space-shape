@@ -797,8 +797,8 @@ public:
  * Utils types
  * ------------------------------------------------------------------------------------------------
  */
-using ListKey = std::vector<__key__>;
-using MapKey  = std::unordered_map<__key__, __key__>;
+using KeyList = std::vector<__key__>;
+using KeyMap  = std::unordered_map<__key__, __key__>;
 /**
  * ------------------------------------------------------------------------------------------------
  * Utils operators
