@@ -31,7 +31,7 @@ namespace FileSystem {
      * @return 
      * ------------------------------------------------------------------------
      */
-    static Boolean Insert(String path, Var tree = Obj(nullptr));
+    Boolean Insert(String path, Var tree = Obj::Null());
     /**
      * ------------------------------------------------------------------------
      * Delete file tree
@@ -40,7 +40,7 @@ namespace FileSystem {
      * @return 
      * ------------------------------------------------------------------------
      */
-    static Boolean Delete(String path, Var tree = Obj(nullptr));
+    Boolean Delete(String path, Var tree = Obj::Null());
     /**
      * ------------------------------------------------------------------------
      * Find file tree
@@ -59,8 +59,7 @@ namespace FileSystem {
      * @return
      * ------------------------------------------------------------------------ 
      */
-    static Boolean Copy(
-        String from, String to, Var tree = Obj(nullptr));
+    Boolean Copy(String from, String to, Var tree = Obj::Null());
     /**
      * ------------------------------------------------------------------------
      * Move Files 
@@ -69,38 +68,37 @@ namespace FileSystem {
      * @param tree
      * ------------------------------------------------------------------------
      */
-    static Boolean Move(
-        String from, String to, Var tree = Obj(nullptr));
+    Boolean Move(String from, String to, Var tree = Obj::Null());
     /**
      * ------------------------------------------------------------------------
      * Get path from full path
      * ------------------------------------------------------------------------
      */
-    static String GetFileName(String path);
+    String GetFileName(String path);
     /**
      * ------------------------------------------------------------------------
      * Get File Name from full path
      * ------------------------------------------------------------------------
      */
-    static String GetFilePath(String path);
+    String GetFilePath(String path);
     /**
      * ------------------------------------------------------------------------
      * Get get path from root
      * ------------------------------------------------------------------------
      */
-    static String GetFullPath(String path);
+    String GetFullPath(String path);
     /**
      * ------------------------------------------------------------------------
      * Get working directory
      * ------------------------------------------------------------------------
      */
-    static String GetPath();
+    String GetPath();
     /**
      * ------------------------------------------------------------------------
      * Set working directory
      * ------------------------------------------------------------------------
      */
-    static void SetPath(String path);
+    void SetPath(String path);
 };
 /**
  * ------------------------------------------------------------------------------------------------

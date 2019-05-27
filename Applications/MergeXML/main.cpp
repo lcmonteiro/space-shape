@@ -9,13 +9,12 @@
  * space
  */
 #include "SLog.h"
-#include "SEdit.h"
-#include "SConvertXML.h"
 #include "SConvertARG.h"
-#include "SConvertBIN.h"
-#include "SFileSystem.h"
-#include "SNullStream.h"
-#include "SFileStream.h"
+/**
+ * commands
+ */
+#include "Normalize.h"
+#include "Learn.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * Main
@@ -36,18 +35,11 @@ int main(int argc, char** argv) {
     /**
      * Process
      */
-    auto r = File::Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
-
-    auto w = File::Writer("/tmp/ConnectionEditor.json");
-
-    Convert::ToPrettyJson(w, Convert::FromXML(r));
-
-    r = File::Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
-
-    w = File::Writer("/tmp/ConnectionEditor.bin");
-
-    Convert::ToBin(w, Convert::FromXML(r));
-    return 0;   
+    INFO("Filesystem", Command::Explorer(args["in"])); 
+    /**
+     * finish
+     */
+    return 0;
 }
 /**
  * ------------------------------------------------------------------------------------------------
