@@ -8,8 +8,8 @@ project (MergeXml)
 # ---------------------------------------------------------
 add_executable(MergeXml 
 	main.cpp
-	Commands/Learn.cpp
-	Commands/Normalize.cpp
+	Commands/SLearn.cpp
+	Commands/SNormalize.cpp
 )
 # includes
 target_include_directories(MergeXml
