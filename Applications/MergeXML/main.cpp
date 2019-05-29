@@ -13,8 +13,8 @@
 /**
  * commands
  */
-#include "Normalize.h"
-#include "Learn.h"
+#include "SNormalize.h"
+#include "SLearn.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * Main
@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
     /**
      * Process
      */
-    INFO("Filesystem", Command::Explorer(args["in"])); 
+    INFO("Filesystem", Command::Explorer(args["i"], args["p"])); 
     /**
      * finish
      */
