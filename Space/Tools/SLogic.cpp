@@ -22,25 +22,26 @@ using namespace std;
  * --------------------------------------------------------------------
  */
 Var __ForEach(List& path, Var var, function<Var(const List&, Var)> update) {
-    try {
-        Var::Throw(var);
-    } catch(std::reference_wrapper<Map> m) {
-        for (auto& v : m.get()) {
-            path.emplace_back(Obj(v.first));
-            v.second = __ForEach(path, v.second, update);
-            path.pop_back();
+    switch(Var::Type(var)){
+        case Var::MAP: {
+            for (auto& v : Var::Map(m)) {
+                path.emplace_back(Obj(v.first));
+                v.second = __ForEach(path, v.second, update);
+                path.pop_back();
+            }
+            break;
         }
-    } catch(std::reference_wrapper<List> l) {
-        auto i = 0; 
-        for (auto& v : l.get()) {
-            path.emplace_back(Obj(i++));
-            v = __ForEach(path, v, update);
-            path.pop_back();
+        case Var::LIST: {
+            auto i = 0; 
+            for (auto& v : Var::List(l)) {
+                path.emplace_back(Obj(i++));
+                v = __ForEach(path, v, update);
+                path.pop_back();
+            }
+            break;    
         }
-    } catch(...) {
-        var = update(const_cast<List&>(path), var);
     }
-    return var;
+    return update(const_cast<List&>(path), var);
 }
 /**
  * ----------------------------------------------------------------------------
