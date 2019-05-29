@@ -9,6 +9,10 @@
 #ifndef SLOGIC_H
 #define SLOGIC_H
 /**
+ * std
+ */
+#include <functional>
+/**
  * space
  */
 #include "SEdit.h"
@@ -84,106 +88,24 @@ namespace Logic {
     }
     /**
      * --------------------------------------------------------------------------------------------
-     * Call function (func(const List& path, )) for all elements
+     * Call function (update(const List& path, Var )) for all elements
      * --------------------------------------------------------------------------------------------
      * Var
      * ------------------------------------------------------------------------
      */
-     namespace {
-        template<typename Function>
-        Var __ForEach(List& path, Var var, Function func, std::true_type) {
-            if (Var::IsMap(var)) {
-                for (auto& v : Var::Map(var)) {
-                    path.emplace_back(Obj(v.first));
-                    v.second = __ForEach(path, v.second, func, std::true_type());
-                    path.pop_back();
-                }
-                return var;
-            }
-            if (Var::IsList(var)) {
-                size_t i = 0; 
-                for (auto& v : Var::List(var)) {
-                    path.emplace_back(Obj(i++));
-                    v = __ForEach(path, v, func, std::true_type());
-                    path.pop_back();
-                }
-                return var;
-            }
-            if (Var::IsLink(var)) {
-                auto& v = Var::Link(var);
-                v = __ForEach(path, v, func, std::true_type());
-                return var;
-            }
-            return func(const_cast<List&>(path), var);
-        }
-        template<typename Function>
-        Var __ForEach(List& path, Var var, Function func, std::false_type) {
-            if (Var::IsMap(var)) {
-                for (auto& v : Var::Map(var)) {
-                    path.emplace_back(Obj(v.first));
-                    v.second = __ForEach(path, v.second, func, std::false_type());
-                    path.pop_back();
-                }
-                return var;
-            }
-            if (Var::IsList(var)) {
-                Integer i = 0; 
-                for (auto& v : Var::List(var)) {
-                    path.emplace_back(Obj::Integer(i++));
-                    v = __ForEach(path, v, func, std::false_type());
-                    path.pop_back();
-                }
-                return var;
-            }
-            return func(const_cast<List&>(path), var);
-        }
-    }
-    template<bool LINKS = false, typename Function>
-    static Var ForEach(Var var, Function func) {
-        List path;
-        return __ForEach(path, var, func,
-            typename std::integral_constant<bool, LINKS>::type());
-    }
+    Var ForEach(Var var, std::function<Var(const List&, Var)> update);
     /**
      * ------------------------------------------------------------------------
      * List
      * ------------------------------------------------------------------------
      */ 
-    template<typename Function>
-    static List ForEach(List list, Function func) {
-        for (auto& v : list) {
-            v = func(v);
-        }
-        return list;
-    }
+    List ForEach(List var, std::function<Var(const size_t&, Var)> update);
     /**
      * ------------------------------------------------------------------------
      * Map
      * ------------------------------------------------------------------------
      */ 
-    template<typename Function>
-    static Map  ForEach(Map map, Function func){
-        for (auto& v : map) {
-            v.second = func(v.second);
-        }
-        return map;
-    }
-    /**
-     * ------------------------------------------------------------------------
-     * ForEach
-     * @example Logic::ForEach<Map>(vector<T> in, [](Map& o, T& i){
-     *      o[i.a()] = Obj(i.a());
-     * })
-     * ------------------------------------------------------------------------
-     */
-    template<typename Output, typename Input, typename Function>
-    static Output ForEach(Input& in, Function func) {
-        Output out; 
-        for (auto& i : in) {
-            func(out, i); 
-        } 
-        return out;
-    }  
+    Map ForEach(Map var, std::function<Var(const Key&, Var)> update);
     /**
      * --------------------------------------------------------------------------------------------
      * Logic Converters

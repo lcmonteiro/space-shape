@@ -24,6 +24,16 @@
 using namespace std;
 /**
  * ------------------------------------------------------------------------------------------------
+ * Local Variables
+ * ------------------------------------------------------------------------------------------------
+ */
+static map<int, FileSystem::Resource> __map {
+    {DT_DIR, FileSystem::DIR},
+    {DT_REG, FileSystem::FILE},
+    {DT_LNK, FileSystem::LINK}
+};
+/**
+ * ------------------------------------------------------------------------------------------------
  * Local Interface
  * ------------------------------------------------------------------------------------------------
  */
@@ -245,10 +255,10 @@ static Map __FindDirectory(KeyList& path, function<bool(const KeyList&, int)> fi
                 if (entry->d_name[0] == '.') {
                     break;
                 }
-                if(filter(path, DT_DIR)) {
+                if(filter(path, __map[DT_DIR])) {
                     auto found = __FindDirectory(path, filter);
                     if (found.empty()) {
-                        tree[entry->d_name] = Obj(entry->d_type);
+                        tree[entry->d_name] = Obj(__map[entry->d_type]);
                     } else {
                         tree[entry->d_name] = Obj(found);
                     }
@@ -257,15 +267,15 @@ static Map __FindDirectory(KeyList& path, function<bool(const KeyList&, int)> fi
             }
             case DT_REG:
             {
-                if(filter(path, DT_REG)) {
-                    tree[entry->d_name] = Obj(entry->d_type);
+                if(filter(path, __map[DT_REG])) {
+                    tree[entry->d_name] = Obj(__map[entry->d_type]);
                 }
                 break;
             }
             case DT_LNK:
             {
-                if(filter(path, DT_LNK)) {
-                    tree[entry->d_name] = Obj(entry->d_type);
+                if(filter(path, __map[DT_LNK])) {
+                    tree[entry->d_name] = Obj(__map[entry->d_type]);
                 }
                 break;
             }
