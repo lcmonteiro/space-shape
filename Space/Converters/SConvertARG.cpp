@@ -62,7 +62,7 @@ Var Convert::FromARG(vector<string> args, map<string,string> map) {
                     out[key]= Obj(a);                        
                 break;
                 case 1: // list  
-                    out[key]= Obj::List({out[key], Obj(a)}); 
+                    out[key]= Obj{out[key], Obj(a)}; 
                 break;
                 default: // append
                     Var::List(out[key]) += Obj(a);           

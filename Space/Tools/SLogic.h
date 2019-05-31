@@ -142,7 +142,7 @@ namespace Logic {
      * Logic Link
      * --------------------------------------------------------------------------------------------
      */
-    static inline Var Link(Var from, Var map, Var to = Obj::Map()) {
+    static inline Var Link(Var from, Var map, Var to = Obj(Map())) {
         for(auto& m : ToList(map)){
             to = Edit::Link(from, m, to);
         }

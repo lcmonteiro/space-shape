@@ -106,15 +106,15 @@ public:
 class __interface__ {
     friend class __var__;
     friend class __obj__;
-    virtual __link__ operator[](__string__ val)  { throw std::logic_error(__func__); }
-    virtual __link__ operator[](__integer__ val) { throw std::logic_error(__func__); }
-    virtual __integer__ __to_integer() { throw std::logic_error(__func__); }
-    virtual __float__   __to_float  () { throw std::logic_error(__func__); }
-    virtual __string__  __to_string () { throw std::logic_error(__func__); }
-    virtual __buffer__  __to_buffer () { throw std::logic_error(__func__); }
-    virtual __list__    __to_list   () { throw std::logic_error(__func__); }
-    virtual __map__     __to_map    () { throw std::logic_error(__func__); }
-    virtual void        __throw     () { throw std::logic_error(__func__); }
+    virtual Link operator[](String ) { throw std::logic_error(__func__); }
+    virtual Link operator[](Integer) { throw std::logic_error(__func__); }
+    virtual Integer __to_integer()   { throw std::logic_error(__func__); }
+    virtual Float   __to_float  ()   { throw std::logic_error(__func__); }
+    virtual String  __to_string ()   { throw std::logic_error(__func__); }
+    virtual Buffer  __to_buffer ()   { throw std::logic_error(__func__); }
+    virtual List    __to_list   ()   { throw std::logic_error(__func__); }
+    virtual Map    __to_map     ()   { throw std::logic_error(__func__); }
+    virtual int    __type       ()   { throw std::logic_error(__func__); }
 };
 /**
  * ------------------------------------------------------------------------------------------------
@@ -150,8 +150,8 @@ typedef class __obj__ : public __link__ {
         inline __string__ __to_string () override { 
             return __string__::ValueOf(*this); 
         }
-        inline void __throw () override { 
-            throw *this; 
+        inline int __type () override { 
+            throw BOOLEAN; 
         }
     };
     class __integer : public __integer__, public __interface__ {
@@ -176,8 +176,8 @@ typedef class __obj__ : public __link__ {
         inline __integer__ __to_integer() override {
             return *this;
         }
-        inline void __throw () override { 
-            throw *this; 
+        inline int __type () override { 
+            return INTEGER; 
         }
     };
     class __float : public __float__, public __interface__ {
@@ -202,8 +202,8 @@ typedef class __obj__ : public __link__ {
         inline __float__ __to_float() override {
             return *this; 
         }
-        inline void __throw() override {
-            throw *this; 
+        inline int __type() override {
+            return FLOAT; 
         }
     };
     class __string : public __string__, public __interface__ {
@@ -228,8 +228,8 @@ typedef class __obj__ : public __link__ {
         inline __string__ __to_string() override {
             return *this;
         }
-        inline void __throw() override {
-            throw *this; 
+        inline int __type() override {
+            return STRING;  
         }
     };
     class __buffer : public __buffer__, public __interface__ {
@@ -257,8 +257,8 @@ typedef class __obj__ : public __link__ {
         inline __buffer__ __to_buffer() override {
             return *this;
         }
-        inline void __throw() override {
-            throw *this; 
+        inline int __type() override {
+            return INTEGER;  
         }
     };
     class __list : public __list__, public __interface__ {
@@ -298,8 +298,8 @@ typedef class __obj__ : public __link__ {
         inline __list__ __to_list() override {
             return *this;
         }
-        inline void __throw() override {
-            throw *this; 
+        inline int __type() override {
+            return LIST;  
         }
     };
     class __map : public __map__, public __interface__ {
@@ -337,8 +337,8 @@ typedef class __obj__ : public __link__ {
         inline __map__ __to_map() override {
             return *this;
         }
-        inline void __throw() override {
-            throw *this; 
+        inline int __type() override {
+            return MAP; 
         }
     };
     class __link : public __link__, public __interface__ {
@@ -378,14 +378,26 @@ typedef class __obj__ : public __link__ {
         inline __map__ __to_map() override {
             return get() ? get()->__to_map() : __map__();
         }
-        inline void __throw() override {
-            throw *this; 
+        inline int __type() override {
+            return LINK;  
         }
     };
+    using __link__::operator=;
 public:
     __obj__() = delete;
     /**
-     * native types constructors
+     * --------------------------------------------------------------------------------------------
+     * types identifiers 
+     * --------------------------------------------------------------------------------------------
+     */
+    enum Type : int { 
+        NONE = 0, BOOLEAN, INTEGER, FLOAT, STRING, BUFFER, LIST, MAP, LINK
+    };
+    /**
+     * --------------------------------------------------------------------------------------------
+     * Constructores
+     * --------------------------------------------------------------------------------------------
+     * native types
      */
     __obj__(nullptr_t    ) : __link__() {}
     __obj__(bool        v) : __link__(std::make_shared<__boolean>(v)) {}
@@ -394,105 +406,28 @@ public:
     __obj__(float       v) : __link__(std::make_shared<__float  >(v)) {}
     __obj__(double      v) : __link__(std::make_shared<__float  >(v)) {}
     /**
-     * base types constructors
+     * base types
      */
-    __obj__(__boolean__ v) : __link__(std::make_shared<__boolean>(v)) {}
-    __obj__(__integer__ v) : __link__(std::make_shared<__integer>(v)) {}
-    __obj__(__float__   v) : __link__(std::make_shared<__float  >(v)) {}
-    __obj__(__string__  v) : __link__(std::make_shared<__string >(v)) {}
-    __obj__(__buffer__  v) : __link__(std::make_shared<__buffer >(v)) {}
-    __obj__(__list__    v) : __link__(std::make_shared<__list   >(v)) {}
-    __obj__(__map__     v) : __link__(std::make_shared<__map    >(v)) {}
+    __obj__(__boolean__ v) : __link__(std::make_shared<__boolean>(std::move(v))) {}
+    __obj__(__integer__ v) : __link__(std::make_shared<__integer>(std::move(v))) {}
+    __obj__(__float__   v) : __link__(std::make_shared<__float  >(std::move(v))) {}
+    __obj__(__string__  v) : __link__(std::make_shared<__string >(std::move(v))) {}
+    __obj__(__buffer__  v) : __link__(std::make_shared<__buffer >(std::move(v))) {}
+    __obj__(__list__    v) : __link__(std::make_shared<__list   >(std::move(v))) {}
+    __obj__(__map__     v) : __link__(std::make_shared<__map    >(std::move(v))) {}
+    /**
+     * list initializer
+     */
     __obj__(std::initializer_list<__map::value_type>  l) : __link__(std::make_shared<__map >(l)){}
     __obj__(std::initializer_list<__list::value_type> l) : __link__(std::make_shared<__list>(l)){}
     /**
-     * Null
+     * --------------------------------------------------------------------------------------------
+     * Helpers
+     * --------------------------------------------------------------------------------------------
+     * create link
      */
-    static inline __link__ Null() {
-        return __link__();
-    }
-    /**
-     * Link
-     */
-    template<typename...__args__>
-    static inline __link__ Link(__args__ &&...args) {
-        return std::make_shared<__link>(std::forward<__args__>(args)...);
-    }
-    /**
-     * Boolean
-     */
-    template<typename...__args__>
-    static inline __link__ Boolean(__args__ &&...args) {
-        return std::make_shared<__boolean>(std::forward<__args__>(args)...);
-    }
-    static inline __link__ Boolean(__link__ l) {
-        return std::make_shared<__boolean>(l->__to_integer());
-    }
-    /**
-     * Integer
-     */
-    template<typename...__args__>
-    static inline __link__ Integer(__args__ &&...args) {
-        return std::make_shared<__integer>(std::forward<__args__>(args)...);
-    }
-    static inline __link__ Integer(__link__ l) {
-        return std::make_shared<__integer>(l->__to_integer());
-    }
-    /**
-     * Float
-     */
-    template<typename...__args__>
-    static inline __link__ Float(__args__ &&...args) {
-        return std::make_shared<__float>(std::forward<__args__>(args)...);
-    }
-    static inline __link__ Float(__link__ l) {
-        return std::make_shared<__float>(l->__to_float());
-    }
-    /**
-     * String
-     */
-    template<typename...__args__>
-    static inline __link__ String(__args__ &&...args) {
-        return std::make_shared<__string>(std::forward<__args__>(args)...);
-    }
-    static inline __link__ String(__link__ l) {
-        return std::make_shared<__string>(l->__to_string());
-    }
-    /**
-     * Buffer
-     */
-    template<typename...__args__>
-    static inline __link__ Buffer(__args__ &&...args) {
-        return std::make_shared<__buffer>(std::forward<__args__>(args)...);
-    }
-    static inline __link__ Buffer(__link__ l) {
-        return std::make_shared<__buffer>(l->__to_buffer());
-    }
-    /**
-     * List
-     */
-    template<typename...__args__>
-    static inline __link__ List(__args__ &&...args) {
-        return std::make_shared<__list>(std::forward<__args__>(args)...);
-    }
-    static inline __link__ List(std::initializer_list<__link__> l) {
-        return std::make_shared<__list>(l);
-    }
-    static inline __link__ List(__link__ l) {
-        return std::make_shared<__list>(l->__to_list());
-    }
-    /**
-     * Map
-     */
-    template<typename...__args__>
-    static inline __link__ Map(__args__ &&...args) {
-        return std::make_shared<__map>(std::forward<__args__>(args)...);
-    }
-    static inline __link__ Map(std::initializer_list<std::pair<const __key__, __link__>> l) {
-        return std::make_shared<__map>(l);
-    }
-    static inline __link__ Map(__link__ l) {
-        return std::make_shared<__map>(l->__to_map());
+    static inline __link__ Link(__link__ l) {
+        return std::make_shared<__link>(std::move(l));
     }
 } Obj;
 /**
@@ -530,7 +465,7 @@ public:
             if (IsList(*this)) {
                 return List(*this).at(ToInteger(val));
             }
-            if (IsNull(*this)) {
+            if (IsUndefined(*this)) {
                 return __link__();
             }
         } catch(std::out_of_range& ex){
@@ -543,35 +478,35 @@ public:
      */
     inline __var__ operator+(__var__ val) const {
         if (IsInteger(*this)) {
-            return Obj::Integer(Integer(*this) + ToInteger(val));
+            return Obj(::Integer(Integer(*this) + ToInteger(val)));
         }
         if (IsFloat(*this)) {
-            return Obj::Float(Float(*this) + ToFloat(val));
+            return Obj(::Float(Float(*this) + ToFloat(val)));
         }
         if (IsString(*this)) {
-            return Obj::String(String(*this) + ToString(val));
+            return Obj(::String(String(*this) + ToString(val)));
         }
         throw std::logic_error(__func__);
     }
-#define VAR_OPERATOR_T1(_x_)                                        \
-    inline __var__ operator _x_(__var__ val) const {                \
-        if (IsInteger(*this)) {                                     \
-            return Obj::Integer(Integer(*this) _x_ ToInteger(val)); \
-        }                                                           \
-        if (IsFloat(*this)) {                                       \
-            return Obj::Float(Float(*this) _x_ ToFloat(val));       \
-        }                                                           \
-        throw std::logic_error(__func__);                           \
+#define VAR_OPERATOR_T1(_x_)                                         \
+    inline __var__ operator _x_(__var__ val) const {                 \
+        if (IsInteger(*this)) {                                      \
+            return Obj(::Integer(Integer(*this) _x_ ToInteger(val)));\
+        }                                                            \
+        if (IsFloat(*this)) {                                        \
+            return Obj(::Float(Float(*this) _x_ ToFloat(val)));      \
+        }                                                            \
+        throw std::logic_error(__func__);                            \
     }
     VAR_OPERATOR_T1(-);
     VAR_OPERATOR_T1(*);
     VAR_OPERATOR_T1(/);
-#define VAR_OPERATOR_T2(_x_)                                        \
-    inline __var__ operator _x_(__var__ val) const {                \
-        if (IsInteger(*this)) {                                     \
-            return Obj::Integer(Integer(*this) _x_ ToInteger(val)); \
-        }                                                           \
-        throw std::logic_error(__func__);                           \
+#define VAR_OPERATOR_T2(_x_)                                         \
+    inline __var__ operator _x_(__var__ val) const {                 \
+        if (IsInteger(*this)) {                                      \
+            return Obj(::Integer(Integer(*this) _x_ ToInteger(val)));\
+        }                                                            \
+        throw std::logic_error(__func__);                            \
     }
     VAR_OPERATOR_T2(^);
     VAR_OPERATOR_T2(&);
@@ -620,41 +555,38 @@ public:
     explicit inline operator double() const { return ToFloat(*this);   }
     explicit inline operator const char*() const { return ToString(*this).data(); }
     /**
-     * throw instance
+     * Type identifier
      */
-    static inline void Throw(__var__ v) {
-        if(v.get()) v.get()->__throw(); throw nullptr;
+    static inline auto Type(__var__ v) {
+        return v.get() ? v.get()->__type() : Obj::NONE; 
     }
     /**
-     *  Empty
+     * Empty
      */
-    static inline __boolean__ IsEmpty(__var__ v) {
-        try {
-            Throw(v);
-        } 
-        catch(const __map__    &m) { return m.empty();      } 
-        catch(const __list__   &l) { return l.empty();      }
-        catch(const __string__ &s) { return s.empty();      }
-        catch(const __buffer__ &b) { return b.empty();      }
-        catch(...)                 { return IsUndefined(v); }
+    static inline bool IsEmpty(__var__ v) {
+        switch(Type(v)) {
+            case Obj::STRING : return String(v).empty(); 
+            case Obj::BUFFER : return Buffer(v).empty(); 
+            case Obj::LIST   : return List(v).empty(); 
+            case Obj::MAP    : return Map(v).empty(); 
+        }
+        return IsUndefined(v); 
     }
     /**
-     *  Size
+     * Size
      */
-    static inline __integer__ Size(__var__ v) {
-        try {
-            Throw(v);
-        } 
-        catch(const __map__    &m) { return m.size(); } 
-        catch(const __list__   &l) { return l.size(); }
-        catch(const __string__ &s) { return s.size(); }
-        catch(const __buffer__ &b) { return b.size(); }
-        catch(...)                 { return 0;        }
+    static inline auto Size(__var__ v) {
+        switch(Type(v)) {
+            case Obj::STRING : return String(v).size(); 
+            case Obj::BUFFER : return Buffer(v).size(); 
+            case Obj::LIST   : return List(v).size(); 
+            case Obj::MAP    : return Map(v).size(); 
+        }
+        return size_t(0); 
     }
     /**
      * Test - Null
      */
-    static inline __boolean__ IsNull     (__var__ v) { return v.get() == nullptr; }
     static inline __boolean__ IsUndefined(__var__ v) { return v.get() == nullptr; }
     static inline __boolean__ IsDefined  (__var__ v) { return v.get() != nullptr; }
     /**

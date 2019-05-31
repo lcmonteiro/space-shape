@@ -121,7 +121,7 @@ void __ToJson(std::ostream& os, Var v) {
         os << Var::Float(v);
     } else if (Var::IsInteger(v)) {
         os << Var::Integer(v);
-    } else if (Var::IsNull(v)) {
+    } else if (Var::IsUndefined(v)) {
         os << __NULL__S__;
     } else if (Var::IsLink(v)) {
         __ToJson(os, Var::Link(v));
@@ -218,7 +218,7 @@ std::ostream& __ToPrettyJson(std::ostream& os, Var v, Integer deep) {
         os << Var::Float(v);
     } else if (Var::IsInteger(v)) {
         os << Var::Integer(v);
-    } else if (Var::IsNull(v)) {
+    } else if (Var::IsUndefined(v)) {
         os << __NULL__S__;
     } else if (Var::IsLink(v)) {
         __ToPrettyJson(os, Var::Link(v), deep);
@@ -328,7 +328,7 @@ List& __FromJson(std::istream& is, List&& l) {
                 break;
             }    
             case __NULL__D__: {
-                l.push_back(Obj::Null());
+                l.push_back(Obj(nullptr));
                 break;
             }
             case __LIST_RD__: {
@@ -369,7 +369,7 @@ Map& __FromJson(std::istream& is, Map&& m) {
             }
             case __NULL__D__: {
                 if (!key.empty()) {
-                    m[std::move(key)] = Obj::Null();
+                    m[std::move(key)] = Obj(nullptr);
                 }
                 break;
             }
@@ -437,7 +437,7 @@ Var Convert::FromJson(std::istream& is) {
             data = Obj(__FromJson(is, Float()));
             break;
         case __NULL__D__:
-            data = Obj::Null();
+            data = Obj(nullptr);
             break;
         default:;
     }

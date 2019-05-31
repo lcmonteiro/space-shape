@@ -107,7 +107,7 @@ namespace Utils {
      * --------------------------------------------------------------------------------------------
      */
     inline Var ToList(Var data) {
-        return Var::IsList(data) ? data : Obj::List({data});
+        return Var::IsList(data) ? data : Obj{data};
     }
     inline List& Rotate(List& data) {
         std::rotate(data.begin(), data.begin() + 1, data.end());

@@ -311,7 +311,7 @@ static void __Find(Link& var, const Link& on) {
         }
     } catch (...) {}
     // not found
-    var = Obj::Null();
+    var = Obj(nullptr);
 }
 Var Edit::Find(Var var, const Var on) {
     if(Var::IsDefined(var)) {
@@ -364,11 +364,11 @@ List& Edit::Remove(const List& var, List& on) {
 static void __Remove(const Link& var, Link& on) {
     try {
         if (var == on) {
-            on = Obj::Null();
+            on = Obj(nullptr);
             return;
         } 
         if (Var::IsUndefined(var)) {
-            on = Obj::Null();
+            on = Obj(nullptr);
             return;
         }
         if (Var::IsMap(var) && Var::IsMap(on)) {
@@ -380,7 +380,7 @@ static void __Remove(const Link& var, Link& on) {
             return;
         }
         if (__MatchContent(var, on)) {
-            on = Obj::Null();
+            on = Obj(nullptr);
             return;
         }
     } catch (...) {}
@@ -446,11 +446,11 @@ List& Edit::Delete(const List& var, List& on) {
 static inline void __Delete(const Link& var, Link& on) {
     try {
         if (var == on) {
-            on = Obj::Null();
+            on = Obj(nullptr);
             return;
         }
         if (Var::IsUndefined(var)) {
-            on = Obj::Null();
+            on = Obj(nullptr);
             return;
         }
         if (Var::IsMap(var) && Var::IsMap(on)) {    
@@ -462,7 +462,7 @@ static inline void __Delete(const Link& var, Link& on) {
             return;
         }
         if (__MatchContent(var, on)) {
-            on = Obj::Null();
+            on = Obj(nullptr);
             return;
         }
     } catch (...) {}
@@ -547,15 +547,15 @@ Var Edit::Insert(Key path, Var var, Var on) {
     /**
      * check variable
      */
-    if (Var::IsNull(on)) {
-        on = Obj::Map();
+    if (Var::IsUndefined(on)) {
+        on = Obj(Map());
     }
     auto c = on;
     auto k = String(it->str());
     for (++it; it != end; ++it) {
         auto n = c[k];
-        if (Var::IsNull(n)) {
-            n = Obj::Map();
+        if (Var::IsUndefined(n)) {
+            n = Obj(Map());
             __Insert(k, n, c);
         }
         c = n;
@@ -677,7 +677,7 @@ Var Edit::Remove(Key path, Var on) {
                     m.erase(find);
                     return tmp;
                 }
-                return Obj::Null();
+                return Obj(nullptr);
             }
             if (Var::IsList(o)) {
                 auto& l   = Var::List(o);
@@ -687,7 +687,7 @@ Var Edit::Remove(Key path, Var on) {
                     l.erase(find);
                     return tmp;
                 }
-                return Obj::Null();
+                return Obj(nullptr);
             }
         }
         o = o[key];

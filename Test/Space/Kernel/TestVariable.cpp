@@ -38,14 +38,7 @@ TEST(SVariable, Throw)
     
     // test 2 -----------------------------------------------------------------
     EXPECT_EQ(Var::IsEmpty(var),      false);
-    EXPECT_EQ(Var::IsEmpty(var["b"]), false);
-    
-    // test 3 -----------------------------------------------------------------
-    try {
-        Var::Throw(var);
-    } catch(const Map& m) {
-        EXPECT_TRUE(Edit::Match(Obj(m), var));
-    }
+    EXPECT_EQ(Var::IsEmpty(var["b"]), false);    
 }
 /**
  * ------------------------------------------------------------------------------------------------

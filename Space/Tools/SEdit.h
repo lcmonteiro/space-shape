@@ -259,7 +259,7 @@ namespace Edit {
      * Move
      * ------------------------------------------------------------------------
      */
-    inline Var Move(Var from, KeyMap& map, Var to = Obj::Map()) {
+    inline Var Move(Var from, KeyMap& map, Var to = Obj(Map())) {
         for (auto& v : map) 
             to = Insert(v.second, Remove(v.first, from), to);
         return to;        
@@ -267,10 +267,10 @@ namespace Edit {
     /**
      * derived
      */
-    inline Var Move(Var from, KeyMap&& map, Var to = Obj::Map()) {
+    inline Var Move(Var from, KeyMap&& map, Var to = Obj(Map())) {
         return Move(from, map, to);
     }
-    inline Var Move(Var from, Var map, Var to = Obj::Map()) {
+    inline Var Move(Var from, Var map, Var to = Obj(Map())) {
         return Move(from, ToKeyMap(map), to);
     }
     /**
@@ -278,7 +278,7 @@ namespace Edit {
      * Link
      * ------------------------------------------------------------------------
      */
-    inline Var Link(Var from, KeyMap& map, Var to = Obj::Map()){
+    inline Var Link(Var from, KeyMap& map, Var to = Obj(Map())){
         for (auto& v : map) 
             to = Insert(v.second, Find(v.first, from), to);
         return to;
@@ -286,10 +286,10 @@ namespace Edit {
     /**
      * derived
      */
-    inline Var Link(Var from, KeyMap&& map, Var to = Obj::Map()) {
+    inline Var Link(Var from, KeyMap&& map, Var to = Obj(Map())) {
         return Link(from, map, to);
     }
-    inline Var Link(Var from, Var map, Var to = Obj::Map()) {
+    inline Var Link(Var from, Var map, Var to = Obj(Map())) {
         return Link(from, ToKeyMap(map), to);
     }
     /**

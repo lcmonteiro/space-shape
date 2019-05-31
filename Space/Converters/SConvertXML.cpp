@@ -162,7 +162,7 @@ Var __UnLoadNode(pugi::xml_node& node) {
                     /**
                      * update with list
                      */
-                    nodes[child.name()] = Obj::List({it->second, __UnLoadNode(child)});
+                    nodes[child.name()] = Obj{it->second, __UnLoadNode(child)};
                 }
                 break;
             }
@@ -185,7 +185,7 @@ Var __UnLoadNode(pugi::xml_node& node) {
         /**
          * insert attributes
          */
-        nodes.emplace(__ATTR_KEY__, Obj::Map(attr));
+        nodes.emplace(__ATTR_KEY__, Obj(std::move(attr)));
         /**
          * insert text
          */
@@ -193,23 +193,23 @@ Var __UnLoadNode(pugi::xml_node& node) {
             /**
              * insert text 
              */
-            nodes.emplace(__TEXT_KEY__, Obj::String(text));
+            nodes.emplace(__TEXT_KEY__, Obj(std::move(text)));
         }
-        return Obj::Map(nodes);
+        return Obj(std::move(nodes));
     }
     if (!nodes.empty()) {
         if (!text.empty()) {
             /**
              * insert text 
              */
-            nodes.emplace(__TEXT_KEY__, Obj::String(text));
+            nodes.emplace(__TEXT_KEY__, Obj(std::move(text)));
         }
-        return Obj::Map(nodes);
+        return Obj(std::move(nodes));
     }
     if (!text.empty()) {
-        return Obj::String(text);
+        return Obj(std::move(text));
     }
-    return Obj::Null();
+    return Obj(nullptr);
 }
 Map __UnLoadAttr(pugi::xml_node& node) {
     /**
