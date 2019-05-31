@@ -39,8 +39,10 @@ Var Command::Explorer(const String& path, String pattern) {
      * filter empty folders
      */ 
     var = Logic::ForEach(var, [](auto, auto var) {
-        return Obj(3);
-        //return (Var::ToInteger(var) == FileSystem::DIR)? Obj(nullptr) : var;  
+        if(Var::IsInteger(var)) {
+            return (Var::Integer(var) == FileSystem::DIR)? Obj(nullptr) : var;  
+        }
+        return var;
     });
     /**
      * return 

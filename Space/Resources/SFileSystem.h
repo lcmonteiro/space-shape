@@ -31,7 +31,7 @@ namespace FileSystem {
      * @return 
      * ------------------------------------------------------------------------
      */
-    Boolean Insert(String path, Var tree = Obj::Null());
+    Boolean Insert(String path, Var tree = Obj(nullptr));
     /**
      * ------------------------------------------------------------------------
      * Delete file tree
@@ -40,7 +40,7 @@ namespace FileSystem {
      * @return 
      * ------------------------------------------------------------------------
      */
-    Boolean Delete(String path, Var tree = Obj::Null());
+    Boolean Delete(String path, Var tree = Obj(nullptr));
     /**
      * ------------------------------------------------------------------------
      * Find file tree
@@ -59,7 +59,7 @@ namespace FileSystem {
      * @return
      * ------------------------------------------------------------------------ 
      */
-    Boolean Copy(String from, String to, Var tree = Obj::Null());
+    Boolean Copy(String from, String to, Var tree = Obj(nullptr));
     /**
      * ------------------------------------------------------------------------
      * Move Files 
@@ -68,7 +68,7 @@ namespace FileSystem {
      * @param tree
      * ------------------------------------------------------------------------
      */
-    Boolean Move(String from, String to, Var tree = Obj::Null());
+    Boolean Move(String from, String to, Var tree = Obj(nullptr));
     /**
      * ------------------------------------------------------------------------
      * Get path from full path
