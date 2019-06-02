@@ -106,15 +106,15 @@ public:
 class __interface__ {
     friend class __var__;
     friend class __obj__;
-    virtual Link operator[](String ) { throw std::logic_error(__func__); }
-    virtual Link operator[](Integer) { throw std::logic_error(__func__); }
-    virtual Integer __to_integer()   { throw std::logic_error(__func__); }
-    virtual Float   __to_float  ()   { throw std::logic_error(__func__); }
-    virtual String  __to_string ()   { throw std::logic_error(__func__); }
-    virtual Buffer  __to_buffer ()   { throw std::logic_error(__func__); }
-    virtual List    __to_list   ()   { throw std::logic_error(__func__); }
-    virtual Map    __to_map     ()   { throw std::logic_error(__func__); }
-    virtual int    __type       ()   { throw std::logic_error(__func__); }
+    virtual __link__ operator[](__string__ ) { throw std::logic_error(__func__); }
+    virtual __link__ operator[](__integer__) { throw std::logic_error(__func__); }
+    virtual __integer__ __to_integer()   { throw std::logic_error(__func__); }
+    virtual __float__   __to_float  ()   { throw std::logic_error(__func__); }
+    virtual __string__  __to_string ()   { throw std::logic_error(__func__); }
+    virtual __buffer__  __to_buffer ()   { throw std::logic_error(__func__); }
+    virtual __list__    __to_list   ()   { throw std::logic_error(__func__); }
+    virtual __map__     __to_map    ()   { throw std::logic_error(__func__); }
+    virtual int         __type      ()   { throw std::logic_error(__func__); }
 };
 /**
  * ------------------------------------------------------------------------------------------------

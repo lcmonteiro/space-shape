@@ -76,6 +76,7 @@
     },
     "C_Cpp.intelliSenseEngineFallback": "Enabled",
     "cSpell.words": [
+        "SCONVERT",
         "SEDIT",
         "SFILESTREAM",
         "SFILESYSTEM",
