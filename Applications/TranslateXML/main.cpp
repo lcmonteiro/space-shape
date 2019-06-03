@@ -14,7 +14,9 @@
  * space
  */
 #include "SLog.h"
-#include "SEdit.h"
+#include "SUtils.h"
+#include "SLogic.h"
+#include "SConvert.h"
 #include "SConvertXML.h"
 #include "SConvertARG.h"
 #include "SFileSystem.h"
@@ -32,13 +34,13 @@ List Find(String path, String pattern);
  * Export text to translate
  * --------------------------------------------------------
  */
-void Export(List paths, String out);
+int Export(List paths, String out);
 /**
  * --------------------------------------------------------
  * Import translated text
  * --------------------------------------------------------
  */
-void Import(List paths, String in);
+int Import(List paths, String in);
 /**
  * ------------------------------------------------------------------------------------------------
  * Main
@@ -60,15 +62,15 @@ int main(int argc, char** argv) {
     /**
      * Process
      */
-    std::map<String, std::function<void()>> funcs{
+    std::map<String, std::function<int()>> funcs{
         {"export", [&](){
-            Export(Find(args["i"], args["p"]), args['o']);
+            return Export(Find(args["i"], args["p"]), args['o']);
         }},
         {"import", [&](){
-            Import(Find(args["o"], args["p"]), args['i']);
+            return Import(Find(args["o"], args["p"]), args['i']);
         }}
     };
-    return 0;   
+    return funcs[args["m"]]();   
 }
 /**
  * ------------------------------------------------------------------------------------------------
@@ -78,24 +80,48 @@ int main(int argc, char** argv) {
  * ----------------------------------------------------------------------------
  */
 List Find(String path, String pattern) {
-    
-    return {};
+    /**
+     * read from file system
+     */
+    Var aux = FileSystem::Find(path, [&pattern](auto path, auto type) {
+        return (FileSystem::DIR == type) 
+            || std::regex_match(path.back(), std::regex(pattern));
+    });
+    /**
+     * filter empty folders
+     */ 
+    aux = Var::Trim(Logic::ForEach(aux, [](auto, auto var) {
+        if(Var::IsInteger(var)) {
+            return (Var::Integer(var) == FileSystem::DIR)? Obj(nullptr) : var;  
+        }
+        return var;
+    }));
+    /**
+     * return a list of path files
+     */
+    return Logic::ForEach(
+        Utils::GetKeys(Convert::ToSimpleMap(aux, "/")), [&path](auto, auto var){
+            return Obj(String::Build(path, "/", Var::String(var)));
+        }
+    );
 }
 /**
  * ----------------------------------------------------------------------------
  * Export text to translate
  * ----------------------------------------------------------------------------
  */
-void Export(List paths, String out) {
+int Export(List paths, String out) {
 
+    return 0;
 }
 /**
  * ----------------------------------------------------------------------------
  * Import translated text
  * ----------------------------------------------------------------------------
  */
-void Import(List paths, String in) {
+int Import(List paths, String in) {
 
+    return 0;
 }
 /**
  * ------------------------------------------------------------------------------------------------

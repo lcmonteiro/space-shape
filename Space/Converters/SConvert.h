@@ -160,7 +160,7 @@ namespace Convert {
             }
         }
     }
-    static Map ToMap(Var var, String delim) {
+    static inline Map ToMap(Var var, String delim) {
         Map base;
         if (Var::IsMap(var)) {
             __ToMap("", base, delim, Var::Map(var));
