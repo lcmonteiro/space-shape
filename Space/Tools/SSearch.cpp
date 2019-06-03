@@ -219,7 +219,7 @@ Var Search::Update(Key expr, Var var, Var on) {
     /**
      * execute
      */
-    return Execute(expr, [&](Key path, Var v){ return var; }, on);
+    return Execute(expr, [&var](Key, Var){ return var; }, on);
 }
 /**
  * ----------------------------------------------------------------------------

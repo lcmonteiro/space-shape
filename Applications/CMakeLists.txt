@@ -4,6 +4,7 @@ cmake_minimum_required (VERSION 3.8)
 # ---------------------------------------------------------
 # merge xml
 add_subdirectory(MergeXML)
+add_subdirectory(TranslateXML)
 # ---------------------------------------------------------
 # End
 # ---------------------------------------------------------
