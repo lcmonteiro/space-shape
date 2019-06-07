@@ -314,10 +314,10 @@ public:
     template<typename... Ts>
     static __string__ Build(Ts... args){
         std::ostringstream result;
-        char steps[] = { 
-            (result << args, 'y')... 
+        int steps[] = { 
+            (result << args, 1)... 
         };
-        return result.str();
+        return sizeof(steps) ? result.str() : __string__{};
     }
     /**
      * utilities
