@@ -19,7 +19,20 @@
  */
 Var GetProfile(String key) {
     static Var PROFILE = Obj{
-        {Key("canoe"), {}}
+        /**
+         * ------------------------------------------------
+         * CANOE - Profile
+         * ------------------------------------------------
+         */
+        {Key("canoe"), Obj{
+            {Key("file"), Obj(".*xvp$")},
+            {Key("select"), Obj(".*Property$")},
+            {Key("match"), Obj{
+                {Key("#"), Obj{
+                    {Key("Name"), Obj("Text")}
+                }}
+            }}
+        }}
     };
     return PROFILE[key];
 }

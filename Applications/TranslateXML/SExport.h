@@ -11,9 +11,16 @@
 /**
  * space
  */
-#include "SConvertCSV.h"
+#include "SConvertJson.h"
+#include "SConvertXml.h"
+#include "SConvert.h"
 #include "SVariable.h"
+#include "SSearch.h"
 #include "SFind.h"
+/**
+ * namespace
+ */
+using namespace Keys;
 /**
  * ----------------------------------------------------------------------------
  * Export text to translate
@@ -24,8 +31,13 @@ static inline int Export(String in, Var profile, String out) {
     /**
      * export each file
      */
-    for(auto file : Find(in, profile["p"])) {
-
+    for(Var file : Find(in, profile["pattern"])) {
+        Logic::ForEach(Convert::FromXML(File::Reader(file)), [&](const List& p, Var v) {
+            if(Search::Match(Obj{{$regex, profile["select"]}}, Obj(Convert::ToPath(p)))){
+                DEBUG("v", v);
+            }
+            return v;
+        });
     }
     /**
      * write to file
