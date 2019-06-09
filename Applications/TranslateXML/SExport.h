@@ -15,12 +15,7 @@
 #include "SConvertXml.h"
 #include "SConvert.h"
 #include "SVariable.h"
-#include "SSearch.h"
 #include "SFind.h"
-/**
- * namespace
- */
-using namespace Keys;
 /**
  * ----------------------------------------------------------------------------
  * Export text to translate
@@ -31,10 +26,24 @@ static inline int Export(String in, Var profile, String out) {
     /**
      * export each file
      */
-    for(Var file : Find(in, profile["pattern"])) {
+    for(Var file : Find(in, profile["file"])) {
         Logic::ForEach(Convert::FromXML(File::Reader(file)), [&](const List& p, Var v) {
-            if(Search::Match(Obj{{$regex, profile["select"]}}, Obj(Convert::ToPath(p)))){
-                DEBUG("v", v);
+            /**
+             * select document
+             */
+            if(std::regex_match(
+                Convert::ToPath(p), std::regex(String(profile["select"])))) { 
+                /**
+                 * match document
+                 */
+                if(Edit::Match(
+                    profile["match"], 
+                    Edit::Find(Var::Strip<true>(profile["match"]), v))) {
+                    /**
+                     * save target
+                     */
+                    container.emplace_back(Edit::Find(Key(profile["target"]), v));
+                }
             }
             return v;
         });

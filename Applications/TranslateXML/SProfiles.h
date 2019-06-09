@@ -26,12 +26,13 @@ Var GetProfile(String key) {
          */
         {Key("canoe"), Obj{
             {Key("file"), Obj(".*xvp$")},
-            {Key("select"), Obj(".*Property$")},
+            {Key("select"), Obj(".+Property/[0-9]+$")},
             {Key("match"), Obj{
                 {Key("#"), Obj{
                     {Key("Name"), Obj("Text")}
                 }}
-            }}
+            }},
+            {Key("target"), Obj("'")}
         }}
     };
     return PROFILE[key];
