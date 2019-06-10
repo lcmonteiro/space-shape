@@ -56,8 +56,8 @@ int main(int argc, char** argv) {
     };
     try {
         return funcs[args["m"]]();
-    } catch(...) {
-        ERROR("Invalid Arguments", args);
+    } catch(std::exception& e) {
+        ERROR(e.what(), args);
         return -1;
     }
 }

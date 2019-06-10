@@ -82,6 +82,7 @@
         "SFILESYSTEM",
         "SKEYS",
         "SNULLSTREAM",
-        "SRESOURCE"
+        "SRESOURCE",
+        "nargs"
     ]
 }

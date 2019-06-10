@@ -27,6 +27,10 @@ static inline int Export(String in, Var profile, String out) {
      * export each file
      */
     for(Var file : Find(in, profile["file"])) {
+        INFO("Export", "file= " << String(file));
+        /**
+         * parse file
+         */
         Logic::ForEach(Convert::FromXML(File::Reader(file)), [&](const List& p, Var v) {
             /**
              * select document
@@ -40,9 +44,20 @@ static inline int Export(String in, Var profile, String out) {
                     profile["match"], 
                     Edit::Find(Var::Strip<true>(profile["match"]), v))) {
                     /**
-                     * save target
+                     * verify target
                      */
-                    container.emplace_back(Edit::Find(Key(profile["target"]), v));
+                    auto target = Edit::Find(Key(profile["target"]), v);
+                    if(Var::IsString(target)) {
+                        auto& s = Var::String(target);
+                        /**
+                         * replaces
+                         */
+                        std::replace(s.begin(), s.end(), '"', '\'');
+                        /**
+                         * save target
+                         */
+                        container.emplace_back(target);
+                    }
                 }
             }
             return v;
@@ -51,7 +66,7 @@ static inline int Export(String in, Var profile, String out) {
     /**
      * write to file
      */
-    Convert::ToJson(File::Writer(out), Obj(std::move(container)));
+    Convert::ToPrettyJson(File::Writer(out), Obj(std::move(container)));
     return 0;
 }
 /**
