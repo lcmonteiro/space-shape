@@ -53,10 +53,10 @@ static inline int Import(String in, Var profile, String out) {
                      * check target
                      */
                     auto target = Edit::Find(Key(profile["target"]), v);
-                    if(Var::IsDefined(target)) {
+                    if(Var::IsString(target)) {
                         /**
                          * update target
-                         */
+                         */ 
                         if(it == end) {
                             throw std::runtime_error(String::Build(
                                 "mismatch between input(", in, ") and output (", out, ")"));
