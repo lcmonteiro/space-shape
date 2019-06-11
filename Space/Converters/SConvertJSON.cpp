@@ -382,12 +382,12 @@ Map& __FromJson(std::istream& is, Map&& m) {
     return m;
 }
 String& __FromJson(std::istream& is, String&& s) {
-    if (is.peek() == __STR___D__) {
-        is.get();
-        return s;
-    }
     String tmp;
     while (is.good()) {
+        if (is.peek() == __STR___D__) {
+            is.get();
+            return s;
+        }
         is >> tmp;
         switch (__Get(is)) {
             case __KEY___D__: {
