@@ -31,13 +31,19 @@ static inline int Learn(String in, String filter, String out) {
         /**
          * parse file
          */
-        Logic::ForEach(Convert::FromXML(File::Reader(file)), [&](const List& p, Var v) {
+        Logic::ForEach(Convert::FromXML(File::Reader(file)), [&](const List& p, Var v) -> Var {
             /**
-             * select document
+             * find lists
              */
+            if(Var::IsList(v)) {
+                profile[Var::ToString(p.back())] = v;
+                //DEBUG(Convert::ToPath(p), v);
+                return Obj(nullptr);
+            }
             return v;
         });
     }
+    DEBUG("keys", Utils::GetKeys(profile));
     /**
      * write to file
      */
