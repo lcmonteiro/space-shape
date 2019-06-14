@@ -67,6 +67,10 @@ static inline int Import(String in, Var profile, String out) {
             }
             return v;
         });
+        if(it != end) {
+            throw std::runtime_error(String::Build(
+                "mismatch between input(", in, ") and output (", out, ")"));
+        }
         /**
          * write data
          */
