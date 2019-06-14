@@ -22,7 +22,7 @@
  * ----------------------------------------------------------------------------
  */
 static inline int Learn(String in, String filter, String out) {
-    auto profile = Map();
+    Var profile = Obj(Map());
     /**
      * learn each file
      */
@@ -36,18 +36,29 @@ static inline int Learn(String in, String filter, String out) {
              * find lists
              */
             if(Var::IsList(v)) {
-                profile[Var::ToString(p.back())] = v;
-                //DEBUG(Convert::ToPath(p), v);
+                auto path = Var::ToString(p.back());
+                /**
+                 * process document
+                 */
+                for(Var d : Var::List(v)) {
+                    Edit::Insert(path, 
+                        Var::Trim(
+                            Edit::Remove(Var::Strip(Edit::Find(path, profile)), d)
+                        ),
+                        profile
+                    );
+                }
                 return Obj(nullptr);
             }
             return v;
         });
     }
-    DEBUG("keys", Utils::GetKeys(profile));
+    //DEBUG("keys", Utils::GetKeys(Var::Map(profile)));
+    DEBUG("profile", profile);
     /**
      * write to file
      */
-    Convert::ToPrettyJson(File::Writer(out), Obj(std::move(profile)));
+    Convert::ToPrettyJson(File::Writer(out), profile);
     return 0;
 }
 /**
