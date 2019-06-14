@@ -1,11 +1,11 @@
 
 /**
- * --------------------------------------------------------------------------------------------------------------------
+ * ------------------------------------------------------------------------------------------------
  * File:   Search.cc
  * Author: Luis Monteiro
  *
  * Created on Apr 10, 2019, 12:11 PM
- * --------------------------------------------------------------------------------------------------------------------
+ * ------------------------------------------------------------------------------------------------
  */
 #include <iostream>
 /**
@@ -19,61 +19,72 @@
  */
 using namespace std;
 /**
- * ---------------------------------------------------------------------------------------------------------------------
- * Helpers
- * ---------------------------------------------------------------------------------------------------------------------
- * Match
  * ------------------------------------------------------------------------------------------------
+ * Helpers
+ * ------------------------------------------------------------------------------------------------
+ * Match
+ * ----------------------------------------------------------------------------
  */
 static inline Boolean __Match(Var val, Var on);
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Match Select
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
 static inline Boolean __MatchSelect(List& expr, Var on);
 static inline Boolean __MatchSelect(Map&  expr, Var on);
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Match Policy
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
 static inline Boolean __MatchPolicy(List& expr, Var on);
 static inline Boolean __MatchPolicy(Map&  expr, Var on);
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Match Compare
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
 static inline Boolean __MatchCompare(List val, const String& op, Var on);
 static inline Boolean __MatchCompare(Var  val, const String& op, Var on);
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * operators
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
 static inline Boolean __MatchGreatThan( Var val, Var on);
 static inline Boolean __MatchLessThan ( Var val, Var on);
 static inline Boolean __MatchEqual    ( Var val, Var on);
 static inline Boolean __MatchRegex    ( Var val, Var on);
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Find path filter
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
-static inline Var __FindFilter(sregex_iterator it, sregex_iterator& end, Var on); 
+static inline Var __FindFilter(
+    sregex_iterator it, sregex_iterator& end, Var on); 
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Delete path filter
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
-static inline Boolean __DeleteFilter(sregex_iterator it, sregex_iterator& end, Var on); 
+static inline Boolean __DeleteFilter(
+    sregex_iterator it, sregex_iterator& end, Var on); 
 /**
- * ---------------------------------------------------------------------------------------------------------------------
- * Search - Implementation
- * ---------------------------------------------------------------------------------------------------------------------
- * Find
+ * ----------------------------------------------------------------------------
+ * Execute path filter
+ * ----------------------------------------------------------------------------
+ */
+static inline Var __ExecuteFilter(
+    sregex_iterator  it, 
+    sregex_iterator& end, 
+    function<Var(const Key&, Var)> func, Key path, Var on);
+/**
  * ------------------------------------------------------------------------------------------------
+ * Search - Implementation
+ * ------------------------------------------------------------------------------------------------
+ * Find
+ * ----------------------------------------------------------------------------
  */
 List Search::Find(Var expr, const List& on) {
     List out;
@@ -93,7 +104,7 @@ Map Search::Find(Var expr, const Map& on) {
     }
     return out;
 }
-Var Search::Find(Var expr, Var& on) {
+Var Search::Find(Var expr, Var on) {
     if (Var::IsMap(on)) {
         return Obj(Find(expr, Var::Map(on)));
     }
@@ -106,35 +117,35 @@ Var Search::Find(Var expr, Var& on) {
     return Obj(nullptr);
 }
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Remove
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
 List Search::Remove(Var expr, List& on){
-    ::List r;
-    for (List::iterator it = on.begin(); it != on.end();) {
+    auto r = List();
+    for (auto it = on.begin(); it != on.end();) {
         if (__Match(expr, *it)) {    
             r.push_back(*it);
             it = on.erase(it);
-            continue;
+        } else {
+            ++it;
         }
-        ++it;
     }
     return r;
 }
 Map Search::Remove(Var expr, Map& on) {
-    ::Map r;
-    for (Map::iterator it = on.begin(); it != on.end();) {
+    auto r = Map();
+    for (auto it = on.begin(); it != on.end();) {
         if (__Match(expr, it->second)) {            
             r.insert(*it);
             it = on.erase(it);
-            continue;
+        } else {
+            ++it;
         }
-        ++it;
     }
     return r;
 }
-Var Search::Remove(Var expr, Var& on) {
+Var Search::Remove(Var expr, Var on) {
     if (Var::IsMap(on)) {
         return Obj(Remove(expr, Var::Map(on)));
     } 
@@ -147,30 +158,37 @@ Var Search::Remove(Var expr, Var& on) {
     return Obj(nullptr);
 }
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Delete
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
+List& Search::Delete(Var expr, List& on){
+    for (auto it = on.begin(); it != on.end();) {
+        if (__Match(expr, *it)) {    
+            it = on.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    return on;
+}
+Map& Search::Delete(Var expr, Map& on) {
+    for (auto it = on.begin(); it != on.end();) {
+        if (__Match(expr, it->second)) {            
+            it = on.erase(it);
+        } else {
+            ++it;
+        } 
+    }
+    return on;
+}
 Var Search::Delete(Var expr, Var on) {
     if (Var::IsMap(on)) {
-        ::Map& m = Var::Map(on);
-        for (Map::iterator it = m.begin(); it != m.end();) {
-            if (__Match(expr, it->second)) {            
-                it = m.erase(it);
-                continue;
-            }
-            ++it;
-        }
+        Delete(expr, Var::Map(on));
         return on;
-    } else if (Var::IsList(on)) {
-        ::List& l = Var::List(on);
-        for (List::iterator it = l.begin(); it != l.end();) {
-            if (__Match(expr, *it)) {    
-                it = l.erase(it);
-                continue;
-            }
-            ++it;
-        }
+    }
+    if (Var::IsList(on)) {
+        Delete(expr, Var::List(on));
         return on;
     }
     if (__Match(expr, on)) {    
@@ -179,9 +197,9 @@ Var Search::Delete(Var expr, Var on) {
     return Obj(nullptr);
 }
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Match
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
 Boolean Search::Match(Var expr, const List& on) {
     for (auto it = on.begin(); it != on.end(); ++it) {
@@ -199,7 +217,7 @@ Boolean Search::Match(Var expr, const Map& on) {
     }
     return false;
 }
-Boolean Search::Match(Var expr, Var& on) {
+Boolean Search::Match(Var expr, Var on) {
     if (Var::IsList(on)) {
         return Match(expr, Var::List(on));
     }
@@ -212,14 +230,32 @@ Boolean Search::Match(Var expr, Var& on) {
  * ------------------------------------------------------------------------------------------------
  * Match Tree
  * ------------------------------------------------------------------------------------------------
- * Update
+ * Execute
  * ----------------------------------------------------------------------------
  **/
+Var Search::Execute(Key expr, function<Var(const Key&, Var)> func, Var on) {
+    const std::regex e("([^/]+)");
+    /**
+     * iterators
+     */
+    auto it   = std::sregex_iterator(expr.begin(), expr.end(), e);
+    auto end  = std::sregex_iterator();
+    auto path = Key("/");
+    /**
+     * execute
+     */
+    return __ExecuteFilter(it, end, func, path, on);
+}
+/**
+ * ----------------------------------------------------------------------------
+ * Update
+ * ----------------------------------------------------------------------------
+ */
 Var Search::Update(Key expr, Var var, Var on) {
     /**
      * execute
      */
-    return Execute(expr, [&](Key path, Var v){ return var; }, on);
+    return Execute(expr, [&var](Key, Var){ return var; }, on);
 }
 /**
  * ----------------------------------------------------------------------------
@@ -228,12 +264,14 @@ Var Search::Update(Key expr, Var var, Var on) {
  */
 Var Search::Find(Key expr, Var on) {
     static const regex e("([^/]+)");
-    
-    // iterator ---------------------------------------
+    /**
+     * iterators
+     */
     sregex_iterator it(expr.begin(), expr.end(), e);
     sregex_iterator end;
-    
-    // execute ----------------------------------------
+    /**
+     * execute
+     */
     return __FindFilter(it, end, on);
 }
 /**
@@ -243,22 +281,23 @@ Var Search::Find(Key expr, Var on) {
  */
 Var Search::Delete(Key expr, Var on) {
     static const regex e("([^/]+)");
-
-    // iterator ---------------------------------------
+    /**
+     * iterators
+     */
     sregex_iterator it(expr.begin(), expr.end(), e);
     sregex_iterator end;
-    
-    // execute ----------------------------------------
+    /**
+     * execute
+     */
     __DeleteFilter(it, end, on);
-
     return on;
 }
 /**
- * --------------------------------------------------------------------------------------------------------------------
- * helpers implementation
- * --------------------------------------------------------------------------------------------------------------------
- * Match
  * ------------------------------------------------------------------------------------------------
+ * helpers implementation
+ * ------------------------------------------------------------------------------------------------
+ * Match
+ * ----------------------------------------------------------------------------
  */
 Boolean __Match(Var expr, Var on) {
     try {
@@ -274,9 +313,9 @@ Boolean __Match(Var expr, Var on) {
     }
 }
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Match Select
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
 Boolean __MatchSelect(List& expr, Var on) {
     for (Var e : expr) {
@@ -301,27 +340,33 @@ Boolean __MatchSelect(List& expr, Var on) {
 Boolean __MatchSelect(Map& expr, Var on) {
     for (auto& e : expr) {
         if (Var::IsList(e.second)) {
-            if (!__MatchPolicy(Var::List(e.second), Edit::Find(e.first, on))) {
+            if (!__MatchPolicy(
+                Var::List(e.second), Edit::Find(e.first, on))
+                ) {
                 return false;
             }
             continue;
         }
         if (Var::IsMap(e.second)) {
-            if (!__MatchPolicy(Var::Map(e.second), Edit::Find(e.first, on))) {
+            if (!__MatchPolicy(
+                Var::Map(e.second), Edit::Find(e.first, on))
+                ) {
                 return false;
             }
             continue;
         }
-        if (!__MatchEqual(e.second, Edit::Find(e.first, on))) {
+        if (!__MatchEqual(
+            e.second, Edit::Find(e.first, on))
+            ) {
             return false;
         }
     }
     return true;
 }
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Match Policy
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
 Boolean __MatchPolicy(List& expr, Var on) {
     for (Var e : expr) {
@@ -358,9 +403,9 @@ Boolean __MatchPolicy(Map& expr, Var on) {
     return true;
 }
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Match Compare
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
 Boolean __MatchCompare(List val, const String& op, Var on) {
     if (Keys::$eq == op) {
@@ -424,9 +469,9 @@ Boolean __MatchCompare(Var val, const String& op, Var on) {
     return false;
 }
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * operators
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
 Boolean __MatchGreatThan(Var val, Var on) {
     if (
@@ -456,78 +501,92 @@ Boolean __MatchEqual(Var val, Var on) {
     return (String(on).compare(String(val)) == 0);
 }
 Boolean __MatchRegex(Var val, Var on) {
-    return regex_match(Var::ToString(on), regex(Var::ToString(val)));
+    return regex_match(
+        Var::ToString(on), regex(Var::ToString(val)));
 }
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Find Filter
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  */
 Var __FindFilter(sregex_iterator it, sregex_iterator& end, Var on) {
-    // end condition --------------------------------------
+    /**
+     * end condition
+     */
     if (it == end) {
         return on;
     }
-    // get next key ---------------------------------------
-    Key k = it->str();
-
-    // get next value -------------------------------------
-    Var n = on[k];
-
-    // no regex -------------------------------------------
-    if (Var::IsDefined(n)) {
+    /**
+     * get next key and value
+     */
+    auto key  = it->str();
+    auto next = on[key];
+    /**
+     * ----------------------------------------------------
+     * no regex 
+     * ----------------------------------------------------
+     */ 
+    if (Var::IsDefined(next)) {
         // find next
-        Var f = __FindFilter(++it, end, n);
+        auto found = __FindFilter(++it, end, next);
         // check result
-        if (Var::IsUndefined(f)) {
+        if (Var::IsUndefined(found)) {
             return Obj(nullptr);
         }
         if (Var::IsMap(on)) {
-            return Obj{{k, f}};
+            return Obj{{key, found}};
         }
         if (Var::IsList(on)) {
-            return Obj{f};
+            return Obj{found};
         }
+        return found;
     }
-    // regex - map case -----------------------------------
+    /**
+     * ----------------------------------------------------
+     *  regex - map case
+     * ----------------------------------------------------
+     */
     if (Var::IsMap(on)) {
-        regex expr(k);
         // go to next position
         ++it;
-        // iterate
-        Map m;
+        // foreach map element
+        auto exp = regex(key);
+        auto map = Map();
         for (auto v : Var::Map(on)) {
-            if (regex_match(v.first, expr)) {
+            if (regex_match(v.first, exp)) {
                 // try to find
-                Var f = __FindFilter(it, end, v.second);
+                auto found = __FindFilter(it, end, v.second);
                 // save if found
-                if (Var::IsDefined(f)) {
-                    m[v.first] = f;
+                if (Var::IsDefined(found)) {
+                    map[v.first] = found;
                 }
             }
         }
-        return m.size() ? Obj(m) : Obj(nullptr);
+        return map.size() ? Obj(map) : Obj(nullptr);
     }
-    // regex - list case -----------------------------------
+    /**
+     * ----------------------------------------------------
+     *  regex - list case 
+     * ----------------------------------------------------
+     */
     if (Var::IsList(on)) {
-        // validate regex
-        regex expr(k);
         // go to next position
         ++it;
-        // iterate
-        List    l;
-        Integer i;
+        // foreach list element
+        auto expr = regex(key);
+        auto list = List();
+        auto pos  = Integer();
         for (Var v : Var::List(on)) {
-            if (regex_match(String::ValueOf(i++), expr)) {
+            if (regex_match(String::ValueOf(pos++), expr)) {
                 // try to find
-                Var f = __FindFilter(it, end, v);
+                auto found = __FindFilter(it, end, v);
                 // save if found
-                if (Var::IsDefined(f)) {
-                    l.push_back(f);
+                if (Var::IsDefined(found)) {
+                    list.push_back(found);
                 }
             }
         }
-        return l.size() ? Obj(l) : Obj(nullptr);
+        return list.size() ? Obj(list) : Obj(nullptr);
     }
     return Obj(nullptr);
 }
@@ -537,65 +596,156 @@ Var __FindFilter(sregex_iterator it, sregex_iterator& end, Var on) {
  * ------------------------------------------------------------------------------------------------
  */
 Boolean __DeleteFilter(sregex_iterator it, sregex_iterator& end, Var on) {
-    // end condition --------------------------------------
+    /**
+     * end condition
+     */
     if (it == end) {
         return true;
     }
-
-    // map case -------------------------------------------
+    /**
+     * get key and move to next
+     */
+    auto key = (it++)->str();
+    /**
+     * ----------------------------------------------------
+     * map case
+     * ----------------------------------------------------
+     */
     if (Var::IsMap(on)) {
-        ::Map& m = Var::Map(on);
+        auto& map = Var::Map(on);
         // try to find
-        auto find = m.find(it->str());
-        if (find != m.end()) {
-            if (__DeleteFilter(++it, end, find->second)) {
-                m.erase(find);
+        auto found = map.find(key);
+        if (found != map.end()) {
+            if (__DeleteFilter(++it, end, found->second)) {
+                map.erase(found);
             }
-            return m.empty();
+            return map.empty();
         }
         // validate regex
-        regex expr(it->str());
-        ++it;
-        for (auto mit = m.begin(); mit != m.end();) {
+        auto expr = regex(key);
+        for (auto mit = map.begin(); mit != map.end();) {
             if (regex_match(mit->first, expr)) {
                 if (__DeleteFilter(it, end, mit->second)) {
-                    mit = m.erase(mit);
+                    mit = map.erase(mit);
                     continue;
                 }
             }
             ++mit;
         }
-        return m.empty();
+        return map.empty();
     }
-    // list case ------------------------------------------
+    /**
+     * ----------------------------------------------------
+     *  list case
+     * ----------------------------------------------------
+     */
     if (Var::IsList(on)) {
-        ::List& l = Var::List(on);
+        auto& list = Var::List(on);
         // try to find
-        auto find = l.begin() + Integer::ValueOf(it->str());
-        if (find < l.end()) {
-            if (__DeleteFilter(++it, end, *find)) {
-                l.erase(find);
+        auto found = list.begin() + Integer::ValueOf(key);
+        if (found < list.end()) {
+            if (__DeleteFilter(++it, end, *found)) {
+                list.erase(found);
             }
-            return l.empty();
+            return list.empty();
         }
         // validate regex
-        regex expr(it->str());
-        ++it;
-        for (auto lit = l.begin(); lit != l.end();) {
-            if (regex_match(String::ValueOf(Integer(distance(l.begin(), lit))), expr)) {
+        auto expr = regex(key);
+        for (auto lit = list.begin(); lit != list.end();) {
+            // compute position
+            auto pos = Integer(distance(list.begin(), lit));
+            // try to match
+            if (regex_match(String::ValueOf(pos), expr)) {
                 if (__DeleteFilter(it, end, *lit)) {
-                    lit = l.erase(lit);
+                    lit = list.erase(lit);
                     continue;
                 }
             }
             ++lit;
         }
-        return l.empty();
+        return list.empty();
     }
     return false;
 }
 /**
- * --------------------------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
+ * Execute Filter
+ * ----------------------------------------------------------------------------
+ */
+static inline Var __ExecuteFilter(
+    sregex_iterator  it, 
+    sregex_iterator& end, 
+    function<Var(const Key&, Var)> func, Key path, Var on
+    ) {
+    /**
+     * end condition
+     */
+    if (it == end) {
+        return func(path, on); 
+    }
+    /**
+     * get key and move to next
+     */
+    auto key = (it++)->str();
+    /**
+     * ----------------------------------------------------
+     * map case 
+     * ----------------------------------------------------
+     */
+    if (Var::IsMap(on)) {
+        auto& map = Var::Map(on);
+        // try to find 
+        auto found = map.find(key);
+        if (found != map.end()) {
+            found->second = __ExecuteFilter(it, end, 
+                func, path + found->first, found->second);
+            return on;
+        }
+        // try to find by regex
+        auto expr = regex(key);
+        for (auto mit = map.begin(); mit != map.end(); ++mit) {
+            if (std::regex_match(mit->first, expr)) {
+                mit->second = __ExecuteFilter(it, end, 
+                    func, path + mit->first, mit->second);
+            }
+        }
+        return on;
+    }
+    /**
+     * ----------------------------------------------------
+     * list case 
+     * ----------------------------------------------------
+     */
+    if (Var::IsList(on)) {
+        auto& list = Var::List(on);
+        try {
+            // try to find
+            auto found = list.begin() + Integer::ValueOf(key);
+            if (found != list.end()) {
+                *found = __ExecuteFilter(
+                    it, end, func, path + key, *found);
+                return on;
+            }
+        } catch (std::invalid_argument& ex) {
+            // try to find by regex 
+            auto expr = regex(key);
+            for (auto lit = list.begin(); lit != list.end(); ++lit) {
+                // compute position
+                auto str = String::ValueOf(
+                    Integer(std::distance(list.begin(), lit)));
+                // try to match
+                if (regex_match(str, expr)) {
+                    *lit = __ExecuteFilter(
+                        it, end, func, path + str, *lit);
+                }
+            }
+        }
+        return on;
+    }
+    return on;
+}
+/**
+ * ------------------------------------------------------------------------------------------------
  * End
- * --------------------------------------------------------------------------------------------------------------------
+ * ------------------------------------------------------------------------------------------------
  */

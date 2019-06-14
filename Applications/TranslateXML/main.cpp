@@ -14,13 +14,17 @@
  * space
  */
 #include "SLog.h"
+#include "SUtils.h"
+#include "SLogic.h"
 #include "SConvertARG.h"
+#include "SFileSystem.h"
 /**
  * local
  */
 #include "SProfiles.h"
-#include "SNormalize.h"
-#include "SLearn.h"
+#include "SFind.h"
+#include "SImport.h"
+#include "SExport.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * Main
@@ -33,9 +37,9 @@ int main(int argc, char** argv) {
     auto args = Convert::FromARG(
         {argv + 1, argv + argc}, {
             {"in"     , "i"}, 
-            {"filter" , "f"},
+            {"out"    , "o"},
             {"method" , "m"},
-            {"profile" ,"p"}
+            {"profile", "p"}
         }
     );
     INFO("Arguments", args);
@@ -43,11 +47,11 @@ int main(int argc, char** argv) {
      * Process
      */
     std::map<String, std::function<int()>> funcs{
-        {"learn", [&](){
-            return Learn(args["i"], args["f"], args["p"]);
+        {"export", [&](){
+            return Export(args["i"], GetProfile(args["p"]), args["o"]);
         }},
-        {"normalize", [&](){
-            return Normalize(args["i"], args["f"], GetProfile(args["p"]));
+        {"import", [&](){
+            return Import(args["i"], GetProfile(args["p"]), args["o"]);
         }}
     };
     try {

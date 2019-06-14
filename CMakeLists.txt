@@ -4,6 +4,7 @@ enable_testing()
 project (SpaceData)
 # properties
 set(CMAKE_CXX_STANDARD 14)
+add_compile_options(-Wall -Wextra)
 # folder for Applications
 add_subdirectory(Applications)
 # folder for common use

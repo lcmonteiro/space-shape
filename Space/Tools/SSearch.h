@@ -12,9 +12,11 @@
  * std
  */
 #include <regex>
+#include <functional>
 /**
  * space
  */
+#include "SKeys.h"
 #include "SVariable.h"
 /**
  * ------------------------------------------------------------------------------------------------
@@ -29,8 +31,7 @@ namespace Search {
      * Execute all branches that match the tree expression
      * ------------------------------------------------------------------------
      */
-    template<typename F>
-    Var Execute(Key expr, F func, Var on);
+    Var Execute(Key expr, std::function<Var(const Key&, Var)> func, Var on);
     /**
      * ------------------------------------------------------------------------
      * Update all branches that match the tree expression
@@ -70,7 +71,7 @@ namespace Search {
      */
     List Find(Var expr, const List& on);
     Map  Find(Var expr, const Map&  on);
-    Var  Find(Var expr,       Var&  on);
+    Var  Find(Var expr,       Var   on);
     /**
      * ------------------------------------------------------------------------
      * Remove vars from a start location (on)
@@ -78,13 +79,15 @@ namespace Search {
      */
     List Remove(Var expr, List& on);
     Map  Remove(Var expr, Map&  on);
-    Var  Remove(Var expr, Var&  on);
+    Var  Remove(Var expr, Var   on);
     /**
      * ------------------------------------------------------------------------
      * Delete match from a start location (on)
      * ------------------------------------------------------------------------
      */
-    Var Delete(Var expr, Var on);
+    List& Delete(Var expr, List& on);
+    Map&  Delete(Var expr, Map&  on);
+    Var   Delete(Var expr, Var   on);
     /**
      * ------------------------------------------------------------------------
      * Verify if expression match on var 
@@ -92,112 +95,7 @@ namespace Search {
      */
     Boolean Match(Var expr, const List& on);
     Boolean Match(Var expr, const Map&  on);
-    Boolean Match(Var expr,       Var&  on);
-    /**
-     * ------------------------------------------------------------------------
-     * Execute function f match 
-     * ------------------------------------------------------------------------
-     */
-    template<typename Function>
-    Var Execute(Key expr, Function func, Var on);
-    /**
-     * --------------------------------------------------------------------------------------------
-     * Implementation
-     * --------------------------------------------------------------------------------------------
-     */
-    namespace {
-        /**
-         * --------------------------------------------------------------------
-         * Execute Filter
-         * --------------------------------------------------------------------
-         */
-        template<typename F>
-        Var __ExecuteFilter(
-            std::sregex_iterator  it, 
-            std::sregex_iterator& end, F func, Key path, Var on) {
-            /**
-             * end case
-             */
-            if (it == end) { return func(path, on); }
-            /**
-             * map case 
-             */
-            if (Var::IsMap(on)) {
-                Map& m = Var::Map(on);
-                /**
-                 *  try to find 
-                 */
-                auto find = m.find(it->str());
-                if (find != m.end()) {
-                    find->second = __ExecuteFilter(
-                        ++it, end, func, path + find->first, find->second);
-                    return on;
-                }
-                /**
-                 * try to find by regex
-                 */
-                std::regex expr(it->str());
-                ++it;
-                for (auto mit = m.begin(); mit != m.end(); ++mit) {
-                    if (std::regex_match(mit->first, expr)) {
-                        mit->second = __ExecuteFilter(
-                            it, end, func, path + mit->first, mit->second);
-                    }
-                }
-                return on;
-            }
-            /**
-             * list case 
-             */
-            if (Var::IsList(on)) {
-                List& l = Var::List(on);
-                try {
-                    /**
-                     * try to find
-                     */
-                    auto find = l.begin() + Integer::ValueOf(it->str());
-                    if (find != l.end()) {
-                        *find = __ExecuteFilter(
-                            ++it, end, func, path + it->str(), *find);
-                        return on;
-                    }
-                } catch (std::invalid_argument& ex) {
-                    /**
-                     * try to find by regex 
-                     */
-                    std::regex expr(it->str());
-                    ++it;
-                    for (auto lit = l.begin(); lit != l.end(); ++lit) {
-                        auto str = String::ValueOf(Integer(std::distance(l.begin(), lit)));
-                        if (std::regex_match(str, expr)) {
-                            *lit = __ExecuteFilter(it, end, func, path + str, *lit);
-                        }
-                    }
-                }
-                return on;
-            }
-            return on;
-        }
-    }
-    /**
-     * ------------------------------------------------------------------------
-     * Execute 
-     * ------------------------------------------------------------------------
-     */
-    template<typename Function>
-    Var Execute(Key expr, Function func, Var on) {
-        const std::regex e("([^/]+)");
-        /**
-         * iterator
-         */
-        auto it   = std::sregex_iterator(expr.begin(), expr.end(), e);
-        auto end  = std::sregex_iterator();
-        auto path = Key("/");
-        /**
-         * execute
-         */
-        return __ExecuteFilter(it, end, func, path, on);
-    }
+    Boolean Match(Var expr,       Var   on);
 }
 /**
  * --------------------------------------------------------------------------------------------------------------------

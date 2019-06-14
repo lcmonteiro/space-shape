@@ -144,7 +144,7 @@ namespace Utils {
      * --------------------------------------------------------------------------------------------
      */
     inline Var Reducer(Var v) {
-        return Logic::ForEach(v, [](const List& p, Var d) {
+        return Logic::ForEach(v, [](auto, Var d) {
             return Logic::IfException([&d]() {
                 return Obj(Var::ToInteger(d));
             }, Logic::IfException([&d]() {

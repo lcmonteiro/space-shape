@@ -22,8 +22,8 @@ namespace Keys {
  * Objects Properties Keys
  * ----------------------------------------------------------------------------
  */
-const auto $path      = Key("$size");
-const auto $type      = Key("$size");
+const auto $path      = Key("$path");
+const auto $type      = Key("$type");
 const auto $size      = Key("$size");
 /**
  * ----------------------------------------------------------------------------
@@ -68,7 +68,7 @@ const auto $all       = Key("$all");
 const auto $exception = Key("$exception");
 const auto $code      = Key("$code");
 const auto $what      = Key("$what");
-const auto &object    = Key("$obj");
+const auto $object    = Key("$obj");
 }
 /**
  * ------------------------------------------------------------------------------------------------

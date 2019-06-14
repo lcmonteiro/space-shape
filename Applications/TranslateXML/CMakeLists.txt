@@ -2,28 +2,16 @@ cmake_minimum_required (VERSION 3.8)
 # ---------------------------------------------------------
 # project
 # ---------------------------------------------------------
-project (MergeXml)
+project (TranslateXml)
 # ---------------------------------------------------------
 # MergeXml target
 # ---------------------------------------------------------
-add_executable(MergeXml 
+add_executable(TranslateXml 
 	main.cpp
-	Commands/SLearn.cpp
-	Commands/SNormalize.cpp
-)
-# includes
-target_include_directories(MergeXml
-PUBLIC
-	Commands
-)
-# includes
-target_include_directories(MergeXml
-PUBLIC
-	Commands
 )
 # dependencies 
-target_link_libraries(MergeXml
-PUBLIC
+target_link_libraries(TranslateXml
+PRIVATE
 	Space
 )
 # ---------------------------------------------------------

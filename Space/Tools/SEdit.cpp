@@ -437,6 +437,7 @@ static inline void __Delete(const List& var, List& on) {
 }
 List& Edit::Delete(const List& var, List& on) {
     __Delete(var, on);
+    return on;
 }
 /**
  * ----------------------------------------------------------------------------

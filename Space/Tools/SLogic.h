@@ -37,9 +37,6 @@ namespace Logic {
     static inline Var Select(bool test, Function1 func_true, Function2 func_false) {
         return test ? func_true() : func_false();
     }
-    static inline Var IfnDefined(Var var, Obj def) {
-        return Var::IsDefined(var) ? var : def;
-    }
     static inline Var IfnDefined(Var var, Var def) {
         return Var::IsDefined(var) ? var : def;
     }
@@ -56,27 +53,15 @@ namespace Logic {
     }
     template<typename Function>
     static inline Var IfException(Function func, Obj except) {
-        try {
-            return func();
-        } catch(...) {
-            return except;
-        }
+        try { return func(); } catch(...) { return except; }
     }
     template<typename Function>
     static inline Var IfException(Function func, Var except) {
-        try {
-            return func();
-        } catch(...) {
-            return except;
-        }
+        try { return func(); } catch(...) { return except; }
     }
     template<typename Function1, typename Function2>
     static inline Var IfException(Function1 func, Function2 except) {
-        try {
-            return func();
-        } catch(...) {
-            return except();
-        }
+        try { return func(); } catch(...) { return except(); }
     }
     template<typename Function1, typename Function2>
     static inline Var IfList(Var v, Function1 succ, Function2 fail) {
