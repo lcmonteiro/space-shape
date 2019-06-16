@@ -9,6 +9,11 @@
 #ifndef LEARN_H
 #define LEARN_H
 /**
+ * std
+ */
+#include <map>
+#include <set>
+/**
  * space
  */
 #include "SConvertJson.h"
@@ -22,7 +27,7 @@
  * ----------------------------------------------------------------------------
  */
 static inline int Learn(String in, String filter, String out) {
-    Var profile = Obj(Map());
+    auto profile = Map();
     /**
      * learn each file
      */
@@ -40,25 +45,59 @@ static inline int Learn(String in, String filter, String out) {
                 /**
                  * process document
                  */
+                auto cache = std::map<Key, std::map<Key, std::set<Key>>>();
                 for(Var d : Var::List(v)) {
-                    Edit::Insert(path, 
-                        Var::Trim(
-                            Edit::Remove(Var::Strip(Edit::Find(path, profile)), d)
-                        ),
-                        profile
-                    );
+                    for (auto& p : Convert::ToSimpleMap(Var::Trim(d))){
+                        try {
+                            cache.at(path).at(p.first).emplace(Var::ToString(p.second));
+                        } catch (...) {
+                            auto found = cache.find(path);
+                            if(found != cache.end()) { 
+                                found->second.emplace(p.first, std::set<Key>{
+                                    Var::ToString(p.second)
+                                });
+                            } else {
+                                cache.emplace(path, std::map<Key, std::set<Key>>{
+                                    {p.first, std::set<Key>{
+                                        Var::ToString(p.second)
+                                    }}
+                                });
+                            }
+                        }
+                    }
+                }
+                /**
+                 * update profile
+                 */
+                for(auto& elem : cache) {
+                    Var type = Logic::Get(elem.first, profile, Obj(Map()));
+                    for(auto& path : elem.second) {
+                        Var::Integer(
+                            Logic::Get(path.first, Var::Map(type), Obj(Integer()))
+                        ) += path.second.size();   
+                    }
                 }
                 return Obj(nullptr);
             }
             return v;
         });
     }
-    //DEBUG("keys", Utils::GetKeys(Var::Map(profile)));
-    DEBUG("profile", profile);
     /**
-     * write to file
+     * Select and write to file
      */
-    Convert::ToPrettyJson(File::Writer(out), profile);
+    Convert::ToPrettyJson(File::Writer(out), Obj(Logic::ForEach(std::move(profile), [](auto, Var v) {
+        return Obj(Logic::ForEach(Utils::Select(Logic::Sort(Convert::ToList(v), [](Var a, Var b) {
+            if(a[1] == b[1]) {
+                if(Utils::Count(Var::ToString(a[0]), '#') > 0) {
+                    return true;
+                }  
+                return Utils::Count(Var::ToString(a[0]), '/') < Utils::Count(Var::ToString(b[0]), '/');
+            }
+            return a[1] > b[1];
+        }), 0, 3), [](auto, Var v){
+            return v[0];
+        }));
+    })));
     return 0;
 }
 /**

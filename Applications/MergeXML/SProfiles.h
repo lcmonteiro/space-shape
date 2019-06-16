@@ -11,7 +11,7 @@
 /**
  * space
  */
-#include "SVariable.h"
+#include "Profiles/SProfileARXML.h"
 /**
  * ----------------------------------------------------------------------------
  * Get Profile
@@ -19,21 +19,7 @@
  */
 Var GetProfile(String key) {
     static Var PROFILE = Obj{
-        /**
-         * ------------------------------------------------
-         * CANOE - Profile
-         * ------------------------------------------------
-         */
-        {Key("canoe"), Obj{
-            {Key("file"), Obj(".*xvp$")},
-            {Key("select"), Obj(".+Property/[0-9]+$")},
-            {Key("match"), Obj{
-                {Key("#"), Obj{
-                    {Key("Name"), Obj("Text")}
-                }}
-            }},
-            {Key("target"), Obj("'")}
-        }}
+        {Key("arxml"), PROFILE_ARXML}
     };
     return PROFILE[key];
 }
