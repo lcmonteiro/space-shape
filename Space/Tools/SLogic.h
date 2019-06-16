@@ -33,10 +33,6 @@ namespace Logic {
      * Conditions 
      * --------------------------------------------------------------------------------------------
      */
-    template<typename Function1, typename Function2>
-    static inline Var Select(bool test, Function1 func_true, Function2 func_false) {
-        return test ? func_true() : func_false();
-    }
     static inline Var IfnDefined(Var var, Var def) {
         return Var::IsDefined(var) ? var : def;
     }
@@ -98,7 +94,9 @@ namespace Logic {
      */
     static inline List ToList(Map data) {
         List l; 
-        for (auto& v : data) l.emplace_back(v.second); 
+        for (auto& v : data) { 
+            l.emplace_back(v.second); 
+        }
         return l;
     }
     static inline List ToList(Var data) {
@@ -124,11 +122,43 @@ namespace Logic {
     }
     /**
      * --------------------------------------------------------------------------------------------
+     * Logic Find
+     * --------------------------------------------------------------------------------------------
+     */
+    static inline Var Find(Key path, Var on, Var def) {
+        return IfnDefined(Edit::Find(path, on), [&]() {
+            Edit::Insert(path, def, on);
+            return def;
+        });
+    }
+    /**
+     * --------------------------------------------------------------------------------------------
+     * Logic Get
+     * --------------------------------------------------------------------------------------------
+     */
+    static inline Var Get(Key key, Map& on, Var def) {
+        return IfnDefined(on[key], [&]() {
+            on[key] = def;
+            return def;
+        });
+    }
+    /**
+     * --------------------------------------------------------------------------------------------
+     * Logic Sort list
+     * --------------------------------------------------------------------------------------------
+     */
+    template<typename Function>
+    static inline List Sort(List list, Function f) {
+        std::sort(list.begin(), list.end(), f);
+        return move(list);
+    }
+    /**
+     * --------------------------------------------------------------------------------------------
      * Logic Link
      * --------------------------------------------------------------------------------------------
      */
     static inline Var Link(Var from, Var map, Var to = Obj(Map())) {
-        for(auto& m : ToList(map)){
+        for(auto& m : ToList(map)) {
             to = Edit::Link(from, m, to);
         }
         return to;
