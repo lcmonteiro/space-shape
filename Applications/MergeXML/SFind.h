@@ -11,40 +11,70 @@
 /**
  * space
  */
-#include "SUtils.h"
+#include "SBasic.h"
 #include "SLogic.h"
 #include "SConvert.h"
 #include "SFileSystem.h"
+/**
+ * namespaces
+ */
+using namespace Tools;
 /**
  * ----------------------------------------------------------------------------
  * Find files
  * ----------------------------------------------------------------------------
  */
 static inline List Find(String path, String pattern) {
-    /**
-     * read from file system
-     */
-    Var aux = FileSystem::Find(path, [&pattern](auto path, auto type) {
-        return (FileSystem::DIR == type) 
-            || std::regex_match(path.back(), std::regex(pattern));
-    });
-    /**
-     * filter empty folders
-     */ 
-    aux = Var::Trim(Logic::ForEach(aux, [](auto, auto var) {
-        if(Var::IsInteger(var)) {
-            return (Var::Integer(var) == FileSystem::DIR)? Obj(nullptr) : var;  
+
+    switch(FileSystem::GetPathType(path)) {
+        /**
+         * --------------------------------------------------------------------
+         * File Found
+         * --------------------------------------------------------------------
+         */
+        case FileSystem::Resource::FILE: {
+            return List{Obj(path)};
         }
-        return var;
-    }));
-    /**
-     * return a list of path files
-     */
-    return Logic::ForEach(
-        Utils::GetKeys(Convert::ToSimpleMap(aux, "/")), [&path](auto, auto var){
-            return Obj(String::Build(path, "/", Var::String(var)));
+        /**
+         * --------------------------------------------------------------------
+         * Directory Search
+         * --------------------------------------------------------------------
+         */
+        case FileSystem::Resource::DIR: {
+            /**
+             * read from file system
+             */
+            Var aux = FileSystem::Find(path, [&pattern](auto p, auto t) {
+                return (FileSystem::DIR == t) 
+                    || std::regex_match(p.back(), std::regex(pattern));
+            });
+            /**
+             * filter empty folders
+             */ 
+            aux = Var::Trim(Logic::ForEach(aux, [](auto, auto v) {
+                if(Var::IsInteger(v)) {
+                    return (Var::Integer(v) == FileSystem::DIR)? Obj(nullptr) : v;  
+                }
+                return v;
+            }));
+            /**
+             * return a list of path files
+             */
+            return Logic::ForEach(
+                Basic::GetKeys(Convert::ToSimpleMap(aux, "/")), [&path](auto, auto v) {
+                    return Obj(String::Build(path, "/", Var::String(v)));
+                }
+            );
         }
-    );
+        /**
+         * --------------------------------------------------------------------
+         * Not Found
+         * --------------------------------------------------------------------
+         */
+        default : {
+            return List{};
+        }
+    }
 }
 /**
  * ------------------------------------------------------------------------------------------------

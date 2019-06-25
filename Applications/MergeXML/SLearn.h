@@ -22,6 +22,10 @@
 #include "SVariable.h"
 #include "SFind.h"
 /**
+ * namespaces
+ */
+using namespace Tools;
+/**
  * ----------------------------------------------------------------------------
  * Export learn XML file 
  * ----------------------------------------------------------------------------
@@ -86,12 +90,12 @@ static inline int Learn(String in, String filter, String out) {
      * Select and write to file
      */
     Convert::ToPrettyJson(File::Writer(out), Obj(Logic::ForEach(std::move(profile), [](auto, Var v) {
-        return Obj(Logic::ForEach(Utils::Select(Logic::Sort(Convert::ToList(v), [](Var a, Var b) {
+        return Obj(Logic::ForEach(Basic::Select(Basic::Sort(Convert::ToList(v), [](Var a, Var b) {
             if(a[1] == b[1]) {
-                if(Utils::Count(Var::ToString(a[0]), '#') > 0) {
+                if(Basic::Count(Var::ToString(a[0]), '#') > 0) {
                     return true;
                 }  
-                return Utils::Count(Var::ToString(a[0]), '/') < Utils::Count(Var::ToString(b[0]), '/');
+                return Basic::Count(Var::ToString(a[0]), '/') < Basic::Count(Var::ToString(b[0]), '/');
             }
             return a[1] > b[1];
         }), 0, 3), [](auto, Var v){

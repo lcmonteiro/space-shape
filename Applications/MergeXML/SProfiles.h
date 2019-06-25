@@ -11,17 +11,22 @@
 /**
  * space
  */
+#include "SConvertJson.h"
+#include "SFileStream.h"
+#include "SEdit.h"
+/**
+ * profiles
+ */
 #include "Profiles/SProfileARXML.h"
 /**
  * ----------------------------------------------------------------------------
  * Get Profile
  * ----------------------------------------------------------------------------
  */
-Var GetProfile(String key) {
-    static Var PROFILE = Obj{
+Var GetProfile(String file) {
+    return Edit::Insert(Convert::FromJson(File::Reader(file)), Obj{
         {Key("arxml"), PROFILE_ARXML}
-    };
-    return PROFILE[key];
+    });
 }
 /**
  * ------------------------------------------------------------------------------------------------

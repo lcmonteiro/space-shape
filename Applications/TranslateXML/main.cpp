@@ -14,7 +14,7 @@
  * space
  */
 #include "SLog.h"
-#include "SUtils.h"
+#include "SBasic.h"
 #include "SLogic.h"
 #include "SConvertARG.h"
 #include "SFileSystem.h"
