@@ -1,13 +1,13 @@
 /**
  * -------------------------------------------------------------------------------------------------------------------- 
- * File:   Sutils.h
+ * File:   SBasic.h
  * Author: Luis Monteiro
  *
  * Created on Apr 10, 2019, 12:11 PM
  * --------------------------------------------------------------------------------------------------------------------
  */
-#ifndef SUTILS_H
-#define SUTILS_H
+#ifndef SBASIC_H
+#define SBASIC_H
 /**
  * std
  */
@@ -22,10 +22,11 @@
 #include "SLogic.h"
 /**
  * ------------------------------------------------------------------------------------------------
- * Utils - Space
+ * Basic - Space
  * ------------------------------------------------------------------------------------------------
  */
-namespace Utils {
+namespace Tools {
+namespace Basic {
     /**
      * --------------------------------------------------------------------------------------------
      * Map tools
@@ -57,7 +58,7 @@ namespace Utils {
      * Combine key and values together 
      * -----------------------------------------------------------------------
      */
-    static inline Map Combine(const List& keys, const List& values) {
+    inline Map Combine(const List& keys, const List& values) {
         Map map;
         for (size_t i = 0; i < keys.size() && i < values.size(); ++i) {
             map[Var::ToString(keys[i])] = values[i];
@@ -71,27 +72,27 @@ namespace Utils {
      * Rotate 
      * -----------------------------------------------------------------------
      */
-    static inline List& Rotate(List& data) {
+    inline List& Rotate(List& data) {
         std::rotate(data.begin(), data.begin() + 1, data.end());
         return data;
     }
-    static inline List Rotate(List&& data) {
+    inline List Rotate(List&& data) {
         std::rotate(data.begin(), data.begin() + 1, data.end());
         return std::move(data);
     }
     /**
-     * -----------------------------------------------------------------------
+     * ------------------------------------------------------------------------
      * Select 
      * ------------------------------------------------------------------------
      */
-    static inline List& Select(List& data, size_t beg, size_t end) {
+    inline List& Select(List& data, size_t beg, size_t end) {
         if(data.size() > end)
             data.erase(data.begin() + end, data.end());
         if(data.size() > beg)
             data.erase(data.begin(), data.begin() + beg); 
         return data;
     }
-    static inline List Select(List&& data, size_t beg, size_t end) {
+    inline List Select(List&& data, size_t beg, size_t end) {
         return std::move(Select(data, beg, end));
     }
     /**
@@ -117,26 +118,41 @@ namespace Utils {
     /**
      * -----------------------------------------------------------------------
      * Replace 
-     * ------------------------------------------------------------------------
+     * -----------------------------------------------------------------------
      */
-    static inline String& Replace(
+    inline String& Replace(
         String& str, String::value_type find, String::value_type update
         ) {
         std::replace(str.begin(), str.end(), find, update);
         return str;
     }
-    static inline String Replace(
+    inline String Replace(
         String&& str, String::value_type find, String::value_type update
         ){
         std::replace(str.begin(), str.end(), find, update);
         return std::move(str);
     }
     /**
+     * ------------------------------------------------------------------------
+     * Sort
+     * ------------------------------------------------------------------------
+     */
+    template<typename Function>
+    inline List& Sort(List& list, Function f) {
+        std::sort(list.begin(), list.end(), f);
+        return list;
+    }
+    template<typename Function>
+    inline List Sort(List&& list, Function f) {
+        std::sort(list.begin(), list.end(), f);
+        return std::move(list);
+    }
+    /**
      * -----------------------------------------------------------------------
      * Count 
      * ------------------------------------------------------------------------
      */
-    static inline size_t Count(const String& str, String::value_type find) {
+    inline size_t Count(const String& str, String::value_type find) {
         return std::count(str.begin(), str.end(), find);
     }
     /**
@@ -147,7 +163,7 @@ namespace Utils {
      * ------------------------------------------------------------------------
      */
     inline Var Reducer(Var v) {
-        return Logic::ForEach(v, [](auto, Var d) {
+        return Logic::ForEach(v, [](const List&, Var d) -> Var {
             return Logic::IfException([&d]() {
                 return Obj(Var::ToInteger(d));
             }, Logic::IfException([&d]() {
@@ -155,11 +171,11 @@ namespace Utils {
             }, d));
         });
     }
-}
+}}
 /**
  * --------------------------------------------------------------------------------------------------------------------
  * End
  * --------------------------------------------------------------------------------------------------------------------
  */
-#endif /* SUTILS_H */
+#endif /* SBASIC_H */
 

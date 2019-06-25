@@ -23,6 +23,13 @@
  */
 namespace Logic {
     /**
+     * ------------------------------------------------------------------------
+     * Types
+     * ------------------------------------------------------------------------
+     */
+    using UpdateFunction = std::function<Var(const List&, Var)>; 
+    using MergeFunction  = std::function<Var(const List&, Var, Var)>; 
+    /**
      * --------------------------------------------------------------------------------------------
      * Exceptions 
      * --------------------------------------------------------------------------------------------
@@ -69,45 +76,87 @@ namespace Logic {
     }
     /**
      * --------------------------------------------------------------------------------------------
-     * Call function (update(const List& path, Var )) for all elements
+     * Call function [update(const List& path, Var )] for all elements
      * --------------------------------------------------------------------------------------------
      * Var
      * ------------------------------------------------------------------------
      */
-    Var ForEach(Var var, std::function<Var(const List&, Var)> update);
+    Var ForEach(Var var, UpdateFunction update);
     /**
      * ------------------------------------------------------------------------
      * List
      * ------------------------------------------------------------------------
      */ 
-    List ForEach(List var, std::function<Var(const size_t&, Var)> update);
+    inline List& ForEach(List& list, std::function<Var(size_t, Var)> update) {
+        size_t i = 0;
+        for(auto& v: list) {
+            v = update(i, v); ++i;
+        }
+        return list;
+    }
+    inline List ForEach(List&& list, std::function<Var(size_t, Var)> update) {
+        size_t i = 0;
+        for(auto& v: list) {
+            v = update(i, v); ++i;
+        }
+        return std::move(list);
+    }
     /**
      * ------------------------------------------------------------------------
      * Map
      * ------------------------------------------------------------------------
      */ 
-    Map ForEach(Map var, std::function<Var(const Key&, Var)> update);
+    inline Map& ForEach(Map& map, std::function<Var(const Key&, Var)> update) {
+        for(auto& v: map) {
+            v.second = update(v.first, v.second);
+        }
+        return map;
+    }
+    inline Map ForEach(Map&& map, std::function<Var(const Key&, Var)> update) {
+        for(auto& v: map) {
+            v.second = update(v.first, v.second);
+        }
+        return std::move(map);
+    }
+    /**
+     * --------------------------------------------------------------------------------------------
+     * Merge A (var) into B (on) with F (merge)
+     *   - Call function [merge(const List& path, Var var, Var on)] for all elements
+     * --------------------------------------------------------------------------------------------
+     */
+    Var MergeEach(const Var var, Var on, MergeFunction merge);
     /**
      * --------------------------------------------------------------------------------------------
      * Logic Converters
      * --------------------------------------------------------------------------------------------
+     * To List
+     * ------------------------------------------------------------------------
      */
-    static inline List ToList(Map data) {
-        List l; 
-        for (auto& v : data) { 
-            l.emplace_back(v.second); 
-        }
-        return l;
-    }
-    static inline List ToList(Var data) {
+    inline List ToList(Map data) {
+        List lst; 
+        for (auto& v : data) 
+            lst.emplace_back(v.second); 
+        return std::move(lst);
+    } 
+    inline List ToList(Var data) {
         return Var::IsList(data) ? 
             Var::List(data) : Var::IsDefined(data) ? List{data}: List{};
     }
-    static inline Map ToMap(Var data) {
+    /**
+     * ------------------------------------------------------------------------
+     * To Map
+     * ------------------------------------------------------------------------
+     */ 
+    inline Map ToMap(Var data) {
         return Var::IsMap(data) ? 
             Var::Map(data) : Var::IsDefined(data) ? Map{{Key(), data}}: Map{};
     }
-    static inline String ToString(Var data) {
+    /**
+     * ------------------------------------------------------------------------
+     * To String
+     * ------------------------------------------------------------------------
+     */ 
+    inline String ToString(Var data) {
         return Var::IsString(data) ? 
             Var::String(data) : Var::IsDefined(data) ? String(data): String();
     }
@@ -117,7 +166,7 @@ namespace Logic {
      * --------------------------------------------------------------------------------------------
      */
     template<typename Function>
-    static inline Var Update(Key path, Function func, Var data) {
+    inline Var Update(Key path, Function func, Var data) {
         return Edit::Insert(path, func(Edit::Remove(path, data)), data);
     }
     /**
@@ -141,27 +190,6 @@ namespace Logic {
             on[key] = def;
             return def;
         });
-    }
-    /**
-     * --------------------------------------------------------------------------------------------
-     * Logic Sort list
-     * --------------------------------------------------------------------------------------------
-     */
-    template<typename Function>
-    static inline List Sort(List list, Function f) {
-        std::sort(list.begin(), list.end(), f);
-        return move(list);
-    }
-    /**
-     * --------------------------------------------------------------------------------------------
-     * Logic Link
-     * --------------------------------------------------------------------------------------------
-     */
-    static inline Var Link(Var from, Var map, Var to = Obj(Map())) {
-        for(auto& m : ToList(map)) {
-            to = Edit::Link(from, m, to);
-        }
-        return to;
     }
     /**
      * --------------------------------------------------------------------------------------------

@@ -31,7 +31,7 @@ namespace Random {
      * Random Element
      * ------------------------------------------------------------------------
      */
-    inline Float Element(Float min, Float max){
+    inline Float Element(Float min, Float max) {
         static std::random_device rd;
         std::default_random_engine gen (rd());
         return Float(std::uniform_real_distribution<>(min, max)(gen));        
@@ -41,7 +41,7 @@ namespace Random {
      * Random Container
      * ------------------------------------------------------------------------
      */
-    inline Buffer& Container(Buffer& container){
+    inline Buffer& Container(Buffer& container) {
         static std::random_device rd;
         std::default_random_engine gen (rd());
         for(auto& v : container)
@@ -53,7 +53,7 @@ namespace Random {
      * Shuffle container
      * ------------------------------------------------------------------------
      */
-    inline List Shuffle(List data){
+    inline List Shuffle(List data) {
         static std::random_device rd;
         std::default_random_engine gen (rd());
         std::shuffle(data.begin(), data.end(), gen);

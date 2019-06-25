@@ -8,12 +8,13 @@
  * space
  */
 #include "SConvertCSV.h"
-#include "SUtils.h"
+#include "SBasic.h"
 #include "SEdit.h"
 /**
  * namespaces
  */
 using namespace std;
+using namespace Tools;
 /**
  * ----------------------------------------------------------------------------
  * From CSV
@@ -48,7 +49,7 @@ Var Convert::FromCSV(istream& v, char delim) {
          */
         List::iterator it = lines.begin();
         for (++it; it != lines.end(); ++it) {
-            *it = Obj(Utils::Combine(
+            *it = Obj(Basic::Combine(
                 Var::List(lines.front()), Var::List(*it)));
         }
         /**
@@ -82,7 +83,7 @@ ostream& Convert::ToCSV(ostream& os, Var data, char delim) {
     auto it = entries.begin();
     if (it != entries.end()) {
         if(Var::IsMap(*it)){
-            keys = Utils::GetKeys(Var::Map(*it));
+            keys = Basic::GetKeys(Var::Map(*it));
         }
     }
     /**

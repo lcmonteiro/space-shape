@@ -22,7 +22,7 @@
  * ------------------------------------------------------------------------------------------------
  */
 namespace FileSystem {
-    typedef enum {DIR = 0, FILE, LINK} Resource;
+    typedef enum {DIR = 0, FILE, LINK, NONE} Resource;
     /**
      * ------------------------------------------------------------------------
      * Create file tree
@@ -71,22 +71,28 @@ namespace FileSystem {
     Boolean Move(String from, String to, Var tree = Obj(nullptr));
     /**
      * ------------------------------------------------------------------------
-     * Get path from full path
+     * Get File Name from full path
      * ------------------------------------------------------------------------
      */
     String GetFileName(String path);
     /**
      * ------------------------------------------------------------------------
-     * Get File Name from full path
+     * Get File Path from full path
      * ------------------------------------------------------------------------
      */
-    String GetFilePath(String path);
+    String GetFilePath(const String& path);
     /**
      * ------------------------------------------------------------------------
-     * Get get path from root
+     * Get Path from root
      * ------------------------------------------------------------------------
      */
-    String GetFullPath(String path);
+    String GetFullPath(const String& path);
+    /**
+     * ------------------------------------------------------------------------
+     * Get Path Type
+     * ------------------------------------------------------------------------
+     */
+    Resource GetPathType(const String& path);
     /**
      * ------------------------------------------------------------------------
      * Get working directory
