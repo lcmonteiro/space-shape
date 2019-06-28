@@ -7,6 +7,7 @@ STATIC
 	SEdit.cpp
 	SLogic.cpp
 	SSearch.cpp
+	SPattern.cpp
 )
 # includes
 target_include_directories(SpaceTool
