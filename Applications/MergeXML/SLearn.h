@@ -89,7 +89,8 @@ static inline int Learn(String in, String filter, String out) {
     /**
      * Select and write to file
      */
-    Convert::ToPrettyJson(File::Writer(out), Obj(Logic::ForEach(std::move(profile), [](auto, Var v) {
+    Convert::ToPrettyJson(File::Writer(out), Obj{
+        {Key(filter), Obj(Logic::ForEach(std::move(profile), [](auto, Var v) {
         return Obj(Logic::ForEach(Basic::Select(Basic::Sort(Convert::ToList(v), [](Var a, Var b) {
             if(a[1] == b[1]) {
                 if(Basic::Count(Var::ToString(a[0]), '#') > 0) {
@@ -101,7 +102,7 @@ static inline int Learn(String in, String filter, String out) {
         }), 0, 3), [](auto, Var v){
             return v[0];
         }));
-    })));
+    }))}});
     return 0;
 }
 /**

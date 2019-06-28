@@ -13,6 +13,7 @@
  */
 #include "SBasic.h"
 #include "SLogic.h"
+#include "SPattern.h"
 #include "SConvert.h"
 #include "SFileSystem.h"
 /**
@@ -45,8 +46,7 @@ static inline List Find(String path, String pattern) {
              * read from file system
              */
             Var aux = FileSystem::Find(path, [&pattern](auto p, auto t) {
-                return (FileSystem::DIR == t) 
-                    || std::regex_match(p.back(), std::regex(pattern));
+                return (FileSystem::DIR == t) || Tools::Pattern::Match(p.back(), pattern);
             });
             /**
              * filter empty folders

@@ -25,7 +25,7 @@
  */
 Var GetProfile(String file) {
     return Edit::Insert(Convert::FromJson(File::Reader(file)), Obj{
-        {Key("arxml"), PROFILE_ARXML}
+        {Key("*.arxml"), PROFILE_ARXML}
     });
 }
 /**
