@@ -1,0 +1,17 @@
+settings:
+    # date format (yyyy/mm/dd (w) hh:mm:ss)
+    trigger: ".*(0|2|4|6|8)$"
+    monitor: 
+        - branch: "master" 
+          origin: "master"
+    workspace: ./Bin/
+gates:
+    build:
+        commands:
+            build: "cmake .."
+    test:
+        commands:
+            - "ctest"
+    report:
+        folder:
+            - ""
