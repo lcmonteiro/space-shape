@@ -13,6 +13,7 @@
  */
 #include "SConvertJson.h"
 #include "SFileStream.h"
+#include "SFileSystem.h"
 #include "SEdit.h"
 /**
  * profiles
@@ -23,10 +24,20 @@
  * Get Profile
  * ----------------------------------------------------------------------------
  */
-Var GetProfile(String file) {
+Var GetProfiles(String file) {
     return Edit::Insert(Convert::FromJson(File::Reader(file)), Obj{
         {Key("*.arxml"), PROFILE_ARXML}
     });
+}
+/**
+ * ----------------------------------------------------------------------------
+ * Get Profile
+ * ----------------------------------------------------------------------------
+ */
+List GetProfile(String file) {
+    return Var::List(Map({
+        {Key("arxml"), PROFILE_ARXML_L}
+    })[FileSystem::GetExtension(file)]);
 }
 /**
  * ------------------------------------------------------------------------------------------------

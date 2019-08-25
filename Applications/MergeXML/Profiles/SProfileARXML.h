@@ -30,6 +30,26 @@ Var PROFILE_ARXML = Obj{
         Obj("#/DEST")
     }},
 };
+
+Var PROFILE_ARXML_L = Obj{
+    Obj{
+        Obj("*"), Obj{
+            Obj("SHORT-NAME"),
+            Obj("#/UUID")
+        }
+    },
+    Obj{
+        Obj("*-SCALE"), Obj{ 
+            Obj("SHORT-LABEL"),
+            Obj("COMPU-CONST/VT")
+        }
+    },
+    Obj{
+        Obj("*-REF"), Obj{
+            Obj("#/DEST")
+        }
+    }
+};
 /**
  * ------------------------------------------------------------------------------------------------
  * End

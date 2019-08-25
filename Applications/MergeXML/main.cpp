@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
             return Learn(args["i"], args["f"], args["p"]);
         }},
         {"normalize", [&](){
-            return Normalize(args["i"], args["f"], GetProfile(args["p"]));
+            return Normalize(args["i"], args["f"], GetProfiles(args["p"]));
         }}
     };
     try {

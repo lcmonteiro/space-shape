@@ -207,6 +207,17 @@ String FileSystem::GetFullPath(const String& path) {
 }
 /**
  * ----------------------------------------------------------------------------
+ * Get File Extension
+ * ----------------------------------------------------------------------------
+ */
+String FileSystem::GetExtension(const String& path) {
+    // get file name
+    auto name = GetFileName(path);
+    // get extension
+    return name.substr(name.find_last_of(".") + 1);
+}
+/**
+ * ----------------------------------------------------------------------------
  * Get Working Directory
  * ----------------------------------------------------------------------------
  */
