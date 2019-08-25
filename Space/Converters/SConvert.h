@@ -36,17 +36,19 @@ namespace Convert {
      * ------------------------------------------------------------------------
      */
     static inline List FromString(String p, String pattern) {
-        using filter_iterator = std::regex_iterator<std::string::iterator>;
+        using Filter = std::regex_iterator<std::string::iterator>;
         // implementation
-        const auto reg  = std::regex(pattern);
+        const auto reg = std::regex(pattern);
         auto list = List();
-        for (filter_iterator it(p.begin(), p.end(), reg), end; (it != end); ++it) {
+        for (Filter it(p.begin(), p.end(), reg), end; (it != end); ++it) {
             list.push_back(Obj(it->str()));
         }
         return list;
     }
     /**
-     * utilities
+     * ----------------------------------------------------
+     * extentions
+     * ----------------------------------------------------
      */
     static inline List FromPath(String p) {
         return FromString(p, "([^/]+)"); 
@@ -81,7 +83,9 @@ namespace Convert {
         return os.str();
     }
     /**
-     * utilities
+     * ----------------------------------------------------
+     * extensions
+     * ----------------------------------------------------
      */
     static inline String ToPath(List l) {
        return ToString(l, "/");         
@@ -95,9 +99,9 @@ namespace Convert {
      * ------------------------------------------------------------------------
      */
     namespace {
-        static void __ToSimpleMap(String k, Map& b, String& d, List& l);
-        static void __ToSimpleMap(String k, Map& b, String& d, Map&  m);
-        void __ToSimpleMap(String k, Map& b, String& d, Map& m) {
+        static void __ToSimpleMap(String k, Map& b, const String& d, List& l);
+        static void __ToSimpleMap(String k, Map& b, const String& d, Map&  m);
+        void __ToSimpleMap(String k, Map& b, const String& d, Map& m) {
             for (auto& v : m) {
                 if (Var::IsMap(v.second)) {
                     __ToSimpleMap(k + v.first + d, b, d, Var::Map(v.second));
@@ -108,7 +112,7 @@ namespace Convert {
                 }
             }
         }
-        void __ToSimpleMap(String k, Map& b, String& d, List& l) {
+        void __ToSimpleMap(String k, Map& b, const String& d, List& l) {
             for (Integer i(0); size_t(i) < l.size(); ++i) {
                 Var v = l[i];
                 if (Var::IsMap(v)) {
@@ -121,7 +125,7 @@ namespace Convert {
             }
         }
     }
-    static inline Map ToSimpleMap(Var var, String delim) {
+    static inline Map ToSimpleMap(Var var, const String& delim = "/") {
         Map base;
         if (Var::IsMap(var)) {
             __ToSimpleMap("", base, delim, Var::Map(var));
@@ -168,6 +172,27 @@ namespace Convert {
             __ToMap("", base, delim, Var::List(var));
         }
         return base;
+    }
+    /**
+     * ------------------------------------------------------------------------
+     * To List
+     * ------------------------------------------------------------------------
+     */
+    static inline List ToList(const Map& map) {
+        List list;
+        for(auto& e : map) {
+            list.emplace_back(Obj{Obj(e.first), e.second});
+        }
+        return std::move(list);
+    }
+    static inline List ToList(const Var& var) {
+        if(Var::IsMap(var)) {
+            return ToList(Var::Map(var));
+        }
+        if(Var::IsList(var)) {
+            return Var::List(var);
+        }
+        return List{var};
     }
     /**
      * ------------------------------------------------------------------------

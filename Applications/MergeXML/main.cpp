@@ -6,16 +6,21 @@
  * Created on Apr 10, 2019, 12:11 PM
  * ------------------------------------------------------------------------------------------------
  **
+ * std
+ */
+#include <map>
+#include <functional>
+/**
  * space
  */
 #include "SLog.h"
-#include "SEdit.h"
-#include "SConvertXML.h"
 #include "SConvertARG.h"
-#include "SConvertBIN.h"
-#include "SFileSystem.h"
-#include "SNullStream.h"
-#include "SFileStream.h"
+/**
+ * local
+ */
+#include "SProfiles.h"
+#include "SNormalize.h"
+#include "SLearn.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * Main
@@ -28,26 +33,29 @@ int main(int argc, char** argv) {
     auto args = Convert::FromARG(
         {argv + 1, argv + argc}, {
             {"in"     , "i"}, 
-            {"out"    , "o"},
-            {"pattern", "p"}
+            {"filter" , "f"},
+            {"method" , "m"},
+            {"profile" ,"p"}
         }
     );
     INFO("Arguments", args);
     /**
      * Process
      */
-    auto r = File::Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
-
-    auto w = File::Writer("/tmp/ConnectionEditor.json");
-
-    Convert::ToPrettyJson(w, Convert::FromXML(r));
-
-    r = File::Reader("/mnt/c/Workspace/space-shape/Applications/MergeXML/Resources/ConnectionEditor.arxml");
-
-    w = File::Writer("/tmp/ConnectionEditor.bin");
-
-    Convert::ToBin(w, Convert::FromXML(r));
-    return 0;   
+    std::map<String, std::function<int()>> funcs{
+        {"learn", [&](){
+            return Learn(args["i"], args["f"], args["p"]);
+        }},
+        {"normalize", [&](){
+            return Normalize(args["i"], args["f"], GetProfile(args["p"]));
+        }}
+    };
+    try {
+        return funcs[args["m"]]();
+    } catch(std::exception& e) {
+        ERROR(e.what(), args);
+        return -1;
+    }
 }
 /**
  * ------------------------------------------------------------------------------------------------

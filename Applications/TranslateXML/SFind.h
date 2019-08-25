@@ -11,10 +11,14 @@
 /**
  * space
  */
-#include "SUtils.h"
+#include "SBasic.h"
 #include "SLogic.h"
 #include "SConvert.h"
 #include "SFileSystem.h"
+/**
+ * namespaces
+ */
+using namespace Tools;
 /**
  * ----------------------------------------------------------------------------
  * Find files
@@ -41,7 +45,7 @@ static inline List Find(String path, String pattern) {
      * return a list of path files
      */
     return Logic::ForEach(
-        Utils::GetKeys(Convert::ToSimpleMap(aux, "/")), [&path](auto, auto var){
+        Basic::GetKeys(Convert::ToSimpleMap(aux, "/")), [&path](auto, auto var){
             return Obj(String::Build(path, "/", Var::String(var)));
         }
     );

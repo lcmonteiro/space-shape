@@ -184,7 +184,7 @@ String FileSystem::GetFileName(String path) {
  *  Get File Path
  * ----------------------------------------------------------------------------
  */
-String FileSystem::GetFilePath(String path) {
+String FileSystem::GetFilePath(const String& path) {
     if (path.back() == '/')  return path;
     // convert to "[a, b, c]"
     auto tmp = Convert::FromPath(path);
@@ -198,12 +198,28 @@ String FileSystem::GetFilePath(String path) {
  * Get Full File Path
  * ----------------------------------------------------------------------------
  */
-String FileSystem::GetFullPath(String path) {
+String FileSystem::GetFullPath(const String& path) {
     char tmp[FILENAME_MAX];
     if (realpath(path.data(), tmp) == 0) {
         throw runtime_error(strerror(errno));
     }
     return String(tmp);
+}
+/**
+ * ----------------------------------------------------------------------------
+ * Get Working Directory
+ * ----------------------------------------------------------------------------
+ */
+FileSystem::Resource FileSystem::GetPathType(const String& path) {
+    struct stat st;
+    if(stat((path).data(), &st) >= 0) {
+        if (st.st_mode & S_IFDIR) {
+            return Resource::DIR;
+        } else if (st.st_mode & S_IFREG) {
+            return Resource::FILE;
+        }
+    }
+    return Resource::NONE;
 }
 /**
  * ----------------------------------------------------------------------------

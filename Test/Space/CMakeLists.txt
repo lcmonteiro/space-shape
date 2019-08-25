@@ -18,6 +18,7 @@ TARGET
     TestSpaceTool
 SOURCES 
     Tools/TestEdit.cpp
+    Tools/TestPattern.cpp
 DEPENDS
     Space
 )
