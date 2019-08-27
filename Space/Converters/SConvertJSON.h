@@ -50,6 +50,20 @@ namespace Convert {
 }
 /**
  * ------------------------------------------------------------------------------------------------
+ * Var Serializer
+ * ------------------------------------------------------------------------------------------------
+ */
+inline std::ostream& operator<<(std::ostream& os, const Var& data) {
+    return Convert::ToPrettyJson(os, data); 
+}
+inline std::ostream& operator<<(std::ostream& os, const Map&  data) {
+    return Convert::ToPrettyJson(os, data);
+}
+inline std::ostream& operator<<(std::ostream& os, const List& data) {
+    return Convert::ToPrettyJson(os, data);
+}
+/**
+ * ------------------------------------------------------------------------------------------------
  * End
  * ------------------------------------------------------------------------------------------------
  */

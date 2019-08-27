@@ -3,7 +3,6 @@ cmake_minimum_required (VERSION 3.8)
 # SpaceResource target
 # ---------------------------------------------------------
 add_library(SpaceResource 
-STATIC 
 	Linux/SFileSystem.cpp
 )
 # includes

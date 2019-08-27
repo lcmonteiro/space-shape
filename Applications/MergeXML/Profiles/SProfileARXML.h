@@ -18,20 +18,6 @@
  * ----------------------------------------------------------------------------
  */
 Var PROFILE_ARXML = Obj{
-    {Key("*"), Obj{
-        Obj("SHORT-NAME"),
-        Obj("#/UUID"),
-    }},
-    {Key("*-SCALE"), Obj{
-        Obj("SHORT-LABEL"),
-        Obj("COMPU-CONST/VT")
-    }},
-    {Key("*-REF"), Obj{
-        Obj("#/DEST")
-    }},
-};
-
-Var PROFILE_ARXML_L = Obj{
     Obj{
         Obj("*"), Obj{
             Obj("SHORT-NAME"),

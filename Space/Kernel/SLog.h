@@ -19,7 +19,6 @@
  */
 #include "STime.h"
 #include "SVariable.h"
-#include "SConvertJSON.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * Log Macros
@@ -171,20 +170,6 @@ private:
     */
     static std::mutex __mutex;
 };
-/**
- * ------------------------------------------------------------------------------------------------
- * Log Serializer
- * ------------------------------------------------------------------------------------------------
- */
-inline std::ostream& operator<<(std::ostream& os, const Var& data) {
-    return Convert::ToPrettyJson(os, data); 
-}
-inline std::ostream& operator<<(std::ostream& os, const Map&  data) {
-    return Convert::ToPrettyJson(os, data);
-}
-inline std::ostream& operator<<(std::ostream& os, const List& data) {
-    return Convert::ToPrettyJson(os, data);
-}
 /**
  * ------------------------------------------------------------------------------------------------
  * End

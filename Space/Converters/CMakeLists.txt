@@ -5,7 +5,6 @@ include(Pugixml.cmake)
 # SpaceKernel target
 # ---------------------------------------------------------
 add_library(SpaceConverter 
-STATIC 
 	SConvertJSON.cpp
 	SConvertBin.cpp
 	SConvertXML.cpp

@@ -35,18 +35,32 @@ int main(int argc, char** argv) {
             {"in"     , "i"}, 
             {"filter" , "f"},
             {"method" , "m"},
-            {"profile" ,"p"}
+            {"profile", "p"},
+            {"log"    , "l"},
         }
     );
-    INFO("Arguments", args);
+    /**
+     * Set Debug Level
+     */
+    SLog::SetLevel(std::map<String, SLog::Level>{
+        {"DEBUG"  , SLog::DEBUG},
+        {"INFO"   , SLog::INFO},
+        {"WARNING", SLog::WARNING},
+        {"ERROR"  , SLog::ERROR},
+        {""       , SLog::ERROR}
+    }[args["l"]]);
     /**
      * Process
      */
+    INFO("Arguments", args);
     std::map<String, std::function<int()>> funcs{
         {"learn", [&](){
             return Learn(args["i"], args["f"], args["p"]);
         }},
         {"normalize", [&](){
+            return Normalize(args["i"], GetProfiles(args["p"]));
+        }},
+        {"normalize-recursive", [&](){
             return Normalize(args["i"], args["f"], GetProfiles(args["p"]));
         }}
     };

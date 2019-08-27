@@ -17,20 +17,21 @@
 #include "SVariable.h"
 #include "SPattern.h"
 #include "SFind.h"
+#include "SLog.h"
 /**
  * ------------------------------------------------------------------------------------------------
- * Normalize XML - File
+ * Normalize - Engine
  * ------------------------------------------------------------------------------------------------
  */
-static inline int Normalize(String file, List profile) {
+static inline int Normalize(const String& in, const String& out, const List& profile) {
     /**
      * write normalize data
      */
-    Convert::ToXML(File::Writer(file), Logic::ForEach(
+    Convert::ToXML(File::Writer(out), Logic::ForEach(
         /**
          * read and normalize
          */
-        Edit::Normalize(Convert::FromXML(File::Reader(file))), 
+        Edit::Normalize(Convert::FromXML(File::Reader(in))), 
         /**
          * sort lists
          */
@@ -72,27 +73,27 @@ static inline int Normalize(String in, String filter, Map profiles) {
     /**
      * normalize each file
      */
-    // for(Var file : Find(in, filter)) {
-    //     INFO("Normalize", "file= " << String(file));
-    //     /**
-    //      * find a profile
-    //      */ 
-    //     DEBUG("profiles", profiles);
-    //     Var profile = Obj(Map());
-    //     Logic::ForEach(profiles, [&](auto k, Var v) {
-    //         if(Tools::Pattern::Match(file, k)) { 
-    //             profile = Logic::MergeEach(v, profile, [](auto, Var v, Var) {
-    //                 return v;
-    //             }); 
-    //         }
-    //         return v;
-    //     });
-    //     /**
-    //      * write normalize data
-    //      */
-    //     DEBUG("profile", profile);
-    //     Normalize(file, Var::Map(profile));
-    // }
+    for(Var file : Find(in, filter)) {
+        INFO("Normalize", "file= " << String(file));
+        /**
+         * write normalize data
+         */
+        Normalize(file, file, Var::ToList(profiles[FileSystem::GetExtension(file)]));
+    }
+    return 0;
+}
+/**
+ * ------------------------------------------------------------------------------------------------
+ * Normalize XML - File 
+ * ------------------------------------------------------------------------------------------------
+ */
+static inline int Normalize(String in, Map profiles) {
+    /**
+     * write normalize data
+     */
+    Normalize(in, in, Var::ToList(profiles[FileSystem::GetExtension(in)]));
+    /**
+     */
     return 0;
 }
 /**

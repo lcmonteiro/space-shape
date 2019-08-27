@@ -22,18 +22,24 @@
 #include "SVariable.h"
 #include "SFind.h"
 /**
+ * settings
+ */
+#define MAX_SELECTED  3
+/**
  * namespaces
  */
 using namespace Tools;
 /**
- * ----------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  * Export learn XML file 
- * ----------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  */
 static inline int Learn(String in, String filter, String out) {
     auto profile = Map();
     /**
+     * --------------------------------------------------------------------------------------------
      * learn each file
+     * --------------------------------------------------------------------------------------------
      */
     for(Var file : Find(in, filter)) {
         INFO("Learn", "file= " << String(file));
@@ -87,27 +93,34 @@ static inline int Learn(String in, String filter, String out) {
         });
     }
     /**
+     * --------------------------------------------------------------------------------------------
      * Select and write to file
+     * --------------------------------------------------------------------------------------------
      */
-    Convert::ToPrettyJson(File::Writer(out), Obj{
-        {Key(filter), Obj(Logic::ForEach(std::move(profile), [](auto, Var v) {
-        return Obj(Logic::ForEach(Basic::Select(Basic::Sort(Convert::ToList(v), [](Var a, Var b) {
-            if(a[1] == b[1]) {
-                if(Basic::Count(Var::ToString(a[0]), '#') > 0) {
-                    return true;
-                }  
-                return Basic::Count(Var::ToString(a[0]), '/') < Basic::Count(Var::ToString(b[0]), '/');
-            }
-            return a[1] > b[1];
-        }), 0, 3), [](auto, Var v){
-            return v[0];
-        }));
-    }))}});
+    Convert::ToPrettyJson(File::Writer(out), Obj{{
+        Key(filter), 
+        // sort by most relevant rules
+        Obj(Basic::Sort(Convert::ToList(Obj(Logic::ForEach(std::move(profile), [](auto, Var v) {
+            // sort and select filds
+            return Obj(Logic::ForEach(Basic::Select(Basic::Sort(Convert::ToList(v), [](Var a, Var b) {
+                if(a[1] == b[1]) {
+                    if(Basic::Count(Var::ToString(a[0]), '#') > 0) {
+                        return true;
+                    }  
+                    return Basic::Count(Var::ToString(a[0]), '/') < Basic::Count(Var::ToString(b[0]), '/');
+                }
+                return a[1] > b[1];
+            }), 0, MAX_SELECTED), [](auto, Var v) {
+                return v;
+            }));
+        }))), [](Var a, Var b) {
+            return Logic::Accumulate(a[1], "1") > Logic::Accumulate(b[1], "1");
+        }))}});
     return 0;
 }
 /**
- * ------------------------------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  * End
- * ------------------------------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  */
 #endif	/* LEARN_H */

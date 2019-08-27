@@ -193,6 +193,25 @@ namespace Logic {
     }
     /**
      * --------------------------------------------------------------------------------------------
+     * Logic Sum
+     * --------------------------------------------------------------------------------------------
+     */
+    static inline Var Accumulate(List data, Key path) {
+        Var result;
+        // process first element 
+        auto it  = data.begin();
+        auto end = data.end();
+        if(it!=end) {        
+            result = Edit::Find(path, *it);
+            // process the remaining ones
+            for(++it; it!=end; ++it) {
+                result = result + Edit::Find(path, *it);
+            }
+        }
+        return result;
+    }
+    /**
+     * --------------------------------------------------------------------------------------------
      * assert
      * --------------------------------------------------------------------------------------------
      */
