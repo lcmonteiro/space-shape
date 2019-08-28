@@ -16,7 +16,7 @@ ExternalProject_Add(
 # -----------------------------------------------------------------------------
 ExternalProject_Get_Property(pugixml source_dir binary_dir)
 set(PUGIXML_INCLUDE_DIRS ${source_dir}/src)
-set(PUGIXML_LIBRARY_PATH ${binary_dir}/${CMAKE_FIND_LIBRARY_PREFIXES}pugixml.a)
+set(PUGIXML_LIBRARY_PATH ${binary_dir}/${CMAKE_STATIC_LIBRARY_PREFIX}pugixml${CMAKE_STATIC_LIBRARY_SUFFIX})
 file(MAKE_DIRECTORY ${PUGIXML_INCLUDE_DIRS})
 # -----------------------------------------------------------------------------
 # Pugixml target

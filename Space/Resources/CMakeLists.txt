@@ -1,9 +1,17 @@
 cmake_minimum_required (VERSION 3.8)
 # ---------------------------------------------------------
+# Select platform
+# ---------------------------------------------------------
+if(MSVC OR MINGW)
+    set(platform Windows)
+else()
+	set(platform Linux)
+endif()
+# ---------------------------------------------------------
 # SpaceResource target
 # ---------------------------------------------------------
 add_library(SpaceResource 
-	Windows/SFileSystem.cpp
+	${platform}/SFileSystem.cpp
 )
 # includes
 target_include_directories(SpaceResource

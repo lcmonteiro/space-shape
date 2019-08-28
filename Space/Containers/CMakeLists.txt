@@ -8,7 +8,7 @@ target_include_directories(SpaceContainer
 	INTERFACE . 
 )
 # dependencies 
-target_link_libraries(SpaceConverter 
+target_link_libraries(SpaceContainer 
 	INTERFACE SpaceKernel
 )
 # ---------------------------------------------------------

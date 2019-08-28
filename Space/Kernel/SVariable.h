@@ -384,7 +384,7 @@ typedef class __obj__ : public __link__ {
     };
     using __link__::operator=;
 public:
-    __obj__() = delete;
+    //__obj__() = delete;
     /**
      * --------------------------------------------------------------------------------------------
      * types identifiers 
@@ -399,7 +399,7 @@ public:
      * --------------------------------------------------------------------------------------------
      * native types
      */
-    __obj__(nullptr_t    ) : __link__() {}
+    __obj__(             ) : __link__() {}
     __obj__(bool        v) : __link__(std::make_shared<__boolean>(v)) {}
     __obj__(int         v) : __link__(std::make_shared<__integer>(v)) {}
     __obj__(const char* v) : __link__(std::make_shared<__string >(v)) {}

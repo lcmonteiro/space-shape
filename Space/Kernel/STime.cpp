@@ -54,16 +54,18 @@ const String STime::ToDateTime(
     const Float& time, const String& pattern, Boolean* isdst
     ) {
     char str[64];
-    struct tm tm;
     time_t t = (time_t) time;
     memset(str, 0, sizeof (str));
-    memset(&tm, 0, sizeof (struct tm));
     /**
-     * convert
+     * get time
      */
-    strftime(str, sizeof (str), pattern.c_str(), localtime_r(&t, &tm));
+    auto* tm = localtime(&t);
+    /**
+     * convert time
+     */
+    strftime(str, sizeof (str), pattern.c_str(), tm);
     if (isdst) {
-        *isdst = tm.tm_isdst==1;
+        *isdst = tm->tm_isdst==1;
     }
     return str;
 }
@@ -75,16 +77,19 @@ const String STime::ToDateTime(
 const Float STime::FromDateTime(
     const String& time, const String& pattern, Boolean isdst
     ) {
-    struct tm tm;
-    memset(&tm, 0, sizeof (struct tm));
     /**
-     * convert
+     * convert to tm structor
      */
-    strptime(time.data(), pattern.c_str(), &tm);
+    std::tm t = {};
+    std::istringstream ss(time);
+    ss >> std::get_time(&t, pattern.data());
+    /**
+     * convert to seconds
+     */
     if (isdst) {
-        tm.tm_isdst = 1;
+        t.tm_isdst = 1;
     }
-    return timelocal(&tm);
+    return std::mktime(&t);
 }
 /**
  * ------------------------------------------------------------------------------------------------
