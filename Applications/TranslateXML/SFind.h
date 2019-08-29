@@ -37,7 +37,7 @@ static inline List Find(String path, String pattern) {
      */ 
     aux = Var::Trim(Logic::ForEach(aux, [](auto, auto var) {
         if(Var::IsInteger(var)) {
-            return (Var::Integer(var) == FileSystem::DIR)? Obj(nullptr) : var;  
+            return (Var::Integer(var) == FileSystem::DIR)? Obj() : var;  
         }
         return var;
     }));

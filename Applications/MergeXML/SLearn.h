@@ -87,7 +87,7 @@ static inline int Learn(String in, String filter, String out) {
                         ) += path.second.size();   
                     }
                 }
-                return Obj(nullptr);
+                return Obj();
             }
             return v;
         });

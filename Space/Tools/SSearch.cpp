@@ -114,7 +114,7 @@ Var Search::Find(Var expr, Var on) {
     if (__Match(expr, on)) {    
         return on;
     }
-    return Obj(nullptr);
+    return Obj();
 }
 /**
  * ----------------------------------------------------------------------------
@@ -155,7 +155,7 @@ Var Search::Remove(Var expr, Var on) {
     if (__Match(expr, on)) {
         return on;
     }
-    return Obj(nullptr);
+    return Obj();
 }
 /**
  * ----------------------------------------------------------------------------
@@ -194,7 +194,7 @@ Var Search::Delete(Var expr, Var on) {
     if (__Match(expr, on)) {    
         return on;
     }
-    return Obj(nullptr);
+    return Obj();
 }
 /**
  * ----------------------------------------------------------------------------
@@ -531,7 +531,7 @@ Var __FindFilter(sregex_iterator it, sregex_iterator& end, Var on) {
         auto found = __FindFilter(++it, end, next);
         // check result
         if (Var::IsUndefined(found)) {
-            return Obj(nullptr);
+            return Obj();
         }
         if (Var::IsMap(on)) {
             return Obj{{key, found}};
@@ -562,7 +562,7 @@ Var __FindFilter(sregex_iterator it, sregex_iterator& end, Var on) {
                 }
             }
         }
-        return map.size() ? Obj(map) : Obj(nullptr);
+        return map.size() ? Obj(map) : Obj();
     }
     /**
      * ----------------------------------------------------
@@ -586,9 +586,9 @@ Var __FindFilter(sregex_iterator it, sregex_iterator& end, Var on) {
                 }
             }
         }
-        return list.size() ? Obj(list) : Obj(nullptr);
+        return list.size() ? Obj(list) : Obj();
     }
-    return Obj(nullptr);
+    return Obj();
 }
 /**
  * ------------------------------------------------------------------------------------------------

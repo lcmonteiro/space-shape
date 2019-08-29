@@ -209,7 +209,7 @@ Var __UnLoadNode(pugi::xml_node& node) {
     if (!text.empty()) {
         return Obj(std::move(text));
     }
-    return Obj(nullptr);
+    return Obj();
 }
 Map __UnLoadAttr(pugi::xml_node& node) {
     /**

@@ -89,7 +89,7 @@ Var Var::Clone(Var var, false_type, true_type) {
 	if (Var::IsLink(var)) {
 		return Obj::Link(Var::Link(var));
 	}
-	return Obj(nullptr);
+	return Obj();
 }
 Var Var::Clone(Var var, true_type, true_type) {	
 	if (Var::IsMap(var)) {
@@ -126,7 +126,7 @@ Var Var::Clone(Var var, true_type, true_type) {
 	if (Var::IsBuffer(var)) {
 		return Obj(Var::Buffer(var));
 	}
-	return Obj(nullptr);
+	return Obj();
 }
 /**
  * ------------------------------------------------------------------------------------------------
@@ -184,7 +184,7 @@ Var Var::Copy(Var var, false_type, true_type) {
 	if (Var::IsBuffer(var)) {
 		return Obj(Var::Buffer(var));
 	}
-	return Obj(nullptr);
+	return Obj();
 }
 Var Var::Copy(Var var, true_type, true_type) {	
 	if (Var::IsMap(var)) {
@@ -219,7 +219,7 @@ Var Var::Copy(Var var, true_type, true_type) {
 	if (Var::IsBuffer(var)) {
 		return Obj(Var::Buffer(var));
 	}
-	return Obj(nullptr);
+	return Obj();
 }
 /**
  * ------------------------------------------------------------------------------------------------
@@ -241,7 +241,7 @@ Var Var::Strip(Var var, false_type, false_type) {
 		}
 		return var;
 	}
-	return Obj(nullptr);
+	return Obj();
 }
 Var Var::Strip(Var var, false_type, true_type) {
 	if (Var::IsMap(var)) {
@@ -262,7 +262,7 @@ Var Var::Strip(Var var, false_type, true_type) {
 		Var::Link(var) = Strip(Var::Link(var), false_type(), true_type());
 		return var;
 	}
-	return Obj(nullptr);
+	return Obj();
 }
 Var Var::Strip(Var var, true_type, false_type) {
 	if (Var::IsMap(var)) {
@@ -279,7 +279,7 @@ Var Var::Strip(Var var, true_type, false_type) {
 		}
 		return Obj(move(l));
 	}
-	return Obj(nullptr);
+	return Obj();
 }
 Var Var::Strip(Var var, true_type, true_type) {
 	if (Var::IsMap(var)) {
@@ -299,7 +299,7 @@ Var Var::Strip(Var var, true_type, true_type) {
 	if (Var::IsLink(var)) {
 		return Obj::Link(Strip(Var::Link(var), true_type(), true_type()));
 	}
-	return Obj(nullptr);
+	return Obj();
 }
 /**
  * ------------------------------------------------------------------------------------------------
@@ -319,7 +319,7 @@ Var Var::Trim(Var var, false_type, false_type) {
 			++it;
 		}
 		if (m.empty()) {
-			return Obj(nullptr);
+			return Obj();
 		}
 	} else if (Var::IsList(var)) {
 		::List& l = Var::List(var);
@@ -333,7 +333,7 @@ Var Var::Trim(Var var, false_type, false_type) {
 			++it;
 		}
 		if (l.empty()) {
-			return Obj(nullptr);
+			return Obj();
 		}
 	}
 	return var;
@@ -351,7 +351,7 @@ Var Var::Trim(Var var, false_type, true_type) {
 			++it;
 		}
 		if (m.empty()) {
-			return Obj(nullptr);
+			return Obj();
 		}
 	} else if (Var::IsList(var)) {
 		::List& l = Var::List(var);
@@ -365,13 +365,13 @@ Var Var::Trim(Var var, false_type, true_type) {
 			++it;
 		}
 		if (l.empty()) {
-			return Obj(nullptr);
+			return Obj();
 		}
 	}
 	if (Var::IsLink(var)) {
 		Var aux = Trim(var, false_type(), true_type());
 		if (Var::IsUndefined(aux)) {
-			return Obj(nullptr);
+			return Obj();
 		}
 		Var::Link(var) = aux;
 	}
@@ -386,7 +386,7 @@ Var Var::Trim(Var var, true_type, false_type) {
 				m[v.first] = aux;
 			}
 		}
-		return m.empty() ? Obj(nullptr) : Obj(move(m));
+		return m.empty() ? Obj() : Obj(move(m));
 	}
 	if (Var::IsList(var)) {
 		::List l;
@@ -397,7 +397,7 @@ Var Var::Trim(Var var, true_type, false_type) {
 			}
 
 		}
-		return l.empty() ? Obj(nullptr) : Obj(move(l));
+		return l.empty() ? Obj() : Obj(move(l));
 	}
 	return var;
 }
@@ -410,7 +410,7 @@ Var Var::Trim(Var var, true_type, true_type) {
 				m[v.first] = aux;
 			}
 		}
-		return m.empty() ? Obj(nullptr) : Obj(move(m));
+		return m.empty() ? Obj() : Obj(move(m));
 	}
 	if (Var::IsList(var)) {
 		::Map m;
@@ -420,12 +420,12 @@ Var Var::Trim(Var var, true_type, true_type) {
 				m[v.first] = aux;
 			}
 		}
-		return m.empty() ? Obj(nullptr) : Obj(move(m));
+		return m.empty() ? Obj() : Obj(move(m));
 	}
 	if (Var::IsLink(var)) {
 		Var aux = Trim(var, true_type(), true_type());
 		if (Var::IsUndefined(aux)) {
-			return Obj(nullptr);
+			return Obj();
 		}
 		return Obj::Link(aux);
 	}
@@ -463,7 +463,7 @@ Var Var::Shape(Var var, false_type, false_type) {
 		}
 		return var;
 	}
-	return Obj(nullptr);
+	return Obj();
 }
 Var Var::Shape(Var var, false_type, true_type) {
 	if (Var::IsMap(var)) {
@@ -498,7 +498,7 @@ Var Var::Shape(Var var, false_type, true_type) {
 			return Var::Link(var) = aux;
 		}
 	}
-	return Obj(nullptr);
+	return Obj();
 }
 Var Var::Shape(Var var, true_type, false_type) {
 	if (Var::IsMap(var)) {
@@ -522,7 +522,7 @@ Var Var::Shape(Var var, true_type, false_type) {
 		}
 		return Obj(move(l));
 	}
-	return Obj(nullptr);
+	return Obj();
 }
 Var Var::Shape(Var var, true_type, true_type) {
 	if (Var::IsMap(var)) {
@@ -551,7 +551,7 @@ Var Var::Shape(Var var, true_type, true_type) {
 			return Obj::Link(aux);
 		}
 	}
-	return Obj(nullptr);
+	return Obj();
 }
 /**
  * ------------------------------------------------------------------------------------------------

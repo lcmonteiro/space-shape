@@ -311,7 +311,7 @@ static void __Find(Link& var, const Link& on) {
         }
     } catch (...) {}
     // not found
-    var = Obj(nullptr);
+    var = Obj();
 }
 Var Edit::Find(Var var, const Var on) {
     if(Var::IsDefined(var)) {
@@ -364,11 +364,11 @@ List& Edit::Remove(const List& var, List& on) {
 static void __Remove(const Link& var, Link& on) {
     try {
         if (var == on) {
-            on = Obj(nullptr);
+            on = Obj();
             return;
         } 
         if (Var::IsUndefined(var)) {
-            on = Obj(nullptr);
+            on = Obj();
             return;
         }
         if (Var::IsMap(var) && Var::IsMap(on)) {
@@ -380,7 +380,7 @@ static void __Remove(const Link& var, Link& on) {
             return;
         }
         if (__MatchContent(var, on)) {
-            on = Obj(nullptr);
+            on = Obj();
             return;
         }
     } catch (...) {}
@@ -447,11 +447,11 @@ List& Edit::Delete(const List& var, List& on) {
 static inline void __Delete(const Link& var, Link& on) {
     try {
         if (var == on) {
-            on = Obj(nullptr);
+            on = Obj();
             return;
         }
         if (Var::IsUndefined(var)) {
-            on = Obj(nullptr);
+            on = Obj();
             return;
         }
         if (Var::IsMap(var) && Var::IsMap(on)) {    
@@ -463,7 +463,7 @@ static inline void __Delete(const Link& var, Link& on) {
             return;
         }
         if (__MatchContent(var, on)) {
-            on = Obj(nullptr);
+            on = Obj();
             return;
         }
     } catch (...) {}
@@ -678,7 +678,7 @@ Var Edit::Remove(Key path, Var on) {
                     m.erase(find);
                     return tmp;
                 }
-                return Obj(nullptr);
+                return Obj();
             }
             if (Var::IsList(o)) {
                 auto& l   = Var::List(o);
@@ -688,12 +688,12 @@ Var Edit::Remove(Key path, Var on) {
                     l.erase(find);
                     return tmp;
                 }
-                return Obj(nullptr);
+                return Obj();
             }
         }
         o = o[key];
     }
-    return Obj(nullptr);
+    return Obj();
 }
 /**
  * ------------------------------------------------------------------------------------------------

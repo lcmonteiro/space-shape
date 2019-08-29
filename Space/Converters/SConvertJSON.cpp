@@ -328,7 +328,7 @@ List& __FromJson(std::istream& is, List&& l) {
                 break;
             }    
             case __NULL__D__: {
-                l.push_back(Obj(nullptr));
+                l.push_back(Obj());
                 break;
             }
             case __LIST_RD__: {
@@ -369,7 +369,7 @@ Map& __FromJson(std::istream& is, Map&& m) {
             }
             case __NULL__D__: {
                 if (!key.empty()) {
-                    m[std::move(key)] = Obj(nullptr);
+                    m[std::move(key)] = Obj();
                 }
                 break;
             }
@@ -437,7 +437,7 @@ Var Convert::FromJson(std::istream& is) {
             data = Obj(__FromJson(is, Float()));
             break;
         case __NULL__D__:
-            data = Obj(nullptr);
+            data = Obj();
             break;
         default:;
     }

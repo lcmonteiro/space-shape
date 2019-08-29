@@ -79,7 +79,7 @@ Var __MergeEach(List& path, const Var var, Var on, Function merge) {
                         );
                     } else {
                         auto merged = merge(
-                            const_cast<List&>(path), it->second, Obj(nullptr)
+                            const_cast<List&>(path), it->second, Obj()
                         );
                         if(Var::IsDefined(merged)) {
                             m_o[it->first] = merged;
@@ -104,7 +104,7 @@ Var __MergeEach(List& path, const Var var, Var on, Function merge) {
                         ref_v = __MergeEach(path, ref_v, ref_o, merge);
                     } else {
                         auto merged = merge(
-                            const_cast<List&>(path), ref_v, Obj(nullptr)
+                            const_cast<List&>(path), ref_v, Obj()
                         );
                         if(Var::IsDefined(merged)) {
                             l_o.emplace_back(merged);

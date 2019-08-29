@@ -170,7 +170,7 @@ Var&& __FromBin(std::istream& is, Var&& d) {
             d = Obj::Link(__FromBin(is, Var()));
             break;
         case __NULL__T__:
-            d = Obj(nullptr);
+            d = Obj();
             break;
         default:;
     }

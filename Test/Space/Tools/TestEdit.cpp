@@ -64,13 +64,13 @@ TEST(SEdit, Remove)
     // test 1 -----------------------------------------------------------------
     EXPECT_EQ(
         Edit::Remove(var, var), 
-        Obj(nullptr)
+        Obj()
     );
 
     // test 2 -----------------------------------------------------------------
     EXPECT_EQ(
         Var::Trim(Edit::Remove(Var::Copy(var), Var::Copy(var))),
-        Obj(nullptr)
+        Obj()
     );
 
     // test 3 -----------------------------------------------------------------

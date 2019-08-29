@@ -53,9 +53,9 @@ static inline int Normalize(const String& in, const String& out, const List& pro
                      * join key list as a string
                      */
                     return Convert::ToString(Logic::ForEach(Var::ToList(l), [&a](auto, Var v) {
-                        try { return Edit::Find(Key(v), a);} catch (...) { return Var(Obj(nullptr)); }    
+                        try { return Edit::Find(Key(v), a);} catch (...) { return Var(Obj()); }    
                     }), "") < Convert::ToString(Logic::ForEach(Var::ToList(l), [&b](auto, Var v) {
-                        try { return Edit::Find(Key(v), b);} catch (...) { return Var(Obj(nullptr)); }
+                        try { return Edit::Find(Key(v), b);} catch (...) { return Var(Obj()); }
                     }), "");
                 });
             }

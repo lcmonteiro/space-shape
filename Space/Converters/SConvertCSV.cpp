@@ -42,7 +42,7 @@ Var Convert::FromCSV(istream& v, char delim) {
             lines.emplace_back(Obj(values));
         }
         if(lines.empty()){
-            return Obj(nullptr);
+            return Obj();
         }
         /**
          * create key:value
@@ -60,7 +60,7 @@ Var Convert::FromCSV(istream& v, char delim) {
          */
         return Obj(lines);
     } catch(...) {
-        return Obj(nullptr);
+        return Obj();
     }
 }
 Var Convert::FromCSV(istream&& v, char delim) {
