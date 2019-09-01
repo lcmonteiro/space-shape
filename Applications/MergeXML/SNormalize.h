@@ -15,6 +15,7 @@
 #include "SConvertXML.h"
 #include "SFileStream.h"
 #include "SVariable.h"
+#include "SVariant.h"
 #include "SPattern.h"
 #include "SFind.h"
 #include "SLog.h"
@@ -31,7 +32,7 @@ static inline int Normalize(const String& in, const String& out, const List& pro
         /**
          * read and normalize
          */
-        Edit::Normalize(Convert::FromXML(File::Reader(in))), 
+        Convert::FromXML(File::Reader(in)), 
         /**
          * sort lists
          */
@@ -48,15 +49,15 @@ static inline int Normalize(const String& in, const String& out, const List& pro
                 if(!Tools::Pattern::Match(Var::ToString(p.back()), Var::ToString(k))) {
                     continue;
                 }
-                Tools::Basic::Sort(Var::List(v), [&l](Var a, Var b) {
-                    /**
-                     * join key list as a string
-                     */
-                    return Convert::ToString(Logic::ForEach(Var::ToList(l), [&a](auto, Var v) {
-                        try { return Edit::Find(Key(v), a);} catch (...) { return Var(Obj()); }    
-                    }), "") < Convert::ToString(Logic::ForEach(Var::ToList(l), [&b](auto, Var v) {
-                        try { return Edit::Find(Key(v), b);} catch (...) { return Var(Obj()); }
-                    }), "");
+                Tools::Variant::Sort(Var::List(v), [&l](Var a, Var b) {
+                    for(Var p : Var::ToList(l)) {
+                        String v_a = Edit::Find(Key(p), a);
+                        String v_b = Edit::Find(Key(p), b);
+                        if(v_a != v_b) {
+                            return v_a < v_b;
+                        }
+                    }
+                    return false;
                 });
             }
             return v;

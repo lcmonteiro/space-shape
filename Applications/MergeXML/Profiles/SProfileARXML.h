@@ -34,6 +34,11 @@ Var PROFILE_ARXML = Obj{
         Obj("*-REF"), Obj{
             Obj("#/DEST")
         }
+    },
+    Obj{
+        Obj("NONQUEUED-*-COM-SPEC"), Obj{ 
+            Obj("DATA-ELEMENT-REF/'"),
+        }
     }
 };
 /**

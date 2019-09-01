@@ -13,6 +13,7 @@
 #include <ctime>
 #include <chrono>
 #include <stdexcept>
+#include <sstream>
 /**
  * space
  */
@@ -51,23 +52,24 @@ const Float STime::SysTime() {
  * ---------------------------------------------------------------------------
  */
 const String STime::ToDateTime(
-    const Float& time, const String& pattern, Boolean* isdst
-    ) {
-    char str[64];
+    const Float& time, const String& pattern, Boolean* isdst) {
     time_t t = (time_t) time;
-    memset(str, 0, sizeof (str));
     /**
      * get time
      */
-    auto* tm = localtime(&t);
+    auto* tm = std::localtime(&t);
     /**
-     * convert time
+     * process dls
      */
-    strftime(str, sizeof (str), pattern.c_str(), tm);
     if (isdst) {
         *isdst = tm->tm_isdst==1;
     }
-    return str;
+    /**
+     * convert time
+     */
+    std::ostringstream ss;
+    ss << std::put_time(tm, pattern.data());
+    return ss.str();
 }
 /**
  * ----------------------------------------------------------------------------
@@ -75,8 +77,7 @@ const String STime::ToDateTime(
  * ----------------------------------------------------------------------------
  */
 const Float STime::FromDateTime(
-    const String& time, const String& pattern, Boolean isdst
-    ) {
+    const String& time, const String& pattern, Boolean isdst) {
     /**
      * convert to tm structor
      */
@@ -84,11 +85,14 @@ const Float STime::FromDateTime(
     std::istringstream ss(time);
     ss >> std::get_time(&t, pattern.data());
     /**
-     * convert to seconds
-     */
+     * process dls
+     */ 
     if (isdst) {
         t.tm_isdst = 1;
     }
+    /**
+     * convert to seconds
+     */
     return std::mktime(&t);
 }
 /**

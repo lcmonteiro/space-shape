@@ -188,7 +188,9 @@ List&& __FromBin(std::istream& is, List&& l) {
 Map&& __FromBin(std::istream& is, Map&& m) {
     Integer len(0);
     __Read(is, len);
+#ifdef VAR_UNORDERED_MAP  
     m.reserve(len);
+#endif
     for (int i = 0; i < len; i++) {
         String key = __FromBin(is, String());
         m[std::move(key)] = __FromBin(is, Var());

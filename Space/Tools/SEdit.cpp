@@ -701,6 +701,7 @@ Var Edit::Remove(Key path, Var on) {
  * ------------------------------------------------------------------------------------------------
  */
 Var Edit::Normalize(Var var) {
+#ifdef VAR_UNORDERED_MAP
     if (Var::IsMap(var)) {
         auto& m = Var::Map(var);
         {
@@ -735,6 +736,7 @@ Var Edit::Normalize(Var var) {
             return Obj(out);
         }
     }
+#endif
     return var;
 }
 /**

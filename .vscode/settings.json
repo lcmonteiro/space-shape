@@ -72,7 +72,8 @@
         "optional": "cpp",
         "string_view": "cpp",
         "condition_variable": "cpp",
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "set": "cpp"
     },
     "C_Cpp.intelliSenseEngineFallback": "Enabled",
     "cSpell.words": [

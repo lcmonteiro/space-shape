@@ -12,9 +12,13 @@
  * std
  */
 #include <initializer_list>
-#include <unordered_map>
 #include <stdexcept>
 #include <memory>
+#ifdef VAR_UNORDERED_MAP  
+#include <unordered_map>
+#else
+#include <map>
+#endif
 /**
  * space
  */
@@ -51,9 +55,13 @@ typedef class __link__: public std::shared_ptr<__interface__> {
  * List
  * ----------------------------------------------------------------------------
  **/
-typedef class __list__ : public std::vector<__link__> {
+namespace base {
+template<typename val>
+using list = std::vector<val>;    
+}
+typedef class __list__ : public base::list<__link__> {
 public:
-    using __super__ = std::vector<__link__>;
+    using __super__ = base::list<__link__>;
     /**
      * super
      */ 
@@ -83,9 +91,18 @@ public:
  * Map
  * ----------------------------------------------------------------------------
  */
-typedef class __map__ : public std::unordered_map<__key__, __link__> {
+namespace base {
+#ifdef VAR_UNORDERED_MAP  
+template<typename key, typename val>
+using map = std::unordered_map<key, val>;
+#else
+template<typename key, typename val>
+using map = std::map<key, val>;
+#endif    
+}
+typedef class __map__ : public base::map<__key__, __link__> {
 public:
-    using __super__ = std::unordered_map<__key__, __link__>;
+    using __super__ = base::map<__key__, __link__>;
     /**
      * super
      */ 
@@ -384,7 +401,6 @@ typedef class __obj__ : public __link__ {
     };
     using __link__::operator=;
 public:
-    //__obj__() = delete;
     /**
      * --------------------------------------------------------------------------------------------
      * types identifiers 
@@ -729,8 +745,8 @@ public:
  * Utils types
  * ------------------------------------------------------------------------------------------------
  */
-using KeyList = std::vector<__key__>;
-using KeyMap  = std::unordered_map<__key__, __key__>;
+using KeyList = base::list<__key__>;
+using KeyMap  = base::map<__key__, __key__>;
 /**
  * ------------------------------------------------------------------------------------------------
  * Utils operators
