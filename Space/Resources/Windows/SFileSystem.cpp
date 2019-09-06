@@ -9,6 +9,7 @@
 #include <direct.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <io.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 /**
@@ -265,56 +266,46 @@ void FileSystem::SetPath(String path) {
  */
 static Map __FindDirectory(KeyList& path, function<bool(const KeyList&, int)> filter) {
     Map tree;
-    // /**
-    //  * open directory
-    //  */
-    // DIR* dir = ::opendir(Convert::ToPath(path).data());
-    // if (dir == nullptr) {
-    //     return tree;
-    // }
-    // /**
-    //  * parse directory
-    //  */
-    // struct dirent *entry;
-    // while ((entry = readdir(dir)) != NULL) {
-    //     path.emplace_back(entry->d_name);
-    //     switch (entry->d_type) {
-    //         case DT_DIR:
-    //         {
-    //             if (entry->d_name[0] == '.') {
-    //                 break;
-    //             }
-    //             if(filter(path, __map[DT_DIR])) {
-    //                 auto found = __FindDirectory(path, filter);
-    //                 if (found.empty()) {
-    //                     tree[entry->d_name] = Obj(__map[entry->d_type]);
-    //                 } else {
-    //                     tree[entry->d_name] = Obj(found);
-    //                 }
-    //             }
-    //             break;
-    //         }
-    //         case DT_REG:
-    //         {
-    //             if(filter(path, __map[DT_REG])) {
-    //                 tree[entry->d_name] = Obj(__map[entry->d_type]);
-    //             }
-    //             break;
-    //         }
-    //         case DT_LNK:
-    //         {
-    //             if(filter(path, __map[DT_LNK])) {
-    //                 tree[entry->d_name] = Obj(__map[entry->d_type]);
-    //             }
-    //             break;
-    //         }
-    //     }
-    //     path.pop_back();
-    // }
-    // /**
-    //  * close directory
-    //  */
-    // closedir(dir);
+    /**
+     * open directory
+     */
+    struct _finddata_t c_data;
+    intptr_t handler;
+    /**
+     *  find first 
+     */
+    if((handler = _findfirst(Convert::ToPath(path + Key("*")).data(), &c_data)) < 0) {
+        return tree;
+    }
+    do {
+        path.emplace_back(c_data.name);
+        /**
+         * directory
+         */
+        if(c_data.attrib & _A_SUBDIR) {
+            if(filter(path, FileSystem::DIR)) {
+                auto found = __FindDirectory(path, filter);
+                if (found.empty()) {
+                    tree[c_data.name] = Obj(int(FileSystem::DIR));
+                } else {
+                    tree[c_data.name] = Obj(found);
+                }
+            }
+        } 
+        /**
+         * file
+         */ 
+        else {
+             if(filter(path, FileSystem::FILE)) {
+                tree[c_data.name] = Obj(int(FileSystem::FILE));
+            }
+        }
+        path.pop_back();
+    } while(_findnext(handler, &c_data) == 0);
+    /**
+     * close directory
+     */
+    _findclose( handler );
     return tree;
 }
 /**
@@ -324,33 +315,29 @@ static Map __FindDirectory(KeyList& path, function<bool(const KeyList&, int)> fi
  */
 static bool __CopyDirectory(String from, String to, Map tree) {
     _mkdir(to.data());
-    // for (auto& e : tree) {
-    //     if (Var::IsMap(e.second)) {
-    //         if (!__CopyDirectory(from + "/" + e.first, to + "/" + e.first, Var::Map(e.second))) {
-    //             return false;
-    //         }
-    //     } else if (Var::IsInteger(e.second)) {
-
-    //         switch (Var::Integer(e.second)) {
-    //             case DT_LNK:
-    //             case DT_REG:
-    //             {
-    //                 if (!__CopyFile(from + "/" + e.first, to + "/" + e.first)) {
-    //                     return false;
-    //                 }
-    //                 break;
-    //             }
-    //             case DT_DIR:
-    //             {
-    //                 if (::access((from + "/" + e.first).data(), F_OK) != 0) {
-    //                     return false;
-    //                 }
-    //                 _mkdir((to + "/" + e.first).data());
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
+    for (auto& e : tree) {
+        if (Var::IsMap(e.second)) {
+            if (!__CopyDirectory(from + "/" + e.first, to + "/" + e.first, Var::Map(e.second))) {
+                return false;
+            }
+        } else {
+            switch (Var::ToInteger(e.second)) {
+                case FileSystem::FILE: {
+                    if (!__CopyFile(from + "/" + e.first, to + "/" + e.first)) {
+                        return false;
+                    }
+                    break;
+                }
+                case FileSystem::DIR: {
+                    if (::access((from + "/" + e.first).data(), F_OK) != 0) {
+                        return false;
+                    }
+                    _mkdir((to + "/" + e.first).data());
+                    break;
+                }
+            }
+        }
+    }
     return true;
 }
 /**
@@ -401,33 +388,29 @@ static bool __CopyFile(String from, String to) {
  */
 static bool __MoveDirectory(String from, String to, Map tree) {
     _mkdir(to.data());
-    // for (auto& e : tree) {
-    //     if (Var::IsMap(e.second)) {
-    //         if (!__MoveDirectory(from + "/" + e.first, to + "/" + e.first, Var::Map(e.second))) {
-    //             return false;
-    //         }
-    //     } else if (Var::IsInteger(e.second)) {
-
-    //         switch (Var::Integer(e.second)) {
-    //             case DT_LNK:
-    //             case DT_REG:
-    //             {
-    //                 if (!__MoveFile(from + "/" + e.first, to + "/" + e.first)) {
-    //                     return false;
-    //                 }
-    //                 break;
-    //             }
-    //             case DT_DIR:
-    //             {
-    //                 if (::access((from + "/" + e.first).data(), F_OK) != 0) {
-    //                     return false;
-    //                 }
-    //                 _mkdir((to + "/" + e.first).data());
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
+    for (auto& e : tree) {
+        if (Var::IsMap(e.second)) {
+            if (!__MoveDirectory(from + "/" + e.first, to + "/" + e.first, Var::Map(e.second))) {
+                return false;
+            }
+        } else {
+            switch (Var::ToInteger(e.second)) {
+                case FileSystem::FILE: {
+                    if (!__MoveFile(from + "/" + e.first, to + "/" + e.first)) {
+                        return false;
+                    }
+                    break;
+                }
+                case FileSystem::DIR: {
+                    if (::access((from + "/" + e.first).data(), F_OK) != 0) {
+                        return false;
+                    }
+                    _mkdir((to + "/" + e.first).data());
+                    break;
+                }
+            }
+        }
+    }
     return true;
 }
 /**
