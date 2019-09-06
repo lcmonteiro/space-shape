@@ -70,7 +70,7 @@ static inline int Normalize(const String& in, const String& out, const List& pro
  * Normalize XML - Recursive
  * ------------------------------------------------------------------------------------------------
  */
-static inline int Normalize(String in, String filter, Map profiles) {
+static inline int NormalizeRecursive(String in, Map profiles, String filter) {
     /**
      * normalize each file
      */
@@ -88,11 +88,13 @@ static inline int Normalize(String in, String filter, Map profiles) {
  * Normalize XML - File 
  * ------------------------------------------------------------------------------------------------
  */
-static inline int Normalize(String in, Map profiles) {
+static inline int Normalize(String in, Map profiles, String filter="") {
     /**
      * write normalize data
      */
-    Normalize(in, in, Var::ToList(profiles[FileSystem::GetExtension(in)]));
+    Normalize(in, in, Var::ToList(
+        profiles[filter.empty()?FileSystem::GetExtension(in):filter]
+    ));
     /**
      */
     return 0;
