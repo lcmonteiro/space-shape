@@ -101,7 +101,7 @@ static inline int Learn(String in, String filter, String out) {
         Key(filter), 
         // sort by most relevant rules
         Obj(Basic::Sort(Convert::ToList(Obj(Logic::ForEach(std::move(profile), [](auto, Var v) {
-            // sort and select filds
+            // sort and select fields
             return Obj(Logic::ForEach(Basic::Select(Basic::Sort(Convert::ToList(v), [](Var a, Var b) {
                 if(a[1] == b[1]) {
                     if(Basic::Count(Var::ToString(a[0]), '#') > 0) {
