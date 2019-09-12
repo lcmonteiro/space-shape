@@ -20,6 +20,7 @@
  */
 #include "SProfiles.h"
 #include "SNormalize.h"
+#include "SMinimize.h"
 #include "SLearn.h"
 /**
  * ------------------------------------------------------------------------------------------------
@@ -33,10 +34,15 @@ int main(int argc, char** argv) {
     auto args = Convert::FromARG(
         {argv + 1, argv + argc}, {
             {"in"     , "i"}, 
+            {"out"    , "o"}, 
             {"filter" , "f"},
             {"method" , "m"},
             {"profile", "p"},
             {"log"    , "l"},
+            {"base"   , "B"},
+            {"left"   , "L"},
+            {"right"  , "R"},
+            {"next"   , "N"},
         }
     );
     /**
@@ -62,6 +68,9 @@ int main(int argc, char** argv) {
         }},
         {"normalize-recursive", [&](){
             return Normalize(args["i"], args["f"], GetProfiles(args["p"]));
+        }},
+        {"minimize", [&](){
+            return Minimize(args["i"], args["f"], GetProfiles(args["p"]));
         }}
     };
     try {

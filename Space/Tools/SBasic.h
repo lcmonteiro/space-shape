@@ -148,6 +148,15 @@ namespace Basic {
         return std::move(list);
     }
     /**
+     * ------------------------------------------------------------------------
+     * Accumulate
+     * ------------------------------------------------------------------------
+     */
+    template<typename Type, typename Function>
+    inline Type Accumulate(const List& list, Type base, Function f) {
+        return std::accumulate(list.begin(), list.end(), base, f);
+    }
+    /**
      * -----------------------------------------------------------------------
      * Count 
      * ------------------------------------------------------------------------
