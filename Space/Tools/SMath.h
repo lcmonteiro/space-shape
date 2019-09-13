@@ -29,18 +29,17 @@ namespace Math {
      */
     template<typename Type>
     size_t LevensteinDistance(const Type& source, const Type& target) {
-        if (source.size() > target.size()) {
-            return LevensteinDistance(target, source);
-        }
         auto min_size = source.size(), 
         auto max_size = target.size();
         auto distance = std::vector<size_t>(min_size + 1);
-
+        if (min_size > max_size) {
+            return LevensteinDistance(target, source);
+        }
         for (size_t i = 0; i <= min_size; ++i) {
-            lev_dist[i] = i;
+            distance[i] = i;
         }
         for (size_t j = 1; j <= max_size; ++j) {
-            auto previous_diagonal = lev_dist.front()++;
+            auto previous_diagonal = distance.front()++;
             for (size_t i = 1; i <= min_size; ++i) {
                 auto previous_diagonal_save = lev_dist[i];
                 if (source[i - 1] == target[j - 1]) {
