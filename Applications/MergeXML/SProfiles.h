@@ -28,7 +28,7 @@
 Map GetProfiles(String file) {
     return Edit::Insert(Convert::FromJson(File::Reader(file)), Obj{
         {Key("arxml"), PROFILE_ARXML},
-        {Key("xdm"),   PROFILE_XDM}
+        {Key("xdm"),   PROFILE_XDM  }
     });
 }
 /**
@@ -38,7 +38,8 @@ Map GetProfiles(String file) {
  */
 List GetProfile(String file) {
     return Var::List(Map({
-        {Key("arxml"), PROFILE_ARXML}
+        {Key("arxml"), PROFILE_ARXML},
+        {Key("xdm")  , PROFILE_XDM  }
     })[FileSystem::GetExtension(file)]);
 }
 /**

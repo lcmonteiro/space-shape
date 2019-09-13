@@ -50,13 +50,18 @@ static inline int Normalize(const String& in, const String& out, const List& pro
                     continue;
                 }
                 Tools::Variant::Sort(Var::List(v), [&l](Var a, Var b) {
-                    for(Var p : Var::ToList(l)) {
-                        String v_a = Edit::Find(Key(p), a);
-                        String v_b = Edit::Find(Key(p), b);
-                        if(v_a != v_b) {
-                            return v_a < v_b;
+                    try {
+                        for(Var p : Var::ToList(l)) {
+                            String v_a = Edit::Find(Key(p), a);
+                            String v_b = Edit::Find(Key(p), b);
+                            if(v_a != v_b) {
+                                return v_a < v_b;
+                            }
                         }
-                    }
+                    } catch(...) { }
+                    /**
+                     * fallback
+                     */
                     return false;
                 });
             }

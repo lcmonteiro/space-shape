@@ -4,8 +4,8 @@ enable_testing()
 project (SpaceData)
 # properties
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
 add_compile_options(-Wall -Wextra)
-#add_compile_options(-Wall)
 # folder for Applications
 add_subdirectory(Applications)
 # folder for common use
