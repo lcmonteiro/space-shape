@@ -19,6 +19,7 @@
 #else
 #include <map>
 #endif
+#include <ordered_map.h>
 /**
  * space
  */
@@ -752,12 +753,16 @@ using KeyMap  = base::map<__key__, __key__>;
  * Utils operators
  * ------------------------------------------------------------------------------------------------
  */
-inline __list__ operator+(__list__ list, __var__ var) {
+inline KeyList operator+(KeyList list, Key val) {
+    list.push_back(val);
+    return list;
+}
+inline List operator+(List list, Var var) {
     list.push_back(var);
     return list;
 }
-inline __var__ operator+(__obj__ obj, __var__ var) {
-    return __var__(obj) + var;
+inline Var operator+(Obj obj, Var var) {
+    return Var(obj) + var;
 }
 /**
  * ------------------------------------------------------------------------------------------------ 

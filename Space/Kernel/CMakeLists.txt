@@ -1,5 +1,9 @@
 cmake_minimum_required (VERSION 3.8)
 # ---------------------------------------------------------
+# SpaceKernel includes
+# ---------------------------------------------------------
+include(OrderMap.cmake)
+# ---------------------------------------------------------
 # SpaceKernel target
 # ---------------------------------------------------------
 add_library(SpaceKernel
@@ -14,6 +18,8 @@ PUBLIC
 )
 # connect
 target_link_libraries(SpaceKernel
+PUBLIC
+	OrderMap::OrderMap
 PRIVATE
 	SpaceStream
 )

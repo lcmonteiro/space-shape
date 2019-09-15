@@ -38,11 +38,7 @@ int main(int argc, char** argv) {
             {"filter" , "f"},
             {"method" , "m"},
             {"profile", "p"},
-            {"log"    , "l"},
-            {"base"   , "B"},
-            {"left"   , "L"},
-            {"right"  , "R"},
-            {"next"   , "N"},
+            {"log"    , "l"}
         }
     );
     /**
@@ -64,7 +60,7 @@ int main(int argc, char** argv) {
             return Learn(args["i"], args["f"], args["p"]);
         }},
         {"normalize", [&](){
-            return Normalize(args["i"], GetProfiles(args["p"]));
+            return Normalize(args["i"], GetProfiles(args["p"]), args["f"]);
         }},
         {"normalize-recursive", [&](){
             return Normalize(args["i"], args["f"], GetProfiles(args["p"]));

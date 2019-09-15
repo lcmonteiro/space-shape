@@ -50,13 +50,18 @@ static inline int Normalize(const String& in, const String& out, const List& pro
                     continue;
                 }
                 Tools::Variant::Sort(Var::List(v), [&l](Var a, Var b) {
-                    for(Var p : Var::ToList(l)) {
-                        String v_a = Edit::Find(Key(p), a);
-                        String v_b = Edit::Find(Key(p), b);
-                        if(v_a != v_b) {
-                            return v_a < v_b;
+                    try {
+                        for(Var p : Var::ToList(l)) {
+                            String v_a = Edit::Find(Key(p), a);
+                            String v_b = Edit::Find(Key(p), b);
+                            if(v_a != v_b) {
+                                return v_a < v_b;
+                            }
                         }
-                    }
+                    } catch(...) { }
+                    /**
+                     * fallback
+                     */
                     return false;
                 });
             }
@@ -70,7 +75,7 @@ static inline int Normalize(const String& in, const String& out, const List& pro
  * Normalize XML - Recursive
  * ------------------------------------------------------------------------------------------------
  */
-static inline int Normalize(String in, String filter, Map profiles) {
+static inline int NormalizeRecursive(String in, Map profiles, String filter) {
     /**
      * normalize each file
      */
@@ -88,11 +93,13 @@ static inline int Normalize(String in, String filter, Map profiles) {
  * Normalize XML - File 
  * ------------------------------------------------------------------------------------------------
  */
-static inline int Normalize(String in, Map profiles) {
+static inline int Normalize(String in, Map profiles, String filter="") {
     /**
      * write normalize data
      */
-    Normalize(in, in, Var::ToList(profiles[FileSystem::GetExtension(in)]));
+    Normalize(in, in, Var::ToList(
+        profiles[filter.empty()?FileSystem::GetExtension(in):filter]
+    ));
     /**
      */
     return 0;
