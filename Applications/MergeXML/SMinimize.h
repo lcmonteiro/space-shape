@@ -26,6 +26,42 @@
  */
 namespace {
     /**
+     * minimize function
+     */
+    template<typename Function>
+    inline Var Minimize(Var doc, Var ref, String cache, Function find) {
+        if(Var::IsMap(ref) &&  Var::IsMap(doc)) {
+            auto& m_d = Var::Map(doc);
+            auto& m_r = Var::Map(ref);
+            for (auto it = m_r.begin(); it != m_r.end(); ++it) {
+                auto found = m_d.find(it->first);
+                if (found != m_d.end()) {
+                    m_d->second = Minimize(m_d->second, it->first, it->second, organize);
+                }
+            }
+            return doc;
+        }
+        if(Var::IsList(ref) && Var::IsList(doc)) {
+            /**
+             * map the similar ones
+             */
+            auto map = std::multimap<Var, Var>();
+            for(Var d : Var::List(doc)) {
+                map.insert(find(d, Var::List(ref), d);
+            }
+            /**
+             * 
+             */
+            auto map = std::multimap<Var, Var>();
+            for(Var d : Var::List(doc)) {
+                
+                map.insert(find(d, Var::List(ref), d);
+            }
+            l_d = organize(l_d, l_r, cache);
+        }
+        return doc;
+    }
+    /**
      * structure extract
      */
     inline Map Extract(Var document, const List& profile) {
@@ -70,11 +106,26 @@ namespace {
 
 inline int Minimize(const List& files, const List& profile) {
     DEBUG("files", files);
+
+    auto it  = files.begin();
+    auto end = files.end();
+    if(it != end) {
+        auto ref = Convert::FromXML(File::Reader(Var::ToString(*it)));
+        for(++it; it != end; ++it) {
+            DEBUG("minimize", 
+                Minimize(Convert::FromXML(File::Reader(Var::ToString(*it))), ref,
+                    [&profile](Var doc, Var ref, String catch) {
+
+                    }
+                )
+            );
+        }
+    }
     /**
      * write normalize data
      */
     for(Var file: files) {
-        DEBUG("extract", Extract(Convert::FromXML(File::Reader(file)), profile));
+        // DEBUG("extract", Extract(Convert::FromXML(File::Reader(file)), profile));
 
 
         // Convert::ToJson(File::Writer(file), Logic::ForEach(
