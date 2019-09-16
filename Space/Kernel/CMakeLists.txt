@@ -19,7 +19,7 @@ PUBLIC
 # connect
 target_link_libraries(SpaceKernel
 PUBLIC
-	OrderMap::OrderMap
+	#OrderMap::OrderMap
 PRIVATE
 	SpaceStream
 )

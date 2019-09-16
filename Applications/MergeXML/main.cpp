@@ -63,10 +63,10 @@ int main(int argc, char** argv) {
             return Normalize(args["i"], GetProfiles(args["p"]), args["f"]);
         }},
         {"normalize-recursive", [&](){
-            return Normalize(args["i"], args["f"], GetProfiles(args["p"]));
+            return NormalizeRecursive(args["i"], GetProfiles(args["p"]), args["f"]);
         }},
         {"minimize", [&](){
-            return Minimize(args["i"], args["f"], GetProfiles(args["p"]));
+            return Minimize(args["i"], GetProfiles(args["p"]), args["f"]);
         }}
     };
     try {

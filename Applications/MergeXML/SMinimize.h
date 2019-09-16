@@ -121,7 +121,7 @@ inline int Minimize(const List& files, const List& profile) {
  * Compare XML - File 
  * ------------------------------------------------------------------------------------------------
  */
-inline int Minimize(List files, String filter, Map profiles) {
+inline int Minimize(List files, Map profiles, String filter) {
     /**
      * write minimize data
      */
