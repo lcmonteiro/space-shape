@@ -26,6 +26,13 @@
  */
 namespace {
     /**
+     * minimize
+     */
+    inline Var Minimize(Var document, Var reference, const List& profile) {
+    
+        return document;
+    }
+    /**
      * structure extract
      */
     inline Map Extract(Var document, const List& profile) {
@@ -70,11 +77,24 @@ namespace {
 
 inline int Minimize(const List& files, const List& profile) {
     DEBUG("files", files);
+
+    auto it  = files.begin();
+    auto end = files.end();
+    if(it != end) {
+        auto ref = Convert::FromXML(File::Reader(Var::ToString(*it)));
+        for(++it; it != end; ++it) {
+            DEBUG("minimize", 
+                Minimize(Convert::FromXML(
+                    File::Reader(Var::ToString(*it))
+                ), ref, profile)
+            );
+        }
+    }
     /**
      * write normalize data
      */
     for(Var file: files) {
-        DEBUG("extract", Extract(Convert::FromXML(File::Reader(file)), profile));
+        // DEBUG("extract", Extract(Convert::FromXML(File::Reader(file)), profile));
 
 
         // Convert::ToJson(File::Writer(file), Logic::ForEach(
