@@ -113,11 +113,17 @@ inline int Minimize(const List& files, const List& profile) {
         auto ref = Convert::FromXML(File::Reader(Var::ToString(*it)));
         for(++it; it != end; ++it) {
             DEBUG("minimize", 
+<<<<<<< HEAD
                 Minimize(Convert::FromXML(File::Reader(Var::ToString(*it))), ref,
                     [&profile](Var doc, Var ref, String catch) {
 
                     }
                 )
+=======
+                Minimize(Convert::FromXML(
+                    File::Reader(Var::ToString(*it))
+                ), ref, profile)
+>>>>>>> 5c5d716dd73d21186f28ad98fb1a062fb0df9595
             );
         }
     }
