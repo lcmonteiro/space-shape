@@ -16,10 +16,11 @@
 #include <memory>
 #ifdef VAR_UNORDERED_MAP  
 #include <unordered_map>
+#elif  VAR_ORDERED_MAP
+#include <ordered_map.h>
 #else
 #include <map>
 #endif
-//#include <ordered_map.h>
 /**
  * space
  */
@@ -96,6 +97,9 @@ namespace base {
 #ifdef VAR_UNORDERED_MAP  
 template<typename key, typename val>
 using map = std::unordered_map<key, val>;
+#elif VAR_ORDERED_MAP
+template<typename key, typename val>
+using map = tsl::ordered_map<key, val>;
 #else
 template<typename key, typename val>
 using map = std::map<key, val>;

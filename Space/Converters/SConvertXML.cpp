@@ -110,7 +110,7 @@ std::ostream& Convert::ToXML(std::ostream& os, Var data, FORMAT format) {
     /**
      * save on stream
      */
-    doc.save(os, PUGIXML_TEXT("\t"), std::map<FORMAT, unsigned int>({
+    doc.save(os, PUGIXML_TEXT("  "), std::map<FORMAT, unsigned int>({
         {RAW,      pugi::format_raw },
         {FILE,     pugi::format_indent },
         {RAW_NODE, pugi::format_raw | pugi::format_no_declaration }

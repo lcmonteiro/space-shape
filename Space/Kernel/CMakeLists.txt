@@ -1,9 +1,5 @@
 cmake_minimum_required (VERSION 3.8)
 # ---------------------------------------------------------
-# SpaceKernel includes
-# ---------------------------------------------------------
-include(OrderMap.cmake)
-# ---------------------------------------------------------
 # SpaceKernel target
 # ---------------------------------------------------------
 add_library(SpaceKernel
@@ -15,11 +11,12 @@ add_library(SpaceKernel
 target_include_directories(SpaceKernel
 PUBLIC
 	.
+	/mnt/c/Workspace/space-shape/Bin/Space/Containers/ordered_map-prefix/src/ordered_map/include/tsl
 )
 # connect
 target_link_libraries(SpaceKernel
 PUBLIC
-	#OrderMap::OrderMap
+	SpaceContainer
 PRIVATE
 	SpaceStream
 )

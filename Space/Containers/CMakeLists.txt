@@ -1,15 +1,21 @@
 cmake_minimum_required (VERSION 3.8)
 # ---------------------------------------------------------
-# SpaceKernel target
+# SpaceContainer includes
+# ---------------------------------------------------------
+include(OrderMap.cmake)
+# ---------------------------------------------------------
+# SpaceContainer target
 # ---------------------------------------------------------
 add_library(SpaceContainer INTERFACE)
 # includes
 target_include_directories(SpaceContainer 
-	INTERFACE . 
+INTERFACE 
+	.
 )
 # dependencies 
 target_link_libraries(SpaceContainer 
-	INTERFACE SpaceKernel
+INTERFACE
+	OrderMap
 )
 # ---------------------------------------------------------
 # End

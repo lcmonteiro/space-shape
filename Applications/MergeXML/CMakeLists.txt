@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.10)
 # ---------------------------------------------------------
 # project
 # ---------------------------------------------------------
@@ -14,10 +14,10 @@ target_include_directories(MergeXml
 PUBLIC
 	Commands
 )
-# includes
-target_include_directories(MergeXml
-PUBLIC
-	Commands
+# set options
+set_target_properties(MergeXml
+PROPERTIES 
+	LINK_FLAGS	"-static-libgcc -static-libstdc++"
 )
 # dependencies 
 target_link_libraries(MergeXml

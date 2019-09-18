@@ -17,6 +17,7 @@
 #include "SVariable.h"
 #include "SVariant.h"
 #include "SPattern.h"
+#include "SMath.h"
 #include "SFind.h"
 #include "SLog.h"
 /**
@@ -52,13 +53,14 @@ namespace {
         if(Var::IsList(ref) && Var::IsList(doc)) {
             // map the similar objects
             auto map = std::multimap<Link, Link>();
-            for(Var d : Var::List(doc)) {
+            for(Link d : Var::List(doc)) {
                 map.emplace(find(d, Var::List(ref), cache), d);
             }
             // sort objects
             auto list = List();
-            for(Var d : Var::List(doc)) {
-                for(auto it=map.find(d); it != map.find(d); ++it) {
+            for(Link d : Var::List(ref)) {
+                auto ret = map.equal_range(d);
+                for (auto it= ret.first; it != ret.second; ++it) {
                     list.push_back(it->second);
                 }
             }
@@ -69,117 +71,73 @@ namespace {
          */
         return doc;
     }
-    /**
-     * --------------------------------------------------------------------------------------------
-     * structure extract
-     * --------------------------------------------------------------------------------------------
-     */
-    inline Map Extract(Var document, const List& profile) {
-        Map out;
-        DEBUG("d", document);
-        /** 
-         */
-        Logic::ForEach(document, [&profile, &out](auto p, Var v) -> Var {
-            if(!Var::IsList(v)) {
-                return v;
-            }
-            for(auto& r : profile) {
-                if(!Var::IsList(r)) {
-                    continue;
-                }
-                auto k = Var::List(r).at(0);
-                auto l = Var::List(r).at(1); 
-                if(!Tools::Pattern::Match(Var::ToString(p.back()), Var::ToString(k))) {
-                    continue;
-                }
-                DEBUG("1", Convert::ToPath(p));
-                out.emplace(
-                    // key
-                    Convert::ToPath(p), 
-                    // value
-                    Obj(Tools::Basic::Accumulate(Var::List(v), List(), 
-                        [&l](List a, Var e) {
-                            return a + Obj(Tools::Basic::Accumulate(Var::ToList(l), List(), 
-                                [&e](List b, Var v) {
-                                    return b + Edit::Find(Key(v), e);
-                                })
-                            );
-                        })
-                    )
-                );
-            }
-            return v;
-        });
-        return out;
-    }
 }
-
+/**
+ * ------------------------------------------------------------------------------------------------
+ * Interfaces
+ * ------------------------------------------------------------------------------------------------
+ */
 inline int Minimize(const List& files, const List& profile) {
-    DEBUG("files", files);
-
     auto it  = files.begin();
     auto end = files.end();
     if(it != end) {
         auto ref = Convert::FromXML(File::Reader(Var::ToString(*it)));
         for(++it; it != end; ++it) {
-            DEBUG("minimize", 
+            Convert::ToXML(File::Writer(Var::ToString(*it)),
                 Minimize(Convert::FromXML(File::Reader(Var::ToString(*it))), ref,
                     [&profile](auto doc, auto ref, auto key) {
-                        return Obj();
+                        /**
+                         * find all paths
+                         */
+                        std::list<Key> paths;
+                        for(auto& r : profile) {
+                            if(Var::IsList(r)) {
+                                auto k = Var::List(r).at(0);
+                                auto l = Var::List(r).at(1); 
+                                if(Tools::Pattern::Match(key, Var::ToString(k))) {
+                                    for(Var p : Var::ToList(l)) {
+                                        paths.emplace_back(Key(p));
+                                    }
+                                }
+                            }
+                        }
+                        /**
+                         * compute the distance
+                         */
+                        std::map<Link, std::vector<size_t>> map;
+                        for(auto& r : ref) {
+                            std::vector<size_t> value;
+                            for(auto&p : paths) {
+                                value.emplace_back(Tools::Math::LevensteinDistance(
+                                    String(Edit::Find(p, doc)),
+                                    String(Edit::Find(p, r  ))
+                                ));
+                            }
+                            map.emplace(r, std::move(value));
+                        }
+                        /**
+                         * find the minimum distance
+                         */
+                        return *std::min_element(ref.begin(), ref.end(), [&map](auto cur, auto min) {
+                            auto& c = map[cur];
+                            auto& m = map[min];
+                            for(auto it_c = c.begin(), it_m = m.begin(); it_c != c.end(); ++it_c, ++it_m) {
+                                if(*it_c != *it_m) {
+                                    return *it_c < *it_m;
+                                }
+                            }
+                            return false;
+                        });
                     }
                 )
             );
         }
     }
-    /**
-     * write normalize data
-     */
-    for(Var file: files) {
-        // DEBUG("extract", Extract(Convert::FromXML(File::Reader(file)), profile));
-
-
-        // Convert::ToJson(File::Writer(file), Logic::ForEach(
-        //     /**
-        //      * read and normalize
-        //      */
-        //     Convert::FromXML(File::Reader(file)), 
-        //     /**
-        //      * sort lists
-        //      */
-        //     [&profile](auto p, Var v) -> Var {
-        //         if(!Var::IsList(v)) {
-        //             return v;
-        //         }
-        //         for(auto& r : profile) {
-        //             if(!Var::IsList(r)) {
-        //                 continue;
-        //             }
-        //             auto k = Var::List(r).at(0);
-        //             auto l = Var::List(r).at(1); 
-        //             if(!Tools::Pattern::Match(Var::ToString(p.back()), Var::ToString(k))) {
-        //                 continue;
-        //             }
-        //             Tools::Variant::Sort(Var::List(v), [&l](Var a, Var b) {
-
-        //                 for(Var p : Var::ToList(l)) {
-        //                     String v_a = Edit::Find(Key(p), a);
-        //                     String v_b = Edit::Find(Key(p), b);
-        //                     if(v_a != v_b) {
-        //                         return v_a < v_b;
-        //                     }
-        //                 }
-        //                 return false;
-        //             });
-        //         }
-        //         return v;
-        //     }
-        // ));
-    }
     return 0;
 }
 /**
  * ------------------------------------------------------------------------------------------------
- * Compare XML - File 
+ * Minimize XML Files 
  * ------------------------------------------------------------------------------------------------
  */
 inline int Minimize(List files, Map profiles, String filter) {
