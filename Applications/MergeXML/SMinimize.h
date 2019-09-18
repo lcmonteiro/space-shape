@@ -26,43 +26,53 @@
  */
 namespace {
     /**
+     * --------------------------------------------------------------------------------------------
      * minimize function
+     * --------------------------------------------------------------------------------------------
      */
     template<typename Function>
-    inline Var Minimize(Var doc, Var ref, String cache, Function find) {
+    inline Var Minimize(Var doc, Var ref, Function find, String cache={}) {
+        /**
+         * process map 
+         */
         if(Var::IsMap(ref) &&  Var::IsMap(doc)) {
             auto& m_d = Var::Map(doc);
             auto& m_r = Var::Map(ref);
             for (auto it = m_r.begin(); it != m_r.end(); ++it) {
                 auto found = m_d.find(it->first);
                 if (found != m_d.end()) {
-                    m_d->second = Minimize(m_d->second, it->first, it->second, organize);
+                    found->second = Minimize(found->second, it->second, find, it->first);
                 }
             }
             return doc;
-        }
+        } 
+        /**
+         * sort list
+         */
         if(Var::IsList(ref) && Var::IsList(doc)) {
-            /**
-             * map the similar ones
-             */
-            auto map = std::multimap<Var, Var>();
+            // map the similar objects
+            auto map = std::multimap<Link, Link>();
             for(Var d : Var::List(doc)) {
-                map.insert(find(d, Var::List(ref), d);
+                map.emplace(find(d, Var::List(ref), cache), d);
             }
-            /**
-             * 
-             */
-            auto map = std::multimap<Var, Var>();
+            // sort objects
+            auto list = List();
             for(Var d : Var::List(doc)) {
-                
-                map.insert(find(d, Var::List(ref), d);
+                for(auto it=map.find(d); it != map.find(d); ++it) {
+                    list.push_back(it->second);
+                }
             }
-            l_d = organize(l_d, l_r, cache);
+            return Obj(list);
         }
+        /**
+         * others
+         */
         return doc;
     }
     /**
+     * --------------------------------------------------------------------------------------------
      * structure extract
+     * --------------------------------------------------------------------------------------------
      */
     inline Map Extract(Var document, const List& profile) {
         Map out;
@@ -113,17 +123,11 @@ inline int Minimize(const List& files, const List& profile) {
         auto ref = Convert::FromXML(File::Reader(Var::ToString(*it)));
         for(++it; it != end; ++it) {
             DEBUG("minimize", 
-<<<<<<< HEAD
                 Minimize(Convert::FromXML(File::Reader(Var::ToString(*it))), ref,
-                    [&profile](Var doc, Var ref, String catch) {
-
+                    [&profile](auto doc, auto ref, auto key) {
+                        return Obj();
                     }
                 )
-=======
-                Minimize(Convert::FromXML(
-                    File::Reader(Var::ToString(*it))
-                ), ref, profile)
->>>>>>> 5c5d716dd73d21186f28ad98fb1a062fb0df9595
             );
         }
     }
