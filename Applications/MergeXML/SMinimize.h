@@ -80,58 +80,71 @@ namespace {
 inline int Minimize(const List& files, const List& profile) {
     auto it  = files.begin();
     auto end = files.end();
-    if(it != end) {
-        auto ref = Convert::FromXML(File::Reader(Var::ToString(*it)));
-        for(++it; it != end; ++it) {
-            Convert::ToXML(File::Writer(Var::ToString(*it)),
-                Minimize(Convert::FromXML(File::Reader(Var::ToString(*it))), ref,
-                    [&profile](auto doc, auto ref, auto key) {
-                        /**
-                         * find all paths
-                         */
-                        std::list<Key> paths;
-                        for(auto& r : profile) {
-                            if(Var::IsList(r)) {
-                                auto k = Var::List(r).at(0);
-                                auto l = Var::List(r).at(1); 
-                                if(Tools::Pattern::Match(key, Var::ToString(k))) {
-                                    for(Var p : Var::ToList(l)) {
-                                        paths.emplace_back(Key(p));
-                                    }
+    if(it == end) {
+        ERROR("Minimize", "Files Not Found ...");
+        return -1;
+    }
+    /**
+     * normalize current
+     */
+    auto ref = Convert::FromXML(File::Reader(Var::ToString(*it)));
+    if(Var::IsUndefined(ref)) {
+        ERROR("Minimize", "File Reference Not Found ...");
+        return -2;
+    }
+    Convert::ToXML(File::Writer(Var::ToString(*it)), ref);
+    /**
+     * minimize base on ref
+     */
+    for(++it; it != end; ++it) {
+        Convert::ToXML(File::Writer(Var::ToString(*it)),
+            Minimize(Convert::FromXML(File::Reader(Var::ToString(*it))), ref,
+                [&profile](auto doc, auto ref, auto key) {
+                    /**
+                     * find all paths
+                     */
+                    std::list<Key> paths;
+                    for(auto& r : profile) {
+                        if(Var::IsList(r)) {
+                            auto k = Var::List(r).at(0);
+                            auto l = Var::List(r).at(1); 
+                            if(Tools::Pattern::Match(key, Var::ToString(k))) {
+                                for(Var p : Var::ToList(l)) {
+                                    paths.emplace_back(Key(p));
                                 }
                             }
                         }
-                        /**
-                         * compute the distance
-                         */
-                        std::map<Link, std::vector<size_t>> map;
-                        for(auto& r : ref) {
-                            std::vector<size_t> value;
-                            for(auto&p : paths) {
-                                value.emplace_back(Tools::Math::LevensteinDistance(
-                                    String(Edit::Find(p, doc)),
-                                    String(Edit::Find(p, r  ))
-                                ));
-                            }
-                            map.emplace(r, std::move(value));
-                        }
-                        /**
-                         * find the minimum distance
-                         */
-                        return *std::min_element(ref.begin(), ref.end(), [&map](auto cur, auto min) {
-                            auto& c = map[cur];
-                            auto& m = map[min];
-                            for(auto it_c = c.begin(), it_m = m.begin(); it_c != c.end(); ++it_c, ++it_m) {
-                                if(*it_c != *it_m) {
-                                    return *it_c < *it_m;
-                                }
-                            }
-                            return false;
-                        });
                     }
-                )
-            );
-        }
+                    /**
+                     * compute the distance
+                     */
+                    std::map<Link, std::vector<size_t>> map;
+                    for(auto& r : ref) {
+                        std::vector<size_t> value;
+                        for(auto&p : paths) {
+                            value.emplace_back(Tools::Math::LevensteinDistance(
+                                String(Edit::Find(p, doc)),
+                                String(Edit::Find(p, r  ))
+                            ));
+                        }
+                        map.emplace(r, std::move(value));
+                    }
+                    /**
+                     * find the minimum distance
+                     */
+                    return *std::min_element(ref.begin(), ref.end(), [&map](auto cur, auto min) {
+                        auto& c = map[cur];
+                        auto& m = map[min];
+                        for(auto it_c = c.begin(), it_m = m.begin(); it_c != c.end(); ++it_c, ++it_m) {
+                            if(*it_c != *it_m) {
+                                return *it_c < *it_m;
+                            }
+                        }
+                        return false;
+                    });
+                }
+            )
+        );
     }
     return 0;
 }

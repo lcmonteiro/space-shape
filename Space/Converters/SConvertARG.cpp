@@ -14,24 +14,26 @@
  * space
  */
 #include "SConvertARG.h"
+#include "SLog.h"
 /**
  * namespace
  */
 using namespace std;
 /**
  * ------------------------------------------------------------------------------------------------
- *  From XML
+ *  From ARGS
  * ------------------------------------------------------------------------------------------------
- *  Public
+ *  definitions
  * ----------------------------------------------------------------------------
- * definitions
  */
 const auto KEY_PATTERNS = list<regex>{
     regex("-([a-zA-Z])"),
     regex("--([a-zA-Z]+)"),
 };
 /**
+ * ----------------------------------------------------------------------------
  * implementation
+ * ----------------------------------------------------------------------------
  */
 Var Convert::FromARG(vector<string> args, map<string,string> map) {
     /**
@@ -58,15 +60,18 @@ Var Convert::FromARG(vector<string> args, map<string,string> map) {
              * updade as a value 
              */
             switch(out.count(key)) {
-                case 0: // new 
+                case 0: {
                     out[key]= Obj(a);                        
-                break;
-                case 1: // list  
-                    out[key]= Obj{out[key], Obj(a)}; 
-                break;
-                default: // append
-                    Var::List(out[key]) += Obj(a);           
-                break;
+                    break;
+                } 
+                case 1: {
+                    if(Var::IsList(out[key])) {
+                        Var::List(out[key]) += Obj(a);  
+                    } else {
+                        out[key] = Obj{out[key], Obj(a)};
+                    }
+                    break;
+                }
             }
             /**
              * key consumed

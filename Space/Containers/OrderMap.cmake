@@ -22,10 +22,9 @@ file(MAKE_DIRECTORY  ${MAP_INCLUDE_DIRS})
 # -----------------------------------------------------------------------------
 add_library(OrderMap INTERFACE)
 # includes
-message("---------------- ${MAP_INCLUDE_DIRS}")
 target_include_directories(OrderMap 
 INTERFACE 
-    MAP_INCLUDE_DIRS
+    ${MAP_INCLUDE_DIRS}
 )
 # -----------------------------------------------------------------------------
 # End
