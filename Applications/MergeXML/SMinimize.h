@@ -1,10 +1,10 @@
 /**
- * ------------------------------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  * File:   SNormalize.h
  * Author: Luis Monteiro
  *
  * Created on Jun 07, 2019, 12:11 PM
- * ------------------------------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  */
 #ifndef SCOMPARE_H
 #define SCOMPARE_H
@@ -21,20 +21,22 @@
 #include "SFind.h"
 #include "SLog.h"
 /**
- * ------------------------------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  * Minimize - Engine
- * ------------------------------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  */
 namespace {
     /**
-     * --------------------------------------------------------------------------------------------
+     * ------------------------------------------------------------------------------------------------------
      * minimize function
-     * --------------------------------------------------------------------------------------------
+     * ------------------------------------------------------------------------------------------------------
      */
     template<typename Function>
     inline Var Minimize(Var doc, Var ref, Function find, const List& profile, const String& context={}) {
         /**
+         * ----------------------------------------------------------------------------------------
          * process map 
+         * ----------------------------------------------------------------------------------------
          */
         if(Var::IsMap(ref) &&  Var::IsMap(doc)) {
             auto& m_d = Var::Map(doc);
@@ -48,10 +50,16 @@ namespace {
             return doc;
         } 
         /**
+         * ----------------------------------------------------------------------------------------
          * sort list
+         * ----------------------------------------------------------------------------------------
          */
         if(Var::IsList(ref) && Var::IsList(doc)) {
-            // find all paths
+            /**
+             * --------------------------------------------------------------------------
+             * find all paths
+             * --------------------------------------------------------------------------
+             */
             std::list<Key> paths;
             for(auto& r : profile) {
                 if(Var::IsList(r)) {
@@ -64,14 +72,42 @@ namespace {
                     }
                 }
             }
-            // map the similar objects
-            auto map   = std::multimap<Link, Link>();
-            auto cache = Var::List(ref);
-            for(Link d : Var::List(doc)) {
-                auto found = find(d, cache, paths), d);
-                map.emplace(find(d, cache, paths), d);
+            /**
+             * --------------------------------------------------------------------------
+             * match elements
+             * --------------------------------------------------------------------------
+             */
+            auto key = Var::List(ref);
+            auto val = Var::List(doc);
+            auto map = std::multimap<Link, Link>();        
+            auto end = std::remove_if(val.begin(), val.end(), [&key, &map, &paths](auto v) {
+                auto found = std::find_if(key.begin(), key.end(), [&paths, &v](auto k) {
+                    return std::all_of(paths.begin(), paths.end(), [&k, &v](auto p) {
+                        return String(Edit::Find(p, k))==String(Edit::Find(p, v));
+                    });
+                });
+                if(found != key.end()) {
+                    // match
+                    map.emplace(*found, v);
+                    // remove
+                    key.erase(found);
+                    return true;
+                }
+                return false;
+            });
+            /**
+             * --------------------------------------------------------------------------
+             * map the similar objects
+             * --------------------------------------------------------------------------
+             */
+            for(auto it = val.begin(); it != end; ++it) {
+                map.emplace(find(*it, key, paths), *it);
             }
-            // sort objects
+            /**
+             * --------------------------------------------------------------------------
+             * sort objects
+             * --------------------------------------------------------------------------
+             */
             auto list = List();
             for(Link d : Var::List(ref)) {
                 DEBUG("ref", Edit::Find("SHORT-NAME", d));
@@ -85,15 +121,17 @@ namespace {
             return Obj(list);
         }
         /**
+         * ----------------------------------------------------------------------------------------
          * others
+         * ----------------------------------------------------------------------------------------
          */
         return doc;
     }
 }
 /**
- * ------------------------------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  * Interfaces
- * ------------------------------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  */
 inline int Minimize(const List& files, const List& profile) {
     auto it  = files.begin();
@@ -103,7 +141,9 @@ inline int Minimize(const List& files, const List& profile) {
         return -1;
     }
     /**
+     * --------------------------------------------------------------------------------------------
      * normalize current
+     * --------------------------------------------------------------------------------------------
      */
     auto ref = Convert::FromXML(File::Reader(Var::ToString(*it)));
     if(Var::IsUndefined(ref)) {
@@ -112,33 +152,46 @@ inline int Minimize(const List& files, const List& profile) {
     }
     Convert::ToXML(File::Writer(Var::ToString(*it)), ref);
     /**
+     * --------------------------------------------------------------------------------------------
      * minimize base on ref
+     * --------------------------------------------------------------------------------------------
      */
     for(++it; it != end; ++it) {
         Convert::ToXML(File::Writer(Var::ToString(*it)),
             Minimize(Convert::FromXML(File::Reader(Var::ToString(*it))), ref,
-                [](auto doc, auto beg, auto end, auto paths) {
+                [](auto doc, auto ref, auto paths) {
+                    // auto pos = Obj();
+                    // auto min = std::vector<size_t>(ref.size());
+                    // for(auto& r : ref) {
+                    //     for(auto&p : paths) {
+                    //         auto dis = Tools::Math::LevensteinDistance(
+                    //             String(Edit::Find(p, doc)),
+                    //             String(Edit::Find(p, r))
+                    //         );
+                    //         if(dis < min[p]) {
+                    //             min[p] = dis;
+                    //             pos = r;
+                    //         }
+                    //     }
+                    // }
                     /**
                      * compute the distance
                      */
                     std::map<Link, std::vector<size_t>> map;
-                    for(auto it = beg; it != end; ++it) {
+                    for(auto& r : ref) {
                         std::vector<size_t> value;
                         for(auto&p : paths) {
                             value.emplace_back(Tools::Math::LevensteinDistance(
                                 String(Edit::Find(p, doc)),
-                                String(Edit::Find(p, *it))
+                                String(Edit::Find(p, r))
                             ));
-                        }
-                        if(std::accumulate(value.begin(), value.end(), 0) == 0) {
-                            return {true, it};
                         }
                         map.emplace(r, std::move(value));
                     }
                     /**
                      * find the minimum distance
                      */
-                    return {false, *std::min_element(ref.begin(), ref.end(), [&map](auto cur, auto min) {
+                    return *std::min_element(ref.begin(), ref.end(), [&map](auto cur, auto min) {
                         auto& c = map[cur];
                         auto& m = map[min];
                         for(auto it_c = c.begin(), it_m = m.begin(); it_c != c.end(); ++it_c, ++it_m) {
@@ -147,7 +200,7 @@ inline int Minimize(const List& files, const List& profile) {
                             }
                         }
                         return false;
-                    })};
+                    });
                 }, profile
             )
         );
@@ -155,9 +208,9 @@ inline int Minimize(const List& files, const List& profile) {
     return 0;
 }
 /**
- * ------------------------------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  * Minimize XML Files 
- * ------------------------------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  */
 inline int Minimize(List files, Map profiles, String filter) {
     /**
@@ -170,8 +223,8 @@ inline int Minimize(List files, Map profiles, String filter) {
     ));
 }
 /**
- * ------------------------------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  * End
- * ------------------------------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  */
 #endif	/* SCOMPARE_H */
