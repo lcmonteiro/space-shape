@@ -228,15 +228,15 @@ Var Var::Copy(Var var, true_type, true_type) {
  */
 Var Var::Strip(Var var, false_type, false_type) {
 	if (Var::IsMap(var)) {
-		::Map& m = Var::Map(var);
-		for (Map::iterator it = m.begin(); it != m.end(); ++it) {
+		auto& m = Var::Map(var);
+		for (auto it = m.begin(); it != m.end(); ++it) {
 			it->second = Strip(it->second, false_type(), false_type());
 		}
 		return var;
 	}
 	if (Var::IsList(var)) {
-		::List& l = Var::List(var);
-		for (List::iterator it = l.begin(); it != l.end(); ++it) {
+		auto& l = Var::List(var);
+		for (auto it = l.begin(); it != l.end(); ++it) {
 			*it = Strip(*it, false_type(), false_type());
 		}
 		return var;
@@ -245,15 +245,15 @@ Var Var::Strip(Var var, false_type, false_type) {
 }
 Var Var::Strip(Var var, false_type, true_type) {
 	if (Var::IsMap(var)) {
-		::Map& m = Var::Map(var);
-		for (Map::iterator it = m.begin(); it != m.end(); ++it) {
+		auto& m = Var::Map(var);
+		for (auto it = m.begin(); it != m.end(); ++it) {
 			it->second = Strip(it->second, false_type(), true_type());
 		}
 		return var;
 	}
 	if (Var::IsList(var)) {
-		::List& l = Var::List(var);
-		for (List::iterator it = l.begin(); it != l.end(); ++it) {
+		auto& l = Var::List(var);
+		for (auto it = l.begin(); it != l.end(); ++it) {
 			*it = Strip(*it, false_type(), true_type());
 		}
 		return var;
@@ -308,8 +308,8 @@ Var Var::Strip(Var var, true_type, true_type) {
  */
 Var Var::Trim(Var var, false_type, false_type) {
 	if (Var::IsMap(var)) {
-		::Map& m = Var::Map(var);
-		for (Map::iterator it = m.begin(); it != m.end();) {
+		auto& m = Var::Map(var);
+		for (auto it = m.begin(); it != m.end();) {
 			it->second = Trim(it->second, false_type(), false_type());
 			// check 
 			if (Var::IsUndefined(it->second)) {
@@ -322,8 +322,8 @@ Var Var::Trim(Var var, false_type, false_type) {
 			return Obj();
 		}
 	} else if (Var::IsList(var)) {
-		::List& l = Var::List(var);
-		for (List::iterator it = l.begin(); it != l.end();) {
+		auto& l = Var::List(var);
+		for (auto it = l.begin(); it != l.end();) {
 			*it = Trim(*it, false_type(), false_type());
 			// check
 			if (Var::IsUndefined(*it)) {
@@ -340,8 +340,8 @@ Var Var::Trim(Var var, false_type, false_type) {
 }
 Var Var::Trim(Var var, false_type, true_type) {
 	if (Var::IsMap(var)) {
-		::Map& m = Var::Map(var);
-		for (Map::iterator it = m.begin(); it != m.end();) {
+		auto& m = Var::Map(var);
+		for (auto it = m.begin(); it != m.end();) {
 			it->second = Trim(it->second, false_type(), true_type());
 			// check
 			if (Var::IsUndefined(it->second)) {
@@ -354,8 +354,8 @@ Var Var::Trim(Var var, false_type, true_type) {
 			return Obj();
 		}
 	} else if (Var::IsList(var)) {
-		::List& l = Var::List(var);
-		for (List::iterator it = l.begin(); it != l.end();) {
+		auto& l = Var::List(var);
+		for (auto it = l.begin(); it != l.end();) {
 			*it = Trim(*it, false_type(), true_type());
 			// check
 			if (Var::IsUndefined(*it)) {
@@ -438,8 +438,8 @@ Var Var::Trim(Var var, true_type, true_type) {
  */
 Var Var::Shape(Var var, false_type, false_type) {
 	if (Var::IsMap(var)) {
-		::Map& m = Var::Map(var);
-		for (Map::iterator it = m.begin(); it != m.end();) {
+		auto& m = Var::Map(var);
+		for (auto it = m.begin(); it != m.end();) {
 			it->second = Shape(it->second, false_type(), false_type());
 			// check
 			if (Var::IsUndefined(it->second)) {
@@ -451,8 +451,8 @@ Var Var::Shape(Var var, false_type, false_type) {
 		return var;
 	}
 	if (Var::IsList(var)) {
-		::List& l = Var::List(var);
-		for (List::iterator it = l.begin(); it != l.end();) {
+		auto& l = Var::List(var);
+		for (auto it = l.begin(); it != l.end();) {
 			*it = Shape(*it, false_type(), false_type());
 			// check
 			if (Var::IsUndefined(*it)) {
@@ -467,8 +467,8 @@ Var Var::Shape(Var var, false_type, false_type) {
 }
 Var Var::Shape(Var var, false_type, true_type) {
 	if (Var::IsMap(var)) {
-		::Map& m = Var::Map(var);
-		for (Map::iterator it = m.begin(); it != m.end();) {
+		auto& m = Var::Map(var);
+		for (auto it = m.begin(); it != m.end();) {
 			it->second = Shape(it->second, false_type(), true_type());
 			// check
 			if (Var::IsUndefined(it->second)) {
@@ -480,8 +480,8 @@ Var Var::Shape(Var var, false_type, true_type) {
 		return var;
 	}
 	if (Var::IsList(var)) {
-		::List& l = Var::List(var);
-		for (List::iterator it = l.begin(); it != l.end();) {
+		auto& l = Var::List(var);
+		for (auto it = l.begin(); it != l.end();) {
 			*it = Shape(*it, false_type(), true_type());
 			// check
 			if (Var::IsUndefined(*it)) {
