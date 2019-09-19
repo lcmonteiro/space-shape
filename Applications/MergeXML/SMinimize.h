@@ -32,7 +32,7 @@ namespace {
      * --------------------------------------------------------------------------------------------
      */
     template<typename Function>
-    inline Var Minimize(Var doc, Var ref, Function find, String cache={}) {
+    inline Var Minimize(Var doc, Var ref, Function find, const List& profile, const String& context={}) {
         /**
          * process map 
          */
@@ -42,7 +42,7 @@ namespace {
             for (auto it = m_r.begin(); it != m_r.end(); ++it) {
                 auto found = m_d.find(it->first);
                 if (found != m_d.end()) {
-                    found->second = Minimize(found->second, it->second, find, it->first);
+                    found->second = Minimize(found->second, it->second, find, profile, it->first);
                 }
             }
             return doc;
@@ -51,17 +51,35 @@ namespace {
          * sort list
          */
         if(Var::IsList(ref) && Var::IsList(doc)) {
+            // find all paths
+            std::list<Key> paths;
+            for(auto& r : profile) {
+                if(Var::IsList(r)) {
+                    auto k = Var::List(r).at(0);
+                    auto l = Var::List(r).at(1); 
+                    if(Tools::Pattern::Match(context, Var::ToString(k))) {
+                        for(Var p : Var::ToList(l)) {
+                            paths.emplace_back(Key(p));
+                        }
+                    }
+                }
+            }
             // map the similar objects
-            auto map = std::multimap<Link, Link>();
+            auto map   = std::multimap<Link, Link>();
+            auto cache = Var::List(ref);
             for(Link d : Var::List(doc)) {
-                map.emplace(find(d, Var::List(ref), cache), d);
+                auto found = find(d, cache, paths), d);
+                map.emplace(find(d, cache, paths), d);
             }
             // sort objects
             auto list = List();
             for(Link d : Var::List(ref)) {
+                DEBUG("ref", Edit::Find("SHORT-NAME", d));
                 auto ret = map.equal_range(d);
                 for (auto it= ret.first; it != ret.second; ++it) {
-                    list.push_back(it->second);
+                    DEBUG("doc", Edit::Find("SHORT-NAME", it->second));
+                    //list.emplace_back(it->second);
+                    list.emplace_back(Minimize(it->second, d, find, profile, context));
                 }
             }
             return Obj(list);
@@ -99,40 +117,28 @@ inline int Minimize(const List& files, const List& profile) {
     for(++it; it != end; ++it) {
         Convert::ToXML(File::Writer(Var::ToString(*it)),
             Minimize(Convert::FromXML(File::Reader(Var::ToString(*it))), ref,
-                [&profile](auto doc, auto ref, auto key) {
-                    /**
-                     * find all paths
-                     */
-                    std::list<Key> paths;
-                    for(auto& r : profile) {
-                        if(Var::IsList(r)) {
-                            auto k = Var::List(r).at(0);
-                            auto l = Var::List(r).at(1); 
-                            if(Tools::Pattern::Match(key, Var::ToString(k))) {
-                                for(Var p : Var::ToList(l)) {
-                                    paths.emplace_back(Key(p));
-                                }
-                            }
-                        }
-                    }
+                [](auto doc, auto beg, auto end, auto paths) {
                     /**
                      * compute the distance
                      */
                     std::map<Link, std::vector<size_t>> map;
-                    for(auto& r : ref) {
+                    for(auto it = beg; it != end; ++it) {
                         std::vector<size_t> value;
                         for(auto&p : paths) {
                             value.emplace_back(Tools::Math::LevensteinDistance(
                                 String(Edit::Find(p, doc)),
-                                String(Edit::Find(p, r  ))
+                                String(Edit::Find(p, *it))
                             ));
+                        }
+                        if(std::accumulate(value.begin(), value.end(), 0) == 0) {
+                            return {true, it};
                         }
                         map.emplace(r, std::move(value));
                     }
                     /**
                      * find the minimum distance
                      */
-                    return *std::min_element(ref.begin(), ref.end(), [&map](auto cur, auto min) {
+                    return {false, *std::min_element(ref.begin(), ref.end(), [&map](auto cur, auto min) {
                         auto& c = map[cur];
                         auto& m = map[min];
                         for(auto it_c = c.begin(), it_m = m.begin(); it_c != c.end(); ++it_c, ++it_m) {
@@ -141,8 +147,8 @@ inline int Minimize(const List& files, const List& profile) {
                             }
                         }
                         return false;
-                    });
-                }
+                    })};
+                }, profile
             )
         );
     }
