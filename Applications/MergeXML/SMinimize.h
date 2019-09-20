@@ -101,7 +101,10 @@ namespace {
              * --------------------------------------------------------------------------
              */
             for(auto it = val.begin(); it != end; ++it) {
-                map.emplace(find(*it, key, paths), *it);
+                auto found = find(key.begin(), key.end(), *it, paths);
+                if(found != key.end()) {
+                    map.emplace(*found, *it);
+                }
             }
             /**
              * --------------------------------------------------------------------------
@@ -159,39 +162,25 @@ inline int Minimize(const List& files, const List& profile) {
     for(++it; it != end; ++it) {
         Convert::ToXML(File::Writer(Var::ToString(*it)),
             Minimize(Convert::FromXML(File::Reader(Var::ToString(*it))), ref,
-                [](auto doc, auto ref, auto paths) {
-                    // auto pos = Obj();
-                    // auto min = std::vector<size_t>(ref.size());
-                    // for(auto& r : ref) {
-                    //     for(auto&p : paths) {
-                    //         auto dis = Tools::Math::LevensteinDistance(
-                    //             String(Edit::Find(p, doc)),
-                    //             String(Edit::Find(p, r))
-                    //         );
-                    //         if(dis < min[p]) {
-                    //             min[p] = dis;
-                    //             pos = r;
-                    //         }
-                    //     }
-                    // }
+                [](auto begin, auto end, auto doc, auto paths) {
                     /**
                      * compute the distance
                      */
                     std::map<Link, std::vector<size_t>> map;
-                    for(auto& r : ref) {
+                    std::for_each(begin, end, [&doc, &paths, &map](auto ref) {
                         std::vector<size_t> value;
                         for(auto&p : paths) {
                             value.emplace_back(Tools::Math::LevensteinDistance(
                                 String(Edit::Find(p, doc)),
-                                String(Edit::Find(p, r))
+                                String(Edit::Find(p, ref))
                             ));
                         }
-                        map.emplace(r, std::move(value));
-                    }
+                        map.emplace(ref, std::move(value));
+                    });
                     /**
                      * find the minimum distance
                      */
-                    return *std::min_element(ref.begin(), ref.end(), [&map](auto cur, auto min) {
+                    return std::min_element(begin, end, [&map](auto cur, auto min) {
                         auto& c = map[cur];
                         auto& m = map[min];
                         for(auto it_c = c.begin(), it_m = m.begin(); it_c != c.end(); ++it_c, ++it_m) {
