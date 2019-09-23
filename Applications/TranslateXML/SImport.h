@@ -67,14 +67,14 @@ static inline int Import(String in, Var profile, String out) {
             }
             return v;
         });
-        if(it != end) {
-            throw std::runtime_error(String::Build(
-                "mismatch between input(", in, ") and output (", out, ")"));
-        }
         /**
          * write data
          */
         Convert::ToXML(File::Writer(file), data);
+    }
+    if(it != end) {
+        throw std::runtime_error(String::Build(
+            "mismatch between input(", in, ") and output (", out, ")"));
     }
     return 0;
 }
