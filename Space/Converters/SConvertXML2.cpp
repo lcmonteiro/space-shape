@@ -31,63 +31,79 @@ const String __DATA_KEY__ = "$";
  * --------------------------------------------------------------------------------------
  */
 static inline void __LoadNode(
-    pugi::xml_node& node, const Key& key, const Link& data, const Map& schema);
+    pugi::xml_node& node, const Key& key, Link data, Map schema);
 static inline void __LoadNode(
-    pugi::xml_node node,  const Key& key, const List& data, const Map& schema);
+    pugi::xml_node node,  const Key& key, List data, Map schema);
 static inline void __LoadNode(
-    pugi::xml_node node,  const Map& data, const Map& schema);
+    pugi::xml_node node,  Map data, Map schema);
 static inline void __LoadAttr(
-    pugi::xml_node node,  const Map& data, const List& schema);
+    pugi::xml_node node,  Map data, List schema);
 /**
  * --------------------------------------------------------------------------------------
  * implementation
  * --------------------------------------------------------------------------------------
  */
 void __LoadNode(
-    pugi::xml_node& node, const Key& key, const Link& data, const Map& schema) {
-    /**
-     * ------------------------------------------------------------------------
-     * if map add attributs or elements
-     * ------------------------------------------------------------------------
-     */
-    if (Var::IsMap(data)) {
-        if (__ATTR_KEY__ == key) {
-            __LoadAttr(node, Var::Map(data)); 
-            return;
-        }
-        __LoadNode(node.append_child(key.data()), Var::Map(data));
-        return;
-    }
-    /**
-     * ------------------------------------------------------------------------
-     * if list add elements
-     * ------------------------------------------------------------------------
-     */
-    if (Var::IsList(data)) {
-        __LoadNode(node, key, Var::List(data));
-        return;
-    }
-    /**
-     * ------------------------------------------------------------------------
-     * if link bypass
-     * ------------------------------------------------------------------------
-     */
-    if (Var::IsLink(data)) {
-        __LoadNode(node, key, Var::Link(data));
-        return;
-    } 
-    /**
-     * ------------------------------------------------------------------------
-     * is a text elememt
-     * ------------------------------------------------------------------------
-     */
-    if (__TEXT_KEY__ == key) {
-        node.append_child(
-            pugi::node_pcdata).set_value(Var::ToString(v).data());
-    } else {
-        node.append_child(k.data()).append_child(
-            pugi::node_pcdata).set_value(Var::ToString(v).data());
-    }
+    pugi::xml_node& node, const Key& key, Link data, Link schema) {
+    
+    switch (Var::Type(data)) {
+        /**
+         * ------------------------------------------------------------------------
+         * if map add attributs or elements
+         * ------------------------------------------------------------------------
+         */
+        case Obj::Type::MAP: {
+            if (__ATTR_KEY__ == key) {
+                __LoadAttr(node, Var::Map(data), 
+                
+                 Edit::Find(String::Build(key)) ); 
+            } else {
+                __LoadNode(node.append_child(key.data()), Var::Map(data));
+            }
+        } break;
+        /**
+         * ------------------------------------------------------------------------
+         * if list add elements
+         * ------------------------------------------------------------------------
+         */
+
+    
+
+    
+    // if (Var::IsMap(data)) {
+    //     if (__ATTR_KEY__ == key) {
+    //         __LoadAttr(node, Var::Map(data)); 
+    //         return;
+    //     }
+    //     __LoadNode(node.append_child(key.data()), Var::Map(data));
+    //     return;
+    // }
+    
+    // if (Var::IsList(data)) {
+    //     __LoadNode(node, key, Var::List(data));
+    //     return;
+    // }
+    // /**
+    //  * ------------------------------------------------------------------------
+    //  * if link bypass
+    //  * ------------------------------------------------------------------------
+    //  */
+    // if (Var::IsLink(data)) {
+    //     __LoadNode(node, key, Var::Link(data));
+    //     return;
+    // } 
+    // /**
+    //  * ------------------------------------------------------------------------
+    //  * is a text elememt
+    //  * ------------------------------------------------------------------------
+    //  */
+    // if (__TEXT_KEY__ == key) {
+    //     node.append_child(
+    //         pugi::node_pcdata).set_value(Var::ToString(v).data());
+    // } else {
+    //     node.append_child(k.data()).append_child(
+    //         pugi::node_pcdata).set_value(Var::ToString(v).data());
+    // }
 }
 /**
  * ------------------------------------------------------------------------------------------------
