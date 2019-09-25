@@ -15,6 +15,8 @@
  * space
  */
 #include "SConvertXML.h"
+#include "SPattern.h"
+#include "SBasic.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * Definitions
@@ -23,21 +25,6 @@
 const String __ATTR_KEY__ = "#";
 const String __TEXT_KEY__ = "'";
 const String __DATA_KEY__ = "$";
-/**
- * ------------------------------------------------------------------------------------------------
- * To XML - Private
- * ------------------------------------------------------------------------------------------------
- * definitions
- * --------------------------------------------------------------------------------------
- */
-static inline void __LoadNode(
-    pugi::xml_node& node, const Key& key, Link data, Map schema);
-static inline void __LoadNode(
-    pugi::xml_node node,  const Key& key, List data, Map schema);
-static inline void __LoadNode(
-    pugi::xml_node node,  Map data, Map schema);
-static inline void __LoadAttr(
-    pugi::xml_node node,  Map data, List schema);
 
 List schema = {
     // rule 1
@@ -53,66 +40,13 @@ List schema = {
         }
     }
 };
-template<typename Data, typename Schema>
-void forward(pugi::xml_node& node, Key key, Data data, Schema schema){
-    
-}
 
-template<typename HandlerAttributes>
-void foreach(const Map& data, const List& rules, HandlerAttributes hattr) {
-    std::for_each(data.begin(), std::remove_if(data.begin(), data.end(), [](){
-
-    }), [](){
-
-    });
-}
-
-template<typename HandlerAttributes, typename HandlerData>
-void foreach(const Map& data, const List& schema, const Key& key, HandlerAttributes hattr, HandlerData hdata) {
-    /**
-     * extract filter
-     */
-    List filter;
-    auto filter = std::accumulate(schema.begin(), schema.end(), std::pair<List> [](){
-
-    });
-    std::copy_if(schema.begin(), schema.end(), std::back_inserter(filter), [](){
-
-    });
-    /**
-     * process filter
-     */ 
-    for(Var rule : Logic::ToList(filter, [](auto data) { 
-        return List(data[__DATA_KEY__]);
-    })) {
-       auto found = data.find(rule);
-       if(found != data.end())) {
-           hdata(found->first, found->second);
-           data.erase(found);
-       } 
-    }
-    /**
-     * process remaining 
-     */
-    std::for_each(data.begin(), data.end(), [](auto pair) {
-            if(__ATTR_KEY__ == pair.first) {
-                foreach(Var::ToMap(link), );
-            } else {
-                hdata(found->first, found->second);
-            }
-        }
-    );
-}
-
-
+namespace Private {
 /**
- * --------------------------------------------------------------------------------------
- * implementation
- * --------------------------------------------------------------------------------------
- */
-void __LoadNode(
-    pugi::xml_node& node, const Key& key, Link data, Link schema) {
-    
+ * 
+ */    
+template<typename Data, typename Schema>
+void forward(pugi::xml_node& node, Key key, Data data, Schema schema) {
     switch (Var::Type(data)) {
         /**
          * ------------------------------------------------------------------------
@@ -129,81 +63,149 @@ void __LoadNode(
                 }
             );
         } break;
-        /**
-         * ------------------------------------------------------------------------
-         * if list add elements
-         * ------------------------------------------------------------------------
-         */
+    }
+}
+/**
+ * 
+ */
+template<typename HandlerAttributes>
+void foreach(const Map& data, const List& rules, HandlerAttributes hattr) {
+    std::for_each(data.begin(), std::remove_if(data.begin(), data.end(), [](){
 
-    
+    }), [](){
 
-    
-    // if (Var::IsMap(data)) {
-    //     if (__ATTR_KEY__ == key) {
-    //         __LoadAttr(node, Var::Map(data)); 
-    //         return;
-    //     }
-    //     __LoadNode(node.append_child(key.data()), Var::Map(data));
-    //     return;
-    // }
-    
-    // if (Var::IsList(data)) {
-    //     __LoadNode(node, key, Var::List(data));
-    //     return;
-    // }
-    // /**
-    //  * ------------------------------------------------------------------------
-    //  * if link bypass
-    //  * ------------------------------------------------------------------------
-    //  */
-    // if (Var::IsLink(data)) {
-    //     __LoadNode(node, key, Var::Link(data));
-    //     return;
-    // } 
-    // /**
-    //  * ------------------------------------------------------------------------
-    //  * is a text elememt
-    //  * ------------------------------------------------------------------------
-    //  */
-    // if (__TEXT_KEY__ == key) {
-    //     node.append_child(
-    //         pugi::node_pcdata).set_value(Var::ToString(v).data());
-    // } else {
-    //     node.append_child(k.data()).append_child(
-    //         pugi::node_pcdata).set_value(Var::ToString(v).data());
-    // }
+    });
+}
+/**
+ * 
+ */
+template<typename FunctionA, typename FunctionD>
+void foreach(const Map& data, const List& schema, const Key& key, FunctionA attributes, FunctionD element) {
+    /**
+     * extract filter
+     */
+    auto filter = Tools::Basic::Accumulate(schema, std::pair<KeyList, KeyList>(), 
+        [&key](auto acc, auto rule) {
+            auto k = Var::List(rule).at(0);
+            auto v = Var::List(rule).at(1);
+            if(Tools::Pattern::Match(key, Var::ToString(k))) {
+                if(Var::IsMap(v)) {
+                    return {
+                        Tools::Basic::Accumulate(List(v[__DATA_KEY__]), acc.first,  std::plus<>()),
+                        Tools::Basic::Accumulate(List(v[__ATTR_KEY__]), acc.second, std::plus<>())
+                    };
+                }
+                return {
+                    Tools::Basic::Accumulate(List(v), acc.first,  std::plus<>()), 
+                    Tools::Basic::Accumulate(List() , acc.second, std::plus<>())
+                };
+            }
+        }
+    );
+    /**
+     * process filter
+     */ 
+    std::for_each(filter.first.begin(), filter.first.end(), 
+        [&data, &element](auto rule) {
+            auto found = data.find(rule);
+            if(found != data.end()) {
+                element(found->first, found->second);
+                data.erase(found);
+            }
+        }
+    );
+    /**
+     * process remaining 
+     */
+    std::for_each(data.begin(), data.end(), 
+        [&attributes, &element](auto pair) {
+            if(__ATTR_KEY__ == pair.first) {
+                //foreach(Var::ToMap(link), );
+            } else {
+                element(pair.first, pair.second);
+            }
+        }
+    );
+}
 }
 /**
  * ------------------------------------------------------------------------------------------------
- * 
+ * To XML
  * ------------------------------------------------------------------------------------------------
+ * Private
+ * ----------------------------------------------------------------------------
+ * definitions
  */
-void __LoadNode(pugi::xml_node node, const Key& k, const List& data) {
+static inline void __LoadNode(
+    pugi::xml_node& node, const Key& k, const Link& v);
+static inline void __LoadNode(
+    pugi::xml_node node,  const Key& k, List&& data);
+static inline void __LoadNode(
+    pugi::xml_node node,  Map&& data);
+static inline void __LoadAttr(
+    pugi::xml_node node,  Map&& data);
+/**
+ * implementation
+ */
+void __LoadNode(pugi::xml_node& node, const Key& k, const Link& v) {
+    if (Var::IsMap(v)) {
+        /**
+         * check if is attribute key
+         */
+        if (k == __ATTR_KEY__) {
+            __LoadAttr(node, Map(Var::Map(v)));
+
+        } else {
+            __LoadNode(node.append_child(k.data()), Map(Var::Map(v)));
+        }
+    } else if (Var::IsList(v)) {
+        /**
+         * load a list of nodes with same type 
+         */
+        __LoadNode(node, k, List(Var::List(v)));
+    } else if (Var::IsLink(v)) {
+        /**
+         * reload function 
+         */
+        __LoadNode(node, k, Var::Link(v));
+    } else {
+        /**
+         * check if is text key
+         */
+        if (k == __TEXT_KEY__) {
+            node.append_child(
+                pugi::node_pcdata).set_value(Var::ToString(v).data());
+        } else {
+            node.append_child(k.data()).append_child(
+                pugi::node_pcdata).set_value(Var::ToString(v).data());
+        }
+    }
+}
+void __LoadNode(pugi::xml_node node, const Key& k, List&& data) {
     for (auto& v : data) {
         __LoadNode(node, k, v);
     }
 }
-void __LoadNode(pugi::xml_node node, const Map& data) {
+void __LoadNode(pugi::xml_node node, Map&& data) {
     for (auto& v : data) {
         __LoadNode(node, v.first, v.second);
     }
 }
-void __LoadAttr(pugi::xml_node node, const Map& data) {
+void __LoadAttr(pugi::xml_node node, Map&& data) {
     for (auto& v : data) {
-        node.append_attribute(v.first.data()).set_value(Var::ToString(v.second).data());
+        node.append_attribute(
+            v.first.data()) = Var::ToString(v.second).data();
     }
 }
 /**
- * ------------------------------------------------------------------------------------------------
- * To XML - Public
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
+ * Public
+ * ----------------------------------------------------------------------------
  */
-std::ostream& Convert::ToXML(std::ostream& os, Var data, Var schema, FORMAT format) {
+std::ostream& Convert::ToXML(std::ostream& os, Var data, FORMAT format) {
     pugi::xml_document doc;
     /**
-     * ------------------------------------------------------------------------
      * load
-     * ------------------------------------------------------------------------
      */
     if (Var::IsMap(data)) {
         __LoadNode(doc, Map(Var::Map(data)));
@@ -211,9 +213,7 @@ std::ostream& Convert::ToXML(std::ostream& os, Var data, Var schema, FORMAT form
         __LoadNode(doc, Map({{__DATA_KEY__, data}}));
     }
     /**
-     * ------------------------------------------------------------------------
      * save on stream
-     * ------------------------------------------------------------------------
      */
     doc.save(os, PUGIXML_TEXT("  "), std::map<FORMAT, unsigned int>({
         {RAW,      pugi::format_raw },
@@ -348,4 +348,3 @@ Var Convert::FromXML(std::istream&& is) {
  * End
  * ------------------------------------------------------------------------------------------------
  */
-

@@ -7,7 +7,7 @@ include(Pugixml.cmake)
 add_library(SpaceConverter 
 	SConvertJSON.cpp
 	SConvertBin.cpp
-	SConvertXML.cpp
+	SConvertXML2.cpp
 	SConvertB64.cpp
 	SConvertCSV.cpp
 	SConvertARG.cpp

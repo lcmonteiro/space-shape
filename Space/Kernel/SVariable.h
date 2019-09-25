@@ -758,12 +758,12 @@ using KeyMap  = base::map<__key__, __key__>;
  * ------------------------------------------------------------------------------------------------
  */
 inline KeyList operator+(KeyList list, Key val) {
-    list.push_back(val);
-    return list;
+    list.emplace_back(val);
+    return std::move(list);
 }
 inline List operator+(List list, Var var) {
-    list.push_back(var);
-    return list;
+    list.emplace_back(var);
+    return std::move(list);
 }
 inline Var operator+(Obj obj, Var var) {
     return Var(obj) + var;
