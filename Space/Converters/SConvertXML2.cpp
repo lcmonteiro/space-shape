@@ -38,6 +38,73 @@ static inline void __LoadNode(
     pugi::xml_node node,  Map data, Map schema);
 static inline void __LoadAttr(
     pugi::xml_node node,  Map data, List schema);
+
+List schema = {
+    // rule 1
+    Obj{ 
+        Obj("*"), 
+        Obj{ 
+            {Key("#"), Obj{ 
+                Obj("attr")
+            }}, 
+            {Key("$"), Obj{ 
+                Obj("")
+            }} 
+        }
+    }
+};
+template<typename Data, typename Schema>
+void forward(pugi::xml_node& node, Key key, Data data, Schema schema){
+    
+}
+
+template<typename HandlerAttributes>
+void foreach(const Map& data, const List& rules, HandlerAttributes hattr) {
+    std::for_each(data.begin(), std::remove_if(data.begin(), data.end(), [](){
+
+    }), [](){
+
+    });
+}
+
+template<typename HandlerAttributes, typename HandlerData>
+void foreach(const Map& data, const List& schema, const Key& key, HandlerAttributes hattr, HandlerData hdata) {
+    /**
+     * extract filter
+     */
+    List filter;
+    auto filter = std::accumulate(schema.begin(), schema.end(), std::pair<List> [](){
+
+    });
+    std::copy_if(schema.begin(), schema.end(), std::back_inserter(filter), [](){
+
+    });
+    /**
+     * process filter
+     */ 
+    for(Var rule : Logic::ToList(filter, [](auto data) { 
+        return List(data[__DATA_KEY__]);
+    })) {
+       auto found = data.find(rule);
+       if(found != data.end())) {
+           hdata(found->first, found->second);
+           data.erase(found);
+       } 
+    }
+    /**
+     * process remaining 
+     */
+    std::for_each(data.begin(), data.end(), [](auto pair) {
+            if(__ATTR_KEY__ == pair.first) {
+                foreach(Var::ToMap(link), );
+            } else {
+                hdata(found->first, found->second);
+            }
+        }
+    );
+}
+
+
 /**
  * --------------------------------------------------------------------------------------
  * implementation
@@ -53,20 +120,14 @@ void __LoadNode(
          * ------------------------------------------------------------------------
          */
         case Obj::Type::MAP: {
-            if (__ATTR_KEY__ == key) {
-                
-
-                __LoadNode(node, Var::Map(data), [](){
-
-                })
-
-
-                __LoadAttr(node, Var::Map(data), 
-                
-                 Edit::Find(String::Build(key)) ); 
-            } else {
-                __LoadNode(node.append_child(key.data()), Var::Map(data));
-            }
+            foreach(Var::Map(data), Var::ToList(schema), key, 
+                [&node](auto key, auto value) {
+                    node.append_attribute(key.data()).set_value(value.data());
+                }, 
+                [&node](auto key, auto value) {
+                    forward(node.append_child(key.data()), value);
+                }
+            );
         } break;
         /**
          * ------------------------------------------------------------------------
@@ -129,7 +190,7 @@ void __LoadNode(pugi::xml_node node, const Map& data) {
 }
 void __LoadAttr(pugi::xml_node node, const Map& data) {
     for (auto& v : data) {
-        node.append_attribute(v.first.data()) = Var::ToString(v.second).data();
+        node.append_attribute(v.first.data()).set_value(Var::ToString(v.second).data());
     }
 }
 /**

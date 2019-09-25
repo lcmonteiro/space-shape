@@ -138,9 +138,12 @@ namespace Logic {
             lst.emplace_back(v.second); 
         return std::move(lst);
     } 
-    inline List ToList(Var data) {
-        return Var::IsList(data) ? 
-            Var::List(data) : Var::IsDefined(data) ? List{data}: List{};
+    inline List ToList(Var data, List exception) {
+        return Var::IsList(data) ? Var::List(data) : exception;
+    }
+    template<typename Function>
+    static List ToList(Var data, Function exception) {
+        return Var::IsList(data) ? Var::List(data) : exception(data);
     }
     /**
      * ------------------------------------------------------------------------
