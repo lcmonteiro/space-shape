@@ -27,7 +27,7 @@
  * --------------------------------------------------------
  */
 #define DEBUG(_tag_, _msg_) do {                     \
-    std::lock_guard<std::mutex>(SLog::Locker());     \
+    std::lock_guard<std::mutex> lck(SLog::Locker()); \
     SLog::Debug()                                    \
         << "[ " << STime::ToDateTime(STime::Time()) << " ] "\
         << "[  DEBUG  ] "                            \
@@ -41,7 +41,7 @@
  * --------------------------------------------------------
  */
 #define INFO(_tag_, _msg_) do {                      \
-    std::lock_guard<std::mutex>(SLog::Locker());     \
+    std::lock_guard<std::mutex> lck(SLog::Locker()); \
     SLog::Info()                                     \
         << "\e[32m"                                  \
         << "[ " << STime::ToDateTime(STime::Time()) << " ] "\
@@ -57,7 +57,7 @@
  * --------------------------------------------------------
  */
 #define WARNING(_tag_, _msg_) do {                   \
-    std::lock_guard<std::mutex>(SLog::Locker());     \
+    std::lock_guard<std::mutex> lck(SLog::Locker()); \
     SLog::Warning()                                  \
         << "\e[33m"                                  \
         << "[ " << STime::ToDateTime(STime::Time()) << " ] "\
@@ -73,7 +73,7 @@
  * --------------------------------------------------------
  */
 #define ERROR(_tag_, _msg_) do {                     \
-    std::lock_guard<std::mutex>(SLog::Locker());     \
+    std::lock_guard<std::mutex> lck(SLog::Locker()); \
     SLog::Error()                                    \
         << "\e[31m"                                  \
         << "[ " << STime::ToDateTime(STime::Time()) << " ] "\
