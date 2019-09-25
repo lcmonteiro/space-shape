@@ -113,11 +113,8 @@ namespace {
              */
             auto list = List();
             for(Link d : Var::List(ref)) {
-                DEBUG("ref", Edit::Find("SHORT-NAME", d));
                 auto ret = map.equal_range(d);
                 for (auto it= ret.first; it != ret.second; ++it) {
-                    DEBUG("doc", Edit::Find("SHORT-NAME", it->second));
-                    //list.emplace_back(it->second);
                     list.emplace_back(Minimize(it->second, d, find, profile, context));
                 }
             }

@@ -54,6 +54,13 @@ void __LoadNode(
          */
         case Obj::Type::MAP: {
             if (__ATTR_KEY__ == key) {
+                
+
+                __LoadNode(node, Var::Map(data), [](){
+
+                })
+
+
                 __LoadAttr(node, Var::Map(data), 
                 
                  Edit::Find(String::Build(key)) ); 
