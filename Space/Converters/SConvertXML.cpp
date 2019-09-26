@@ -16,27 +16,38 @@
  */
 #include "SConvertXML.h"
 #include "SPattern.h"
+#include "SVariant.h"
 #include "SBasic.h"
+#include "SLog.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * Definitions
  * ------------------------------------------------------------------------------------------------
  */
-const String __ATTR_KEY__ = "#";
-const String __TEXT_KEY__ = "'";
-const String __DATA_KEY__ = "$";
+const String ATTR_KEY = "#";
+const String TEXT_KEY = "'";
+const String NODE_KEY = "$";
 
-List schema = {
+// List schema_model = {
+//     // rule 1
+//     Obj{ 
+//         Obj("*"), 
+//         Obj{ 
+//             {Key("#"), Obj{ 
+//                 Obj("attr")
+//             }}, 
+//             {Key("$"), Obj{ 
+//                 Obj("SHORT-NAME")
+//             }} 
+//         }
+//     }
+// };
+List schema_model = {
     // rule 1
     Obj{ 
         Obj("*"), 
         Obj{ 
-            {Key("#"), Obj{ 
-                Obj("attr")
-            }}, 
-            {Key("$"), Obj{ 
-                Obj("")
-            }} 
+            Obj("SHORT-NAME")
         }
     }
 };
@@ -51,57 +62,55 @@ namespace Private {
  * process 
  * ------------------------------------------------------------------------------------------------
  */    
-template<typename Schema>
-void Forward(pugi::xml_node node, const Key& key, Var data, Schema schema) {
+template<typename S>
+void Forward(pugi::xml_node node, const Key& key, Var data, S schema) {
     switch (Var::Type(data)) {
-        /**
-         * ------------------------------------------------------------------------
-         * if map add attributs end elements
-         * ------------------------------------------------------------------------
-         */
         case Obj::Type::MAP: {
+            DEBUG("map", key);
+            /**
+             * add attributs end elements
+             */
             Foreach(key, Var::Map(data), schema, 
-                [&node](String key, String value) {
+                [&node](auto key, String value) {
                     node.append_attribute(key.data()).set_value(value.data());
                 }, 
+                [&node](auto value) {
+                    node.append_child(pugi::node_pcdata).set_value(value.data());
+                },
                 [&node, &schema](auto key, auto value) {
                     Forward(node.append_child(key.data()), key, value, schema);
                 }
             );
-        } break;
-        /**
-         * ------------------------------------------------------------------------
-         * if list fill element
-         * ------------------------------------------------------------------------
-         */
+            break;
+        } 
         case Obj::Type::LIST: {
-            Tools::Basic::Foreach(Var::List(data), 
+            DEBUG("list", key);
+            /**
+             * fill element
+             */
+            Tools::Variant::Foreach(Var::List(data), 
                 [&node, &key, &schema](Var value) {
                     Forward(node, key, value, schema);
+                },
+                [&node, &key, &schema](Var value) {
+                    Forward(node.append_child(key.data()), key, value, schema);
                 }
             );
-        } break;
-        /**
-         * ------------------------------------------------------------------------
-         * if link forward
-         * ------------------------------------------------------------------------
-         */
+            break;
+        } 
         case Obj::Type::LINK: {
+            /**
+             * link forward
+             */
             Forward(node, key, data, schema);
-        } break;
-        /**
-         * ------------------------------------------------------------------------
-         * default element data  
-         * ------------------------------------------------------------------------
-         */
+            break;
+        } 
         default: {
-            if (key == __TEXT_KEY__) {
-                node.append_child(
-                    pugi::node_pcdata).set_value(Var::ToString(data).data());
-            } else {
-                node.append_child(key.data()).append_child(
-                    pugi::node_pcdata).set_value(Var::ToString(data).data());
-            }
+            /**
+             * data element  
+             */
+            node.append_child(
+                pugi::node_pcdata).set_value(Var::ToString(data).data());   
         }
     }
 }
@@ -110,8 +119,8 @@ void Forward(pugi::xml_node node, const Key& key, Var data, Schema schema) {
  * process schema
  * ------------------------------------------------------------------------------------------------
  */
-template<typename Filter, typename Handler>
-void Foreach(Map data, Filter filter, Handler handler) {
+template<typename F, typename H>
+void Foreach(Map data, F filter, H handler) {
     /**
      * process filter
      */ 
@@ -144,8 +153,8 @@ struct Plus {
         return std::move(left);
     }
 };
-template<typename Schema, typename HandlerA, typename HandlerE>
-void Foreach(const Key& key, Map data, Schema schema, HandlerA attributes, HandlerE elements) {
+template<typename S, typename A, typename C, typename E>
+void Foreach(const Key& key, Map data, S schema, A attributes, C content, E elements) {
     /**
      * extract filters (nodes, attributes)
      */
@@ -156,8 +165,8 @@ void Foreach(const Key& key, Map data, Schema schema, HandlerA attributes, Handl
             if(Tools::Pattern::Match(key, Var::ToString(k))) {
                 if(Var::IsMap(v)) {
                     return {
-                        Tools::Basic::Accumulate(List(v[__DATA_KEY__]), acc.first,  Plus()),
-                        Tools::Basic::Accumulate(List(v[__ATTR_KEY__]), acc.second, Plus())
+                        Tools::Basic::Accumulate(List(v[NODE_KEY]), acc.first,  Plus()),
+                        Tools::Basic::Accumulate(List(v[ATTR_KEY]), acc.second, Plus())
                     };
                 }
                 return {
@@ -168,22 +177,35 @@ void Foreach(const Key& key, Map data, Schema schema, HandlerA attributes, Handl
             return std::move(acc);
         }
     );
-    /**
-     * process attributes 
-     */
-    auto found = data.find(__ATTR_KEY__);
-    if(found != data.end()) {
-        if(Var::IsMap(found->second)) {
-            Foreach(Var::Map(found->second), filter.second, attributes);
-            data.erase(found);
-        }        
+    { 
+        /**
+         * process attributes 
+         */  
+        auto found = data.find(ATTR_KEY);
+        if(found != data.end()) {
+            if(Var::IsMap(found->second)) {
+                Foreach(Var::Map(found->second), filter.second, attributes);
+                data.erase(found);
+            }        
+        }
+    }
+    {
+        /**
+         * process content 
+         */
+        auto found = data.find(TEXT_KEY);
+        if(found != data.end()) {
+            if(Var::IsString(found->second)) {
+                content(Var::String(found->second));
+                data.erase(found);
+            }        
+        }
     }
     /**
      * process elements
      */ 
     Foreach(data, filter.first, elements);
-}
-}
+}}
 /**
  * ----------------------------------------------------------------------------------------------------------
  * ToXML - Public
@@ -191,10 +213,12 @@ void Foreach(const Key& key, Map data, Schema schema, HandlerA attributes, Handl
  */
 std::ostream& Convert::ToXML(std::ostream& os, Var data, Var schema, FORMAT format) {
     pugi::xml_document doc;
+
+    //schema = Obj(schema_model);
     /**
      * load
      */
-    Private::Forward(doc, "", data, Var::ToList(schema));
+    Private::Forward(doc, {}, data, Var::ToList(schema));
     /**
      * save on stream
      */
@@ -273,7 +297,7 @@ Var __UnLoadNode(pugi::xml_node& node) {
         /**
          * insert attributes
          */
-        nodes.emplace(__ATTR_KEY__, Obj(std::move(attr)));
+        nodes.emplace(ATTR_KEY, Obj(std::move(attr)));
         /**
          * insert text
          */
@@ -281,7 +305,7 @@ Var __UnLoadNode(pugi::xml_node& node) {
             /**
              * insert text 
              */
-            nodes.emplace(__TEXT_KEY__, Obj(std::move(text)));
+            nodes.emplace(TEXT_KEY, Obj(std::move(text)));
         }
         return Obj(std::move(nodes));
     }
@@ -290,7 +314,7 @@ Var __UnLoadNode(pugi::xml_node& node) {
             /**
              * insert text 
              */
-            nodes.emplace(__TEXT_KEY__, Obj(std::move(text)));
+            nodes.emplace(TEXT_KEY, Obj(std::move(text)));
         }
         return Obj(std::move(nodes));
     }
@@ -307,9 +331,7 @@ Map __UnLoadAttr(pugi::xml_node& node) {
     for (pugi::xml_attribute attr : node.attributes()) {
         auto res = out.insert(make_pair(attr.name(), Obj(attr.value())));
         if ( !res.second ) {
-            String error="xml::tag=";
-            error.append(attr.name());
-            throw std::range_error(error);
+            throw std::range_error(String::Build("xml::attr=", attr.name()));
         }
     }
     return out;

@@ -41,6 +41,21 @@ namespace Variant {
         list = Sort(std::move(list), cmp);
         return list;
     }
+    /**
+     * ------------------------------------------------------------------------
+     * Foreach 
+     * ------------------------------------------------------------------------
+     */
+    template<typename Sequency, typename Function1, typename FunctionN>
+    inline FunctionN Foreach(const Sequency& seq, Function1 first, FunctionN next) {
+        auto it  = seq.begin();
+        auto end = seq.end();
+        if(it != end) 
+            first(*it);
+        for (++it ; it != end; ++it)
+		    next(*it);
+	    return next;
+    }
 }}
 /**
  * --------------------------------------------------------------------------------------------------------------------
