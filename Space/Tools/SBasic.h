@@ -165,6 +165,15 @@ namespace Basic {
         return std::count(str.begin(), str.end(), find);
     }
     /**
+     * -----------------------------------------------------------------------
+     * Foreach 
+     * ------------------------------------------------------------------------
+     */
+    template<typename Sequency, typename Function>
+    inline Function Foreach(const Sequency& seq, Function callback) {
+        return std::for_each(seq.begin(), seq.end(), callback);
+    }
+    /**
      * --------------------------------------------------------------------------------------------
      * Var tools
      * --------------------------------------------------------------------------------------------

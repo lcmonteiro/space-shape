@@ -1,10 +1,10 @@
 /**
- * ------------------------------------------------------------------------------------------------
+ * --------------------------------------------------------------------------------------------------------------------
  * File:   XmlConverter.h
  * Author: Luis Monteiro
  *
  * Created on Apr 10, 2019, 12:11 PM
- * ------------------------------------------------------------------------------------------------
+ * ---------------------------------------------------------------------------------------------------------------------
  */
 #include <pugixml.hpp>
 /**
@@ -15,6 +15,8 @@
  * space
  */
 #include "SConvertXML.h"
+#include "SPattern.h"
+#include "SBasic.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * Definitions
@@ -23,90 +25,176 @@
 const String __ATTR_KEY__ = "#";
 const String __TEXT_KEY__ = "'";
 const String __DATA_KEY__ = "$";
-/**
- * ------------------------------------------------------------------------------------------------
- * To XML
- * ------------------------------------------------------------------------------------------------
- * Private
- * ----------------------------------------------------------------------------
- * definitions
- */
-static inline void __LoadNode(
-    pugi::xml_node& node, const Key& k, const Link& v);
-static inline void __LoadNode(
-    pugi::xml_node node,  const Key& k, List&& data);
-static inline void __LoadNode(
-    pugi::xml_node node,  Map&& data);
-static inline void __LoadAttr(
-    pugi::xml_node node,  Map&& data);
-/**
- * implementation
- */
-void __LoadNode(pugi::xml_node& node, const Key& k, const Link& v) {
-    if (Var::IsMap(v)) {
-        /**
-         * check if is attribute key
-         */
-        if (k == __ATTR_KEY__) {
-            __LoadAttr(node, Map(Var::Map(v)));
 
-        } else {
-            __LoadNode(node.append_child(k.data()), Map(Var::Map(v)));
-        }
-    } else if (Var::IsList(v)) {
-        /**
-         * load a list of nodes with same type 
-         */
-        __LoadNode(node, k, List(Var::List(v)));
-    } else if (Var::IsLink(v)) {
-        /**
-         * reload function 
-         */
-        __LoadNode(node, k, Var::Link(v));
-    } else {
-        /**
-         * check if is text key
-         */
-        if (k == __TEXT_KEY__) {
-            node.append_child(
-                pugi::node_pcdata).set_value(Var::ToString(v).data());
-        } else {
-            node.append_child(k.data()).append_child(
-                pugi::node_pcdata).set_value(Var::ToString(v).data());
+List schema = {
+    // rule 1
+    Obj{ 
+        Obj("*"), 
+        Obj{ 
+            {Key("#"), Obj{ 
+                Obj("attr")
+            }}, 
+            {Key("$"), Obj{ 
+                Obj("")
+            }} 
         }
     }
-}
-void __LoadNode(pugi::xml_node node, const Key& k, List&& data) {
-    for (auto& v : data) {
-        __LoadNode(node, k, v);
-    }
-}
-void __LoadNode(pugi::xml_node node, Map&& data) {
-    for (auto& v : data) {
-        __LoadNode(node, v.first, v.second);
-    }
-}
-void __LoadAttr(pugi::xml_node node, Map&& data) {
-    for (auto& v : data) {
-        node.append_attribute(
-            v.first.data()) = Var::ToString(v.second).data();
+};
+/**
+ * ----------------------------------------------------------------------------------------------------------
+ * ToXML - Private
+ * ----------------------------------------------------------------------------------------------------------
+ */
+namespace Private {
+/**
+ * ------------------------------------------------------------------------------------------------
+ * process 
+ * ------------------------------------------------------------------------------------------------
+ */    
+template<typename Schema>
+void Forward(pugi::xml_node node, const Key& key, Var data, Schema schema) {
+    switch (Var::Type(data)) {
+        /**
+         * ------------------------------------------------------------------------
+         * if map add attributs end elements
+         * ------------------------------------------------------------------------
+         */
+        case Obj::Type::MAP: {
+            Foreach(key, Var::Map(data), schema, 
+                [&node](String key, String value) {
+                    node.append_attribute(key.data()).set_value(value.data());
+                }, 
+                [&node, &schema](auto key, auto value) {
+                    Forward(node.append_child(key.data()), key, value, schema);
+                }
+            );
+        } break;
+        /**
+         * ------------------------------------------------------------------------
+         * if list fill element
+         * ------------------------------------------------------------------------
+         */
+        case Obj::Type::LIST: {
+            Tools::Basic::Foreach(Var::List(data), 
+                [&node, &key, &schema](Var value) {
+                    Forward(node, key, value, schema);
+                }
+            );
+        } break;
+        /**
+         * ------------------------------------------------------------------------
+         * if link forward
+         * ------------------------------------------------------------------------
+         */
+        case Obj::Type::LINK: {
+            Forward(node, key, data, schema);
+        } break;
+        /**
+         * ------------------------------------------------------------------------
+         * default element data  
+         * ------------------------------------------------------------------------
+         */
+        default: {
+            if (key == __TEXT_KEY__) {
+                node.append_child(
+                    pugi::node_pcdata).set_value(Var::ToString(data).data());
+            } else {
+                node.append_child(key.data()).append_child(
+                    pugi::node_pcdata).set_value(Var::ToString(data).data());
+            }
+        }
     }
 }
 /**
- * ----------------------------------------------------------------------------
- * Public
- * ----------------------------------------------------------------------------
+ * ------------------------------------------------------------------------------------------------
+ * process schema
+ * ------------------------------------------------------------------------------------------------
  */
-std::ostream& Convert::ToXML(std::ostream& os, Var data, FORMAT format) {
+template<typename Filter, typename Handler>
+void Foreach(Map data, Filter filter, Handler handler) {
+    /**
+     * process filter
+     */ 
+    std::for_each(filter.begin(), filter.end(), 
+        [&data, &handler](auto rule) {
+            auto found = data.find(rule);
+            if(found != data.end()) {
+                handler(found->first, Var(found->second));
+                data.erase(found);
+            }
+        }
+    );
+    /**
+     * process remaining 
+     */
+    std::for_each(data.begin(), data.end(), 
+        [&handler](auto pair) {
+            handler(pair.first, Var(pair.second));
+        }
+    );
+}
+/**
+ * ------------------------------------------------------------------------------------------------
+ * process element
+ * ------------------------------------------------------------------------------------------------
+ */
+struct Plus {	
+    KeyList operator()(KeyList& left, const Link& right) const {	
+        left.emplace_back(Var::ToString(right));
+        return std::move(left);
+    }
+};
+template<typename Schema, typename HandlerA, typename HandlerE>
+void Foreach(const Key& key, Map data, Schema schema, HandlerA attributes, HandlerE elements) {
+    /**
+     * extract filters (nodes, attributes)
+     */
+    auto filter = Tools::Basic::Accumulate(schema, std::pair<KeyList, KeyList>(), 
+        [&key](auto acc, auto rule) -> std::pair<KeyList, KeyList> {
+            Var k = Var::List(rule).at(0);
+            Var v = Var::List(rule).at(1);
+            if(Tools::Pattern::Match(key, Var::ToString(k))) {
+                if(Var::IsMap(v)) {
+                    return {
+                        Tools::Basic::Accumulate(List(v[__DATA_KEY__]), acc.first,  Plus()),
+                        Tools::Basic::Accumulate(List(v[__ATTR_KEY__]), acc.second, Plus())
+                    };
+                }
+                return {
+                    Tools::Basic::Accumulate(List(v), acc.first,  Plus()), 
+                    Tools::Basic::Accumulate(List() , acc.second, Plus())
+                };
+            }
+            return std::move(acc);
+        }
+    );
+    /**
+     * process attributes 
+     */
+    auto found = data.find(__ATTR_KEY__);
+    if(found != data.end()) {
+        if(Var::IsMap(found->second)) {
+            Foreach(Var::Map(found->second), filter.second, attributes);
+            data.erase(found);
+        }        
+    }
+    /**
+     * process elements
+     */ 
+    Foreach(data, filter.first, elements);
+}
+}
+/**
+ * ----------------------------------------------------------------------------------------------------------
+ * ToXML - Public
+ * ----------------------------------------------------------------------------------------------------------
+ */
+std::ostream& Convert::ToXML(std::ostream& os, Var data, Var schema, FORMAT format) {
     pugi::xml_document doc;
     /**
      * load
      */
-    if (Var::IsMap(data)) {
-        __LoadNode(doc, Map(Var::Map(data)));
-    } else {
-        __LoadNode(doc, Map({{__DATA_KEY__, data}}));
-    }
+    Private::Forward(doc, "", data, Var::ToList(schema));
     /**
      * save on stream
      */
@@ -117,8 +205,8 @@ std::ostream& Convert::ToXML(std::ostream& os, Var data, FORMAT format) {
     }).at(format));
     return os;
 }
-std::ostream& Convert::ToXML(std::ostream&& os, Var data, FORMAT format) {
-    return ToXML(os, data, format);
+std::ostream& Convert::ToXML(std::ostream&& os, Var data, Var schema, FORMAT format) {
+    return ToXML(os, data, schema, format);
 }
 /**
  * ------------------------------------------------------------------------------------------------
@@ -243,4 +331,3 @@ Var Convert::FromXML(std::istream&& is) {
  * End
  * ------------------------------------------------------------------------------------------------
  */
-

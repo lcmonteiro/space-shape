@@ -36,9 +36,9 @@ namespace Convert {
      * ------------------------------------------------------------------------
      */
     std::ostream& ToXML(
-        std::ostream&  os, Var data, FORMAT format = FORMAT::FILE);
+        std::ostream&  os, Var data, Var schema = Obj(), FORMAT format = FORMAT::FILE);
     std::ostream& ToXML(
-        std::ostream&& os, Var data, FORMAT format = FORMAT::FILE); 
+        std::ostream&& os, Var data, Var schema = Obj(), FORMAT format = FORMAT::FILE); 
     /**
      * ------------------------------------------------------------------------
      *  From XML
