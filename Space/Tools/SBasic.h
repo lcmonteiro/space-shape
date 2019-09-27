@@ -173,6 +173,12 @@ namespace Basic {
     inline Function Foreach(const Sequency& seq, Function callback) {
         return std::for_each(seq.begin(), seq.end(), callback);
     }
+    template<typename Function>
+    inline Function ForEach(const Map& map, Function callback) {
+        for(auto& v: map)
+            callback(v.first, v.second);
+        return callback;
+    }
     /**
      * --------------------------------------------------------------------------------------------
      * Var tools

@@ -18,7 +18,6 @@
 #include "SPattern.h"
 #include "SVariant.h"
 #include "SBasic.h"
-#include "SLog.h"
 /**
  * ------------------------------------------------------------------------------------------------
  * Definitions
@@ -27,30 +26,6 @@
 const String ATTR_KEY = "#";
 const String TEXT_KEY = "'";
 const String NODE_KEY = "$";
-
-// List schema_model = {
-//     // rule 1
-//     Obj{ 
-//         Obj("*"), 
-//         Obj{ 
-//             {Key("#"), Obj{ 
-//                 Obj("attr")
-//             }}, 
-//             {Key("$"), Obj{ 
-//                 Obj("SHORT-NAME")
-//             }} 
-//         }
-//     }
-// };
-List schema_model = {
-    // rule 1
-    Obj{ 
-        Obj("*"), 
-        Obj{ 
-            Obj("SHORT-NAME")
-        }
-    }
-};
 /**
  * ----------------------------------------------------------------------------------------------------------
  * ToXML - Private
@@ -59,58 +34,42 @@ List schema_model = {
 namespace Private {
 /**
  * ------------------------------------------------------------------------------------------------
- * process 
+ * Fill XML elements 
  * ------------------------------------------------------------------------------------------------
  */    
 template<typename S>
-void Forward(pugi::xml_node node, const Key& key, Var data, S schema) {
+void Fill(pugi::xml_node node, const Key& key, Var data, S schema) {
     switch (Var::Type(data)) {
         case Obj::Type::MAP: {
-            DEBUG("map", key);
-            /**
-             * add attributs end elements
-             */
-            Foreach(key, Var::Map(data), schema, 
-                [&node](auto key, String value) {
-                    node.append_attribute(key.data()).set_value(value.data());
+            auto child = node.append_child(key.data());
+            Parse(key, Var::Map(data), schema, 
+                [&child](auto key, String value) {
+                    child.append_attribute(key.data()).set_value(value.data());
                 }, 
-                [&node](auto value) {
-                    node.append_child(pugi::node_pcdata).set_value(value.data());
+                [&child](auto value) {
+                    child.append_child(pugi::node_pcdata).set_value(value.data());
                 },
-                [&node, &schema](auto key, auto value) {
-                    Forward(node.append_child(key.data()), key, value, schema);
+                [&child, &schema](auto key, auto value) {
+                    Fill(child, key, value, schema);
                 }
             );
             break;
         } 
         case Obj::Type::LIST: {
-            DEBUG("list", key);
-            /**
-             * fill element
-             */
-            Tools::Variant::Foreach(Var::List(data), 
+            Tools::Basic::Foreach(Var::List(data), 
                 [&node, &key, &schema](Var value) {
-                    Forward(node, key, value, schema);
-                },
-                [&node, &key, &schema](Var value) {
-                    Forward(node.append_child(key.data()), key, value, schema);
+                    Fill(node, key, value, schema);
                 }
             );
             break;
         } 
         case Obj::Type::LINK: {
-            /**
-             * link forward
-             */
-            Forward(node, key, data, schema);
+            Fill(node, key, data, schema);
             break;
         } 
         default: {
-            /**
-             * data element  
-             */
-            node.append_child(
-                pugi::node_pcdata).set_value(Var::ToString(data).data());   
+            auto child = node.append_child(key.data());
+            child.append_child(pugi::node_pcdata).set_value(Var::ToString(data).data());  
         }
     }
 }
@@ -120,31 +79,21 @@ void Forward(pugi::xml_node node, const Key& key, Var data, S schema) {
  * ------------------------------------------------------------------------------------------------
  */
 template<typename F, typename H>
-void Foreach(Map data, F filter, H handler) {
-    /**
-     * process filter
-     */ 
-    std::for_each(filter.begin(), filter.end(), 
-        [&data, &handler](auto rule) {
-            auto found = data.find(rule);
-            if(found != data.end()) {
-                handler(found->first, Var(found->second));
-                data.erase(found);
-            }
+void Parse(Map data, F filter, H handler) {
+    Tools::Basic::Foreach(filter, [&data, &handler](auto rule) {
+        auto found = data.find(rule);
+        if(found != data.end()) {
+            handler(found->first, Var(found->second));
+            data.erase(found);
         }
-    );
-    /**
-     * process remaining 
-     */
-    std::for_each(data.begin(), data.end(), 
-        [&handler](auto pair) {
-            handler(pair.first, Var(pair.second));
-        }
-    );
+    });
+    Tools::Basic::Foreach(data, [&handler](auto pair) {
+        handler(pair.first, Var(pair.second));
+    });
 }
 /**
  * ------------------------------------------------------------------------------------------------
- * process element
+ * parse element
  * ------------------------------------------------------------------------------------------------
  */
 struct Plus {	
@@ -154,10 +103,7 @@ struct Plus {
     }
 };
 template<typename S, typename A, typename C, typename E>
-void Foreach(const Key& key, Map data, S schema, A attributes, C content, E elements) {
-    /**
-     * extract filters (nodes, attributes)
-     */
+void Parse(const Key& key, Map data, S schema, A attributes, C content, E elements) {
     auto filter = Tools::Basic::Accumulate(schema, std::pair<KeyList, KeyList>(), 
         [&key](auto acc, auto rule) -> std::pair<KeyList, KeyList> {
             Var k = Var::List(rule).at(0);
@@ -178,21 +124,15 @@ void Foreach(const Key& key, Map data, S schema, A attributes, C content, E elem
         }
     );
     { 
-        /**
-         * process attributes 
-         */  
         auto found = data.find(ATTR_KEY);
         if(found != data.end()) {
             if(Var::IsMap(found->second)) {
-                Foreach(Var::Map(found->second), filter.second, attributes);
+                Parse(Var::Map(found->second), filter.second, attributes);
                 data.erase(found);
             }        
         }
     }
     {
-        /**
-         * process content 
-         */
         auto found = data.find(TEXT_KEY);
         if(found != data.end()) {
             if(Var::IsString(found->second)) {
@@ -201,10 +141,7 @@ void Foreach(const Key& key, Map data, S schema, A attributes, C content, E elem
             }        
         }
     }
-    /**
-     * process elements
-     */ 
-    Foreach(data, filter.first, elements);
+    Parse(data, filter.first, elements);
 }}
 /**
  * ----------------------------------------------------------------------------------------------------------
@@ -213,12 +150,12 @@ void Foreach(const Key& key, Map data, S schema, A attributes, C content, E elem
  */
 std::ostream& Convert::ToXML(std::ostream& os, Var data, Var schema, FORMAT format) {
     pugi::xml_document doc;
-
-    //schema = Obj(schema_model);
     /**
-     * load
+     * Fill element
      */
-    Private::Forward(doc, {}, data, Var::ToList(schema));
+    Tools::Basic::ForEach(Var::ToMap(data), [&schema, &doc](auto key, auto val) {
+        Private::Fill(doc, key, val, Var::ToList(schema));
+    });    
     /**
      * save on stream
      */
@@ -233,123 +170,99 @@ std::ostream& Convert::ToXML(std::ostream&& os, Var data, Var schema, FORMAT for
     return ToXML(os, data, schema, format);
 }
 /**
- * ------------------------------------------------------------------------------------------------
- *  From XML
- * ------------------------------------------------------------------------------------------------
- *  Private
- * ----------------------------------------------------------------------------
- * definitions
+ * ----------------------------------------------------------------------------------------------------------
+ *  From XML - Private
+ * ----------------------------------------------------------------------------------------------------------
  */
-static inline Var __UnLoadNode(pugi::xml_node& node);
-static inline Map __UnLoadAttr(pugi::xml_node& node);
-/**
- * implementation
- */
-Var __UnLoadNode(pugi::xml_node& node) {
+namespace Private {
     /**
-     * get attributes
+     * ------------------------------------------------------------------------------------------------
+     * unload attributes 
+     * ------------------------------------------------------------------------------------------------
      */
-    Map attr = __UnLoadAttr(node);
+    Map UnloadAttr(pugi::xml_node& node) {
+        //the attribute name must be unique
+        Map out;
+        for (pugi::xml_attribute attr : node.attributes()) {
+            auto res = out.insert(make_pair(attr.name(), Obj(attr.value())));
+            if ( !res.second ) {
+                throw std::range_error(String::Build("xml::attr=", attr.name()));
+            }
+        }
+        return out;
+    }
     /**
-     * get children
+     * ------------------------------------------------------------------------------------------------
+     * unload node 
+     * ------------------------------------------------------------------------------------------------
      */
-    Map nodes;
-    String text;
-    for (pugi::xml_node child : node.children()) {
-        switch (child.type()) {
-            case pugi::xml_node_type::node_element:
-            {
-                Map::iterator it = nodes.find(child.name());
-                if (it == nodes.end()) {
-                    /**
-                     * new
-                     */
-                    nodes[child.name()] = __UnLoadNode(child);
-                } else if (Var::IsList(it->second)) {
-                    /**
-                     * append
-                     */
-                    Var::List(it->second).emplace_back(__UnLoadNode(child));
-                } else {
-                    /**
-                     * update with list
-                     */
-                    nodes[child.name()] = Obj{it->second, __UnLoadNode(child)};
+    Var UnloadNode(pugi::xml_node& node) {
+        auto nodes = Map();
+        auto text  = String();
+        auto attr  = Map();
+        // get attributes
+        attr = UnloadAttr(node);
+        // get children
+        for (pugi::xml_node child : node.children()) {
+            switch (child.type()) {
+                case pugi::xml_node_type::node_element: {
+                    Map::iterator it = nodes.find(child.name());
+                    if (it == nodes.end()) {
+                        // new child
+                        nodes[child.name()] = UnloadNode(child);
+                    } else if (Var::IsList(it->second)) {
+                        // append child
+                        Var::List(it->second).emplace_back(UnloadNode(child));
+                    } else {
+                        // update with list
+                        nodes[child.name()] = Obj{it->second, UnloadNode(child)};
+                    }
+                    break;
                 }
-                break;
-            }
-            case pugi::xml_node_type::node_pcdata:
-            case pugi::xml_node_type::node_cdata:
-            {
-                text.append(child.value());
-                break;
-            }
-            default:
-            {
-                break;
+                case pugi::xml_node_type::node_pcdata:
+                case pugi::xml_node_type::node_cdata: {
+                    text.append(child.value());
+                    break;
+                }
+                default:;
             }
         }
-    }
-    /**
-     * create object
-     */
-    if (!attr.empty()) {
-        /**
-         * insert attributes
-         */
-        nodes.emplace(ATTR_KEY, Obj(std::move(attr)));
-        /**
-         * insert text
-         */
+        if (!attr.empty()) {
+            // insert attributes
+            nodes.emplace(ATTR_KEY, Obj(std::move(attr)));
+            // insert text
+            if (!text.empty()) {
+                nodes.emplace(TEXT_KEY, Obj(std::move(text)));
+            }
+            return Obj(std::move(nodes));
+        }
+        if (!nodes.empty()) {
+            // insert text 
+            if (!text.empty()) {
+                nodes.emplace(TEXT_KEY, Obj(std::move(text)));
+            }
+            return Obj(std::move(nodes));
+        }
         if (!text.empty()) {
-            /**
-             * insert text 
-             */
-            nodes.emplace(TEXT_KEY, Obj(std::move(text)));
+            return Obj(std::move(text));
         }
-        return Obj(std::move(nodes));
+        return Obj();
     }
-    if (!nodes.empty()) {
-        if (!text.empty()) {
-            /**
-             * insert text 
-             */
-            nodes.emplace(TEXT_KEY, Obj(std::move(text)));
-        }
-        return Obj(std::move(nodes));
-    }
-    if (!text.empty()) {
-        return Obj(std::move(text));
-    }
-    return Obj();
-}
-Map __UnLoadAttr(pugi::xml_node& node) {
-    /**
-     * the attribute name must be unique
-     */
-    Map out;
-    for (pugi::xml_attribute attr : node.attributes()) {
-        auto res = out.insert(make_pair(attr.name(), Obj(attr.value())));
-        if ( !res.second ) {
-            throw std::range_error(String::Build("xml::attr=", attr.name()));
-        }
-    }
-    return out;
 }
 /**
- * ----------------------------------------------------------------------------
- * Public
- * ----------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------------------------------------
+ *  From XML - Public
+ * ----------------------------------------------------------------------------------------------------------
  */
 Var Convert::FromXML(std::istream& is) {
     pugi::xml_document doc;
-    return doc.load(is) ? __UnLoadNode(doc) : Var(nullptr);
+    return doc.load(is) ? Private::UnloadNode(doc) : Var(nullptr);
 }
 Var Convert::FromXML(std::istream&& is) {
     return FromXML(is);
 }
 /**
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------------------------------------
  * End
- * ------------------------------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------------------------------------
  */
