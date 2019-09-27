@@ -22,25 +22,26 @@
 #include "Profiles/SProfileXDM.h"
 /**
  * ----------------------------------------------------------------------------
- * Get Profile
+ * Definitions
  * ----------------------------------------------------------------------------
  */
-Map GetProfiles(String file) {
-    return Edit::Insert(Convert::FromJson(File::Reader(file)), Obj{
-        {Key("arxml"), PROFILE_ARXML},
-        {Key("xdm"),   PROFILE_XDM  }
-    });
-}
+auto KEY_SORT   = Key("sort");
+auto KEY_SCHEMA = Key("schema");
 /**
  * ----------------------------------------------------------------------------
  * Get Profile
  * ----------------------------------------------------------------------------
  */
-List GetProfile(String file) {
-    return Var::List(Map({
-        {Key("arxml"), PROFILE_ARXML},
-        {Key("xdm")  , PROFILE_XDM  }
-    })[FileSystem::GetExtension(file)]);
+Map GetProfiles(String file) {
+    return Edit::Insert(Convert::FromJson(File::Reader(file)), Obj{
+        {Key("arxml"), Obj{
+            {KEY_SORT,   ARXML_SORT  },
+            {KEY_SCHEMA, ARXML_SCHEMA},
+        }}, 
+        {Key("xdm"), Obj{
+            {KEY_SORT,   XDM_SORT}
+        }}
+    });
 }
 /**
  * ------------------------------------------------------------------------------------------------
