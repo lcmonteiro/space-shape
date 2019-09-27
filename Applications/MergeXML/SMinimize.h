@@ -133,7 +133,7 @@ namespace {
  * Interfaces
  * --------------------------------------------------------------------------------------------------------------------
  */
-inline int Minimize(const List& files, const List& profile) {
+inline int Minimize(const List& files, const Link& sort, const Link& schema) {
     auto it  = files.begin();
     auto end = files.end();
     if(it == end) {
@@ -150,7 +150,7 @@ inline int Minimize(const List& files, const List& profile) {
         ERROR("Minimize", "File Reference Not Found ...");
         return -2;
     }
-    Convert::ToXML(File::Writer(Var::ToString(*it)), ref);
+    Convert::ToXML(File::Writer(Var::ToString(*it)), ref, schema);
     /**
      * --------------------------------------------------------------------------------------------
      * minimize base on ref
@@ -187,8 +187,8 @@ inline int Minimize(const List& files, const List& profile) {
                         }
                         return false;
                     });
-                }, profile
-            )
+                }, Var::ToList(sort)
+            ), schema
         );
     }
     return 0;
@@ -202,11 +202,12 @@ inline int Minimize(List files, Map profiles, String filter) {
     /**
      * write minimize data
      */
-    return Minimize(files, Var::ToList(Tools::Basic::Accumulate(files, profiles[filter], 
+    Var profile = Tools::Basic::Accumulate(files, profiles[filter], 
         [&profiles](Var p, Var f) {
             return Var::IsDefined(p) ? p : profiles[FileSystem::GetExtension(f)];
-        })
-    ));
+        }
+    );
+    return Minimize(files, profile[KEY_SORT], profile[KEY_SCHEMA]);
 }
 /**
  * --------------------------------------------------------------------------------------------------------------------

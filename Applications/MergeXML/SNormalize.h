@@ -84,7 +84,10 @@ static inline int NormalizeRecursive(String in, Map profiles, String filter) {
         /**
          * write normalize data
          */
-        Normalize(file, file, Var::ToList(profiles[FileSystem::GetExtension(file)]));
+        Var profile = profiles[
+            filter.empty() ? FileSystem::GetExtension(in) : filter
+        ];
+        Normalize(file, file, Var::ToList(profile[KEY_SORT]));
     }
     return 0;
 }
@@ -97,11 +100,10 @@ static inline int Normalize(String in, Map profiles, String filter="") {
     /**
      * write normalize data
      */
-    Normalize(in, in, Var::ToList(
-        profiles[filter.empty()?FileSystem::GetExtension(in):filter]
-    ));
-    /**
-     */
+    Var profile = profiles[
+        filter.empty() ? FileSystem::GetExtension(in) : filter
+    ];
+    Normalize(in, in, Var::ToList(profile[KEY_SORT]));
     return 0;
 }
 /**
