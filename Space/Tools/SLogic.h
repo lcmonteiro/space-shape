@@ -132,18 +132,9 @@ namespace Logic {
      * To List
      * ------------------------------------------------------------------------
      */
-    inline List ToList(Map data) {
-        List lst; 
-        for (auto& v : data) 
-            lst.emplace_back(v.second); 
-        return std::move(lst);
-    } 
-    inline List ToList(Var data, List exception) {
-        return Var::IsList(data) ? Var::List(data) : exception;
-    }
-    template<typename Function>
-    static List ToList(Var data, Function exception) {
-        return Var::IsList(data) ? Var::List(data) : exception(data);
+    inline List ToList(Var data) {
+        return Var::IsList(data) ? 
+            Var::List(data) : Var::IsDefined(data) ? List{data} : List{};
     }
     /**
      * ------------------------------------------------------------------------
@@ -152,7 +143,7 @@ namespace Logic {
      */ 
     inline Map ToMap(Var data) {
         return Var::IsMap(data) ? 
-            Var::Map(data) : Var::IsDefined(data) ? Map{{Key(), data}}: Map{};
+            Var::Map(data) : Var::IsDefined(data) ? Map{{Key(), data}} : Map{};
     }
     /**
      * ------------------------------------------------------------------------

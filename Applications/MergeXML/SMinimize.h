@@ -1,13 +1,13 @@
 /**
  * --------------------------------------------------------------------------------------------------------------------
- * File:   SNormalize.h
+ * File:   SMininize.h
  * Author: Luis Monteiro
  *
  * Created on Jun 07, 2019, 12:11 PM
  * --------------------------------------------------------------------------------------------------------------------
  */
-#ifndef SCOMPARE_H
-#define SCOMPARE_H
+#ifndef SMINIMIZE_H
+#define SMINIMIZE_H
 /**
  * space
  */
@@ -83,7 +83,11 @@ namespace {
             auto end = std::remove_if(val.begin(), val.end(), [&key, &map, &paths](auto v) {
                 auto found = std::find_if(key.begin(), key.end(), [&paths, &v](auto k) {
                     return std::all_of(paths.begin(), paths.end(), [&k, &v](auto p) {
-                        return String(Edit::Find(p, k))==String(Edit::Find(p, v));
+                        try {
+                            return String(Edit::Find(p, k))==String(Edit::Find(p, v));
+                        } catch (...) {
+                            return false;
+                        }
                     });
                 });
                 if(found != key.end()) {
@@ -101,9 +105,13 @@ namespace {
              * --------------------------------------------------------------------------
              */
             for(auto it = val.begin(); it != end; ++it) {
-                auto found = find(key.begin(), key.end(), *it, paths);
-                if(found != key.end()) {
-                    map.emplace(*found, *it);
+                try {
+                    auto found = find(key.begin(), key.end(), *it, paths);
+                    if(found != key.end()) {
+                        map.emplace(*found, *it);
+                    }
+                } catch(std::logic_error&) {
+                    map.emplace(Obj(), *it);
                 }
             }
             /**
@@ -214,4 +222,4 @@ inline int Minimize(List files, Map profiles, String filter) {
  * End
  * --------------------------------------------------------------------------------------------------------------------
  */
-#endif	/* SCOMPARE_H */
+#endif	/* SMINIMIZE_H */
