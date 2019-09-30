@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
             return NormalizeRecursive(args["i"], GetProfiles(args["p"]), args["f"]);
         }},
         {"minimize", [&](){
-            return Minimize(args["i"], GetProfiles(args["p"]), args["f"]);
+            return Minimize(Logic::ToList(args["i"]), GetProfiles(args["p"]), args["f"]);
         }}
     };
     try {

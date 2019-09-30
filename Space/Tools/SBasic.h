@@ -195,6 +195,44 @@ namespace Basic {
             }, d));
         });
     }
+    /**
+     * --------------------------------------------------------------------------------------------
+     * Basic Converters
+     * --------------------------------------------------------------------------------------------
+     * To List
+     * ------------------------------------------------------------------------
+     */
+    inline List ToList(Var data, List exception) {
+        return Var::IsList(data) ? Var::List(data) : exception;
+    }
+    template<typename Function>
+    inline List ToList(Var data, Function exception) {
+        return Var::IsList(data) ? Var::List(data) : exception(data);
+    }
+    /**
+     * ------------------------------------------------------------------------
+     * To Map
+     * ------------------------------------------------------------------------
+     */ 
+    inline Map ToMap(Var data, Map exception) {
+        return Var::IsMap(data) ? Var::Map(data) : exception;
+    }
+    template<typename Function>
+    inline Map ToMap(Var data, Function exception) {
+        return Var::IsMap(data) ? Var::Map(data) : exception(data);
+    }
+    /**
+     * ------------------------------------------------------------------------
+     * To String
+     * ------------------------------------------------------------------------
+     */ 
+    inline String ToString(Var data, String exception) {
+        return Var::IsString(data) ? Var::String(data) : exception;
+    }
+    template<typename Function>
+    inline String ToString(Var data, Function exception) {
+        return Var::IsString(data) ? Var::String(data) : exception(data);
+    }
 }}
 /**
  * --------------------------------------------------------------------------------------------------------------------
