@@ -35,6 +35,41 @@ namespace {
     inline Var Minimize(Var doc, Var ref, Function find, const List& profile, const String& context={}) {
         /**
          * ----------------------------------------------------------------------------------------
+         * tools 
+         * ----------------------------------------------------------------------------------------
+         * remainig 
+         * --------------------------------------------------------------------
+         */
+        struct remaining : public std::list<Link> {
+            using base = std::list<Link>;
+            remaining(const List& list) : base(list.begin(), list.end()) {
+            }
+            inline void update(base::const_iterator it) {
+                _last.clear(), _last.emplace_back(*it), this->erase(it);
+            }
+            inline void reload() {
+                _keep.splice(_keep.end(), _last);
+            }
+            inline void refresh() {
+                _last.clear(), this->splice(this->end(), _keep); 
+            }
+            base _last, _keep;
+        };
+        /**
+         * --------------------------------------------------------------------
+         * mapping
+         * --------------------------------------------------------------------
+         */
+        struct mapping : public std::multimap<Link, Link> {
+            using base = std::multimap<Link, Link>;
+            mapping(): base() {
+            }
+            inline void update(Link key, Link val) {
+                this->emplace(key, val);
+            }
+        };
+        /**
+         * ----------------------------------------------------------------------------------------
          * process map 
          * ----------------------------------------------------------------------------------------
          */
@@ -55,6 +90,8 @@ namespace {
          * ----------------------------------------------------------------------------------------
          */
         if(Var::IsList(ref) && Var::IsList(doc)) {
+            auto key = Var::List(ref);
+            auto val = Var::List(doc);
             /**
              * --------------------------------------------------------------------------
              * find all paths
@@ -77,11 +114,10 @@ namespace {
              * match elements
              * --------------------------------------------------------------------------
              */
-            auto key = Var::List(ref);
-            auto val = Var::List(doc);
-            auto map = std::multimap<Link, Link>();        
-            auto end = std::remove_if(val.begin(), val.end(), [&key, &map, &paths](auto v) {
-                auto found = std::find_if(key.begin(), key.end(), [&paths, &v](auto k) {
+            auto map = mapping();
+            auto rem = remaining(key);        
+            auto end = std::remove_if(val.begin(), val.end(), [&rem, &map, &paths](auto v) {
+                auto found = std::find_if(rem.begin(), rem.end(), [&paths, &v](auto k) {
                     return std::all_of(paths.begin(), paths.end(), [&k, &v](auto p) {
                         try {
                             return String(Edit::Find(p, k))==String(Edit::Find(p, v));
@@ -90,15 +126,15 @@ namespace {
                         }
                     });
                 });
-                if(found != key.end()) {
-                    // match
-                    map.emplace(*found, v);
-                    // remove
-                    key.erase(found);
+                if(found != rem.end()) {
+                    map.update(*found, v);
+                    rem.update(found);
                     return true;
                 }
+                rem.reload();
                 return false;
             });
+            rem.refresh();
             /**
              * --------------------------------------------------------------------------
              * map the similar objects
@@ -106,12 +142,12 @@ namespace {
              */
             for(auto it = val.begin(); it != end; ++it) {
                 try {
-                    auto found = find(key.begin(), key.end(), *it, paths);
-                    if(found != key.end()) {
-                        map.emplace(*found, *it);
+                    auto found = find(rem.begin(), rem.end(), *it, paths);
+                    if(found != rem.end()) {
+                        map.update(*found, *it);
                     }
                 } catch(std::logic_error&) {
-                    map.emplace(Obj(), *it);
+                    map.update(Obj(), *it);
                 }
             }
             /**
