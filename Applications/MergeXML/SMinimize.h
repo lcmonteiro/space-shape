@@ -45,15 +45,8 @@ namespace {
             remaining(const List& list) : base(list.begin(), list.end()) {
             }
             inline void update(base::const_iterator it) {
-                _last.clear(), _last.emplace_back(*it), this->erase(it);
+                erase(it);
             }
-            inline void reload() {
-                _keep.splice(_keep.end(), _last);
-            }
-            inline void refresh() {
-                _last.clear(), this->splice(this->end(), _keep); 
-            }
-            base _last, _keep;
         };
         /**
          * --------------------------------------------------------------------
@@ -65,7 +58,7 @@ namespace {
             mapping(): base() {
             }
             inline void update(Link key, Link val) {
-                this->emplace(key, val);
+                emplace(key, val);
             }
         };
         /**
@@ -131,10 +124,8 @@ namespace {
                     rem.update(found);
                     return true;
                 }
-                rem.reload();
                 return false;
             });
-            rem.refresh();
             /**
              * --------------------------------------------------------------------------
              * map the similar objects
@@ -142,8 +133,8 @@ namespace {
              */
             for(auto it = val.begin(); it != end; ++it) {
                 try {
-                    auto found = find(rem.begin(), rem.end(), *it, paths);
-                    if(found != rem.end()) {
+                    auto found = find(key.begin(), key.end(), *it, paths);
+                    if(found != key.end()) {
                         map.update(*found, *it);
                     }
                 } catch(std::logic_error&) {
@@ -226,7 +217,7 @@ inline int Minimize(const List& files, const Link& sort, const Link& schema) {
                         auto& m = map[min];
                         for(auto it_c = c.begin(), it_m = m.begin(); it_c != c.end(); ++it_c, ++it_m) {
                             if(*it_c != *it_m) {
-                                return *it_c < *it_m;
+                                return *it_c <= *it_m;
                             }
                         }
                         return false;
