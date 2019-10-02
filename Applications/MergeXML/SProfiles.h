@@ -39,7 +39,8 @@ Map GetProfiles(String file) {
             {KEY_SCHEMA, ARXML_SCHEMA},
         }}, 
         {Key("xdm"), Obj{
-            {KEY_SORT,   XDM_SORT}
+            {KEY_SORT,   XDM_SORT},
+            {KEY_SCHEMA, XDM_SCHEMA},
         }}
     });
 }
