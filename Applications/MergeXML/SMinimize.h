@@ -198,11 +198,11 @@ inline int Minimize(const List& files, const Link& sort, const Link& schema) {
                     /**
                      * compute the distance
                      */
-                    std::map<Link, std::vector<size_t>> map;
+                    std::map<Link, std::vector<float_t>> map;
                     std::for_each(begin, end, [&doc, &paths, &map](auto ref) {
-                        std::vector<size_t> value;
+                        std::vector<float_t> value;
                         for(auto&p : paths) {
-                            value.emplace_back(Tools::Math::LevensteinDistance(
+                            value.emplace_back(Tools::Math::DistanceNormalized(
                                 String(Edit::Find(p, doc)),
                                 String(Edit::Find(p, ref))
                             ));

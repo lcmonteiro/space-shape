@@ -27,30 +27,44 @@ namespace Math {
      * String
      * -----------------------------------------------------------------------
      */
-    template<typename Type>
-    size_t LevensteinDistance(const Type& source, const Type& target) {
-        auto min_size = source.size(); 
-        auto max_size = target.size();
-        auto distance = std::vector<size_t>(min_size + 1);
-        if (min_size > max_size) {
-            return LevensteinDistance(target, source);
-        }
-        for (size_t i = 0; i <= min_size; ++i) {
-            distance[i] = i;
-        }
-        for (size_t j = 1; j <= max_size; ++j) {
-            auto previous_diagonal = distance.front()++;
-            for (size_t i = 1; i <= min_size; ++i) {
-                auto previous_diagonal_save = distance[i];
-                if (source[i - 1] == target[j - 1]) {
-                    distance[i] = previous_diagonal;
-                } else {
-                    distance[i] = std::min({distance[i - 1], distance[i], previous_diagonal}) + 1;
-                }
-                previous_diagonal = previous_diagonal_save;
+    namespace Base {
+        /**
+         * base algoritm LevensteinDistance
+         */
+        template<typename Type>
+        size_t Distance(const Type& source, const Type& target) {
+            auto distance = std::vector<size_t>(source.size() + 1);
+            for (size_t i = 0; i <= source.size(); ++i) {
+                distance[i] = i;
             }
+            for (size_t j = 1; j <= target.size(); ++j) {
+                auto previous_diagonal = distance.front()++;
+                for (size_t i = 1; i <= source.size(); ++i) {
+                    auto previous_diagonal_save = distance[i];
+                    if (source[i - 1] == target[j - 1]) {
+                        distance[i] = previous_diagonal;
+                    } else {
+                        distance[i] = std::min({distance[i - 1], distance[i], previous_diagonal}) + 1;
+                    }
+                    previous_diagonal = previous_diagonal_save;
+                }
+            }
+            return distance[source.size()];
         }
-        return distance[min_size];
+    }
+    template<typename Type>
+    size_t Distance(const Type& source, const Type& target) {
+        if (source.size() > target.size()) {
+            return Distance(target, source);
+        }
+        return Base::Distance(source, target);
+    }
+    template<typename Type>
+    float_t DistanceNormalized(const Type& source, const Type& target) {
+        if (source.size() > target.size()) {
+            return DistanceNormalized(target, source);
+        }
+        return float_t(Base::Distance(source, target)) / target.size();
     }
 }}
 /**
