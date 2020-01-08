@@ -283,7 +283,7 @@ static Map __FindDirectory(KeyList& path, function<bool(const KeyList&, int)> fi
          * directory
          */
         if(c_data.attrib & _A_SUBDIR) {
-            if(filter(path, FileSystem::DIR)) {
+            if(path.back() != "." && path.back() != ".." && filter(path, FileSystem::DIR)) {
                 auto found = __FindDirectory(path, filter);
                 if (found.empty()) {
                     tree[c_data.name] = Obj(int(FileSystem::DIR));
@@ -291,12 +291,12 @@ static Map __FindDirectory(KeyList& path, function<bool(const KeyList&, int)> fi
                     tree[c_data.name] = Obj(found);
                 }
             }
-        } 
+        }
         /**
          * file
          */ 
         else {
-             if(filter(path, FileSystem::FILE)) {
+            if(filter(path, FileSystem::FILE)) {
                 tree[c_data.name] = Obj(int(FileSystem::FILE));
             }
         }

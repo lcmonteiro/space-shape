@@ -39,13 +39,24 @@ int main(int argc, char** argv) {
             {"in"     , "i"}, 
             {"out"    , "o"},
             {"method" , "m"},
-            {"profile", "p"}
+            {"profile", "p"},
+            {"log"    , "l"}
         }
     );
-    INFO("Arguments", args);
+    /**
+     * Set Debug Level
+     */
+    SLog::SetLevel(std::map<String, SLog::Level>{
+        {"DEBUG"  , SLog::DEBUG},
+        {"INFO"   , SLog::INFO},
+        {"WARNING", SLog::WARNING},
+        {"ERROR"  , SLog::ERROR},
+        {""       , SLog::ERROR}
+    }[args["l"]]);
     /**
      * Process
      */
+    INFO("Arguments", args);
     std::map<String, std::function<int()>> funcs{
         {"export", [&](){
             return Export(args["i"], GetProfile(args["p"]), args["o"]);

@@ -78,13 +78,13 @@ static mask* make_table() {
  * ----------------------------------------------------------------------------
  * definitions
  */
-static inline void __ToJson(std::ostream& os, List l);
-static inline void __ToJson(std::ostream& os, Map  m);
-static inline void __ToJson(std::ostream& os, Var  v);
+static inline void __ToJson(std::ostream& os, List& l);
+static inline void __ToJson(std::ostream& os, Map&  m);
+static inline void __ToJson(std::ostream& os, Var   v);
 /**
  * implementation
  */
-void __ToJson(std::ostream& os, List l) {
+void __ToJson(std::ostream& os, List& l) {
     auto it = l.begin();
     if(it != l.end()) {
         __ToJson(os, *it);
@@ -93,7 +93,7 @@ void __ToJson(std::ostream& os, List l) {
         }    
     }
 }
-void __ToJson(std::ostream& os, Map m) {
+void __ToJson(std::ostream& os, Map& m) {
     auto it = m.begin();
     if(it != m.end()) {
         os << __STR___D__ << it->first << __STR___D__ << __KEY___D__;
@@ -104,6 +104,9 @@ void __ToJson(std::ostream& os, Map m) {
             __ToJson(os, it->second);    
         }    
     }
+}
+void __ToJson(std::ostream& os, String& s) {
+    os << std::regex_replace(s, std::regex("\n"), "\\n");
 }
 void __ToJson(std::ostream& os, Var v) {
     os << std::setprecision(__PRECISION__);
@@ -116,7 +119,9 @@ void __ToJson(std::ostream& os, Var v) {
         __ToJson(os, Var::Map(v));
         os << __MAP__RD__;
     } else if (Var::IsString(v)) {
-        os << __STR___D__ << Var::String(v) << __STR___D__;
+        os << __STR___D__;
+        __ToJson(os, Var::String(v));
+        os << __STR___D__;
     } else if (Var::IsFloat(v)) {
         os << Var::Float(v);
     } else if (Var::IsInteger(v)) {
@@ -166,9 +171,9 @@ std::ostream& Convert::ToJson(std::ostream& os, Map m) {
  */
 static inline std::ostream& __TAB(std::ostream& os, Integer deep);
 
-static inline std::ostream& __ToPrettyJson(std::ostream& os, List l, Integer deep);
-static inline std::ostream& __ToPrettyJson(std::ostream& os, Map  m, Integer deep);
-static inline std::ostream& __ToPrettyJson(std::ostream& os, Var  v, Integer deep);
+static inline std::ostream& __ToPrettyJson(std::ostream& os, Integer deep, List& l);
+static inline std::ostream& __ToPrettyJson(std::ostream& os, Integer deep, Map&  m);
+static inline std::ostream& __ToPrettyJson(std::ostream& os, Integer deep, Var   v);
 /**
  * implementation
  */
@@ -178,42 +183,44 @@ std::ostream& __TAB(std::ostream& os, Integer deep) {
     }
     return os;
 }
-std::ostream& __ToPrettyJson(std::ostream& os, List l, Integer deep) {
+std::ostream& __ToPrettyJson(std::ostream& os, Integer deep, List& l) {
     auto it = l.begin();
     if(it != l.end()) {
-        __ToPrettyJson(__TAB(os, deep), *it, deep);
+        __ToPrettyJson(__TAB(os, deep), deep, *it);
         for(++it; it != l.end(); ++it) {
             os << __ELM___D__ << std::endl;
-            __ToPrettyJson(__TAB(os, deep), *it, deep);    
+            __ToPrettyJson(__TAB(os, deep), deep , *it);    
         }    
     }
     return os;
 }
-std::ostream& __ToPrettyJson(std::ostream& os, Map m, Integer deep) {
+std::ostream& __ToPrettyJson(std::ostream& os, Integer deep, Map& m) {
     auto it = m.begin();
     if(it != m.end()) {
         __TAB(os, deep) << __STR___D__ << it->first << __STR___D__ << __KEY___D__;
-        __ToPrettyJson(os, it->second, deep);
+        __ToPrettyJson(os, deep, it->second);
         for(++it; it != m.end(); ++it) {
             os << __ELM___D__ << std::endl;
             __TAB(os, deep) << __STR___D__ << it->first << __STR___D__ << __KEY___D__;
-            __ToPrettyJson(os, it->second, deep);  
+            __ToPrettyJson(os, deep, it->second);  
         }    
     }
     return os;
 }
-std::ostream& __ToPrettyJson(std::ostream& os, Var v, Integer deep) {
+std::ostream& __ToPrettyJson(std::ostream& os, Integer deep, Var v) {
     os << std::setprecision(__PRECISION__);
     if (Var::IsList(v)) {
         os << __LIST_LD__ << std::endl;
-        __TAB(__ToPrettyJson(os, Var::List(v), deep + Integer(1)) << std::endl, deep);
+        __TAB(__ToPrettyJson(os, deep + Integer(1), Var::List(v)) << std::endl, deep);
         os << __LIST_RD__;
     } else if (Var::IsMap(v)) {
         os << __MAP__LD__ << std::endl;
-        __TAB(__ToPrettyJson(os, Var::Map(v), deep + Integer(1)) << std::endl, deep);
+        __TAB(__ToPrettyJson(os, deep + Integer(1), Var::Map(v)) << std::endl, deep);
         os << __MAP__RD__;
     } else if (Var::IsString(v)) {
-        os << __STR___D__ << Var::String(v) << __STR___D__;
+        os << __STR___D__;
+        __ToJson(os, Var::String(v));
+        os << __STR___D__;
     } else if (Var::IsFloat(v)) {
         os << Var::Float(v);
     } else if (Var::IsInteger(v)) {
@@ -221,7 +228,7 @@ std::ostream& __ToPrettyJson(std::ostream& os, Var v, Integer deep) {
     } else if (Var::IsUndefined(v)) {
         os << __NULL__S__;
     } else if (Var::IsLink(v)) {
-        __ToPrettyJson(os, Var::Link(v), deep);
+        __ToPrettyJson(os, deep, Var::Link(v));
     } else {
         os << __STR___D__ << String(v) << __STR___D__;
     }
@@ -233,16 +240,16 @@ std::ostream& __ToPrettyJson(std::ostream& os, Var v, Integer deep) {
  * ----------------------------------------------------------------------------
  */
 std::ostream& Convert::ToPrettyJson(std::ostream&& os, Var v) {
-    return __ToPrettyJson(os, v, 0);
+    return __ToPrettyJson(os, 0, v);
 }
 std::ostream& Convert::ToPrettyJson(std::ostream& os, Var v) {
-    return __ToPrettyJson(os, v, 0);
+    return __ToPrettyJson(os, 0, v);
 }
 std::ostream& Convert::ToPrettyJson(std::ostream& os, List l) {
     Integer deep(1);
     os << std::setprecision(__PRECISION__);
     os << __LIST_LD__ << std::endl;
-    __ToPrettyJson(os, l, deep) << std::endl;
+    __ToPrettyJson(os, deep, l) << std::endl;
     os << __LIST_RD__;
     return os;
 }
@@ -250,7 +257,7 @@ std::ostream& Convert::ToPrettyJson(std::ostream& os, Map m) {
     Integer deep(1);
     os << std::setprecision(__PRECISION__);
     os << __MAP__LD__ << std::endl;
-    __ToPrettyJson(os, m, deep) << std::endl;
+    __ToPrettyJson(os, deep, m) << std::endl;
     os << __MAP__RD__;
     return os;
 }
